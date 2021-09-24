@@ -1,3 +1,7 @@
+// const request = require('@tryghost/request');
+const got = require('got');
+
+
 // Let's try to stick to existing strings in the template
 const markers = {
   presentedBy: "<!-- POST CONTENT START -->",
@@ -82,21 +86,24 @@ const mockSponCon = `
  */
 async function fillAdvertisements({site, html}) {
 
-  // @TODO maybe use url instead?
-  const siteID = site.title;
+  // Title with all non-word characters stripped out
+  const siteID = site.title.replace(/[\W_]+/g,"").toLowerCase();
+
+  const endpoint = `http://127.0.0.1:8000/api/v1/newsletters/active-ads/?newsletter=${siteID}`
 
   // Mocking async call that will go to API
   // Ads object will contain a placement and HTML to put there.
-  const ads = await new Promise((resolve, reject) => {
-    const result = {
-      "presentedBy": mockpresentedBy,
-      "other": mockSponCon,
-    }
 
-    setTimeout(() => {
-      resolve(result);
-    }, 1000);
-  });
+  let ads = {};
+  try {
+    const {body} = await got(endpoint, {
+      responseType: 'json'
+    });
+
+    ads = JSON.parse(body);
+  } catch (e) {
+    console.error(e)
+  }
 
   for (let key in ads) {
     const marker = markers[key];
