@@ -66,6 +66,8 @@ const mockSponCon = `
   ${markers.other}
 `
 
+
+
 /**
  * The Atlantic's custom module inserting
  * ads into newsletters.
@@ -83,11 +85,24 @@ async function fillAdvertisements({site, html}) {
   // @TODO maybe use url instead?
   const siteID = site.title;
 
-  html = html.replace(markers.presentedBy, mockpresentedBy);
-  html = html.replace(markers.other, mockSponCon);
+  // Mocking async call that will go to API
+  // Ads object will contain a placement and HTML to put there.
+  const ads = await new Promise((resolve, reject) => {
+    const result = {
+      "presentedBy": mockpresentedBy,
+      "other": mockSponCon,
+    }
 
-  console.log(site);
-  console.log(html);
+    setTimeout(() => {
+      resolve(result);
+    }, 1000);
+  });
+
+  for (let key in ads) {
+    const marker = markers[key];
+    html = html.replace(marker, ads[key]);
+  }
+
   return html;
 }
 
