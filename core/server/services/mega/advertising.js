@@ -24,7 +24,10 @@ async function fillAdvertisements({site, html}) {
 
   // Use the site url as the identifier for the newsletter in Hattie.
   const siteID = encodeURIComponent(site.url);
-  const endpoint = `https://sponsor.theatlantic.com/api/v1/newsletters/active-ads/?newsletter=${siteID}`
+
+  // Allow overriding for local develment
+  const hattie_api = process.env.HATTIE_API || "https://sponsor.theatlantic.com"
+  const endpoint = `${hattie_api}/api/v1/newsletters/active-ads/?newsletter=${siteID}`
 
   // Mocking async call that will go to API
   // Ads object will contain a placement and HTML to put there.
@@ -42,7 +45,7 @@ async function fillAdvertisements({site, html}) {
 
   for (let key in ads) {
     const marker = markers[key];
-    const replacement = `${ads[key]}\n${key}`;
+    const replacement = `${ads[key]}\n${marker}`;
     html = html.replace(marker, replacement);
   }
 
