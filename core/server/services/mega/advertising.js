@@ -24,7 +24,7 @@ async function fillAdvertisements({site, html}) {
 
   // Use the site url as the identifier for the newsletter in Hattie.
   const siteID = encodeURIComponent(site.url);
-  const endpoint = `http://127.0.0.1:8000/api/v1/newsletters/active-ads/?newsletter=${siteID}`
+  const endpoint = `https://sponsor.theatlantic.com/api/v1/newsletters/active-ads/?newsletter=${siteID}`
 
   // Mocking async call that will go to API
   // Ads object will contain a placement and HTML to put there.
