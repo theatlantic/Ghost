@@ -173,8 +173,8 @@ blockquote cite a {
 }
 
 a {
-    color: ${templateSettings.accentColor || '#15212A'};
-    text-decoration: none;
+    color: #000000;
+    text-decoration: underline;
 }
 
 h1,
@@ -269,7 +269,72 @@ figure blockquote p {
 }
 
 .header-image {
-    padding-top: 16px;
+    padding-top: 0;
+    padding-bottom: 40px;
+}
+
+.header-image td {
+    border: 0.5px solid #000000;
+    height: 184px;
+    vertical-align: middle;
+}
+
+.header-image .site-title {
+    font-family: Adobe Garamond Pro, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 24px;
+    line-height: 125%;
+    text-align: center;
+    color: #000000;
+}
+
+.header-date {
+    font-family: Courier, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5E6A74;
+    padding: 16px;
+}
+
+.header-info {
+    font-family: Courier,sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 150%;
+    text-align: center;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #000000;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    background-color: #ffffff;
+}
+
+.email-content>td {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.post-content {
+    font-family: Adobe Garamond Pro, sans-serif;
+    font-style: normal;
+    font-size: 19px;
+    line-height: 150%;
+    color: #000000;
+    padding-bottom: 30px;
+    padding-top: 20px;
+}
+
+.email-white-delimiter {
+    background-color: #ffffff;
+    height: 40px;
 }
 
 .site-icon {
@@ -305,11 +370,14 @@ figure blockquote p {
 }
 
 .post-title {
-    padding-bottom: 10px;
-    font-size: 42px;
-    line-height: 1.1em;
-    font-weight: 600;
-    text-align: center;
+    padding-top: 30px;
+    padding-bottom: 24px;
+    font-family: Adobe Garamond Pro, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 32px;
+    line-height: 40px;
+    color: #21272C;
 }
 .post-title-serif {
     font-family: Georgia, serif;
@@ -322,7 +390,6 @@ figure blockquote p {
     color: #15212A;
     display: block;
     text-align: center;
-    margin-top: 50px;
 }
 .post-title-link-left {
     text-align: left;
@@ -353,30 +420,23 @@ figure blockquote p {
 }
 
 .feature-image {
-    padding-bottom: 30px;
+    padding-top: 40px;
     width: 100%;
 }
 
 .feature-image-with-caption {
-    padding-bottom: 10px;
+    padding-bottom: 3px;
 }
 
 .feature-image-caption {
-    width: 100%;
-    padding-bottom: 30px;
-    text-align: center;
-    font-size: 13px;
-    color: #738a94;
-}
-
-.post-content {
-    max-width: 600px !important;
-    font-family: Georgia, serif;
-    font-size: 18px;
-    line-height: 1.5em;
-    color: #23323D;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #e5eff5;
+    font-family: Courier, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5E6A74;
 }
 
 .post-content-sans-serif {
@@ -390,7 +450,7 @@ figure blockquote p {
 
 .post-content a,
 .post-content-sans-serif a {
-    color: ${templateSettings.accentColor || '#08121A'};
+    color: #000000;
     text-decoration: underline;
 }
 
@@ -542,14 +602,14 @@ figure blockquote p {
     HEADER, FOOTER, MAIN
 ------------------------------------- */
 .main {
-    background: #ffffff;
+    background: #F8F7F3;
     border-radius: 3px;
     width: 100%;
 }
 
 .wrapper {
     box-sizing: border-box;
-    padding: 0 20px;
+    padding: 0;
 }
 
 .content-block {
@@ -557,21 +617,44 @@ figure blockquote p {
     padding-top: 10px;
 }
 
-.footer {
-    color: #738a94;
-    margin-top: 20px;
+.footer-top {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 150%;
     text-align: center;
-    font-size: 13px;
-    padding-bottom: 10px;
+    text-transform: uppercase;
+    color: #5E6A74;
     padding-top: 10px;
-    padding-left: 30px;
-    padding-right: 30px;
-    line-height: 1.5em;
+}
+
+.footer-icons {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.footer-icons .footer-social {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.footer {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 150%;
+    text-align: center;
+    color: #5E6A74;
+    padding-bottom: 13px;
 }
 
 .footer a {
     color: #738a94;
     text-decoration: underline;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 /* -------------------------------------
@@ -878,20 +961,6 @@ figure blockquote p {
     }
 }
 
-
-${ templateSettings.showBadge ? `
-.footer-powered {
-    text-align: center;
-    padding-top: 70px;
-    padding-bottom: 40px;
-}
-
-.gh-powered {
-    width: 142px;
-    height: 30px;
-}
-` : ''}
-
 /* ----- ENDIF THE BROWSER ----- */
 
 </style>
@@ -922,63 +991,56 @@ ${ templateSettings.showBadge ? `
                             <td class="wrapper">
                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
 
-                                    ${ templateSettings.headerImage ? `
-                                    <tr>
-                                        <td class="header-image" width="100%" align="center"><img src="${templateSettings.headerImage}"${templateSettings.headerImageWidth ? ` width="${templateSettings.headerImageWidth}"` : ''}></td>
-                                    </tr>
-                                    ` : ''}
-
-
-                                    ${ templateSettings.showHeaderIcon || templateSettings.showHeaderTitle ? `
-                                    <tr>
-                                        <td class="site-info" width="100%" align="center">
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                                ${ templateSettings.showHeaderIcon && site.iconUrl ? `
-                                                <tr>
-                                                    <td class="site-icon"><a href="${site.url}"><img src="${site.iconUrl}" border="0"></a></td>
-                                                </tr>
-                                                ` : ``}
-                                                ${ templateSettings.showHeaderTitle ? `
-                                                <tr>
-                                                    <td class="site-url"><div style="width: 100% !important;"><a href="${site.url}" class="site-title">${site.title}</a></div></td>
-                                                </tr>
-                                                ` : ``}
-                                            </table>
+                                    <tr class="email-content">
+                                        <td class="header-date" width="100%" align="center">
+                                            ${post.published_at} • Presented By partner brand
                                         </td>
                                     </tr>
-                                    ` : ''}
 
-
-                                    <tr>
-                                        <td class="post-title ${templateSettings.titleFontCategory === 'serif' ? `post-title-serif` : `` } ${templateSettings.titleAlignment === 'left' ? `post-title-left` : ``}">
-                                            <a href="${post.url}" class="post-title-link ${templateSettings.titleAlignment === 'left' ? `post-title-link-left` : ``}">${post.title}</a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr class="email-content">
+                                        <td class="header-image" width="100%" align="center">
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
                                                 <tr>
-                                                    <td class="post-meta ${templateSettings.titleAlignment === 'left' ? `post-meta-left` : ``}">
-                                                        By ${post.authors} –
-                                                        ${post.published_at} –
-                                                        <a href="${post.url}" class="view-online-link">View online →</a>
+                                                    <td width="33%">
+                                                        <img src="${site.url}/ghost/assets/img/email/header-left.png" border="0" width="184" height="184" alt="" style="display: block;">
+                                                    </td>
+                                                    <td width="34%" align="center" valign="middle" style="border-right: 0; border-left: 0;">
+                                                        <a href="${site.url}" class="site-title">${site.title}</a>
+                                                    </td>
+                                                    <td width="33%">
+                                                        <img src="${site.url}/ghost/assets/img/email/header-right.png" border="0" width="184" height="184" alt="" style="display: block;">
                                                     </td>
                                                 </tr>
                                             </table>
                                         </td>
                                     </tr>
-                                    ${ templateSettings.showFeatureImage && post.feature_image ? `
+
                                     <tr>
+                                        <td class="header-info" width="100%" align="center">
+                                            This is a free edition of the x files. to receive subscriber-exclusive editions of the x files,
+                                            <a href="${site.url}/#/portal/signup">become a subscriber</a>.
+                                        </td>
+                                    </tr>
+
+                                    ${ templateSettings.showFeatureImage && post.feature_image ? `
+                                    <tr class="email-content">
                                         <td class="feature-image ${hasFeatureImageCaption ? 'feature-image-with-caption' : ''}"><img src="${post.feature_image}"${post.feature_image_width ? ` width="${post.feature_image_width}"` : ''}${post.feature_image_alt ? ` alt="${post.feature_image_alt}"` : ''}></td>
                                     </tr>
                                     ` : ``}
                                     ${ hasFeatureImageCaption ? `
-                                    <tr>
-                                        <td class="feature-image-caption" align="center">${post.feature_image_caption}</td>
+                                    <tr class="email-content">
+                                        <td class="feature-image-caption" align="left">${post.feature_image_caption}</td>
                                     </tr>
                                     ` : ``}
-                                    <tr>
-                                        <td class="${(templateSettings.bodyFontCategory === 'sans_serif') ? `post-content-sans-serif` : `post-content` }">
+
+                                    <tr class="email-content">
+                                        <td class="post-title">
+                                            ${post.title}
+                                        </td>
+                                    </tr>
+
+                                    <tr class="email-content">
+                                        <td class="post-content">
                                             <!-- POST CONTENT START -->
                                             <!-- ATLANTIC_TOP_AD -->
                                             ${post.html}
@@ -986,31 +1048,56 @@ ${ templateSettings.showBadge ? `
                                             <!-- POST CONTENT END -->
                                         </td>
                                     </tr>
+
                                 </table>
                             </td>
                         </tr>
 
                         <!-- END MAIN CONTENT AREA -->
 
+                        <tr class="email-white-delimiter">
+                            <td>
+                            </td>
+                        </tr>
+
                         <tr>
                             <td class="wrapper" align="center">
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 40px; padding-bottom: 30px;">
-                                    ${iff(!!templateSettings.footerContent, `<tr><td class="footer">${templateSettings.footerContent}</td></tr>`, '')}
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 30px; border-top: 1px solid #D3DCE6;">
                                     <tr>
-                                        <td class="footer">${site.title} &copy; ${date.getFullYear()} – <a href="%recipient.unsubscribe_url%">Unsubscribe</a></td>
+                                        <td class="footer-top">Share The Atlantic Newsletter:</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="footer footer-icons">
+                                            <a href="https://facebook.org/"><img src="${site.url}/ghost/assets/img/email/icon-facebook.svg" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                            <a href="https://twitter.com/"><img src="${site.url}/ghost/assets/img/email/icon-twitter.svg" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                        </td>
                                     </tr>
 
-                                    ${ templateSettings.showBadge ? `
                                     <tr>
-                                        <td class="footer-powered"><a href="https://ghost.org/"><img src="https://static.ghost.org/v4.0.0/images/powered.png" border="0" width="142" height="30" class="gh-powered" alt="Publish with Ghost"></a></td>
+                                        <td class="footer">600 New Hampshire Avenue NW ∙ Washington, DC 20037</td>
                                     </tr>
-                                    ` : '' }
+                                    <tr>
+                                        <td class="footer">
+                                            <a href="#">Subscribe to The Atlantic</a>  |
+                                            <a href="#">Get The Atlantic’s iOS app</a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="footer">
+                                            <a href="#">See all of our newsletters</a>  |
+                                            <a href="%recipient.unsubscribe_url%">Unsubscribe</a>  |
+                                            <a href="#">Privacy Policy</a>  |
+                                            <a href="#">Customer Care</a>
+                                        </td>
+                                    </tr>
                                 </table>
                             </td>
                         </tr>
 
                     </table>
                     <!-- END CENTERED WHITE CONTAINER -->
+
                 </div>
             </td>
             <td>&nbsp;</td>
