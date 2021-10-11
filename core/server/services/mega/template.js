@@ -1005,7 +1005,7 @@ figure blockquote p {
                                                         <img src="${site.url}/ghost/assets/img/email/header-left.png" border="0" width="184" height="184" alt="" style="display: block;">
                                                     </td>
                                                     <td width="34%" align="center" valign="middle" style="border-right: 0; border-left: 0;">
-                                                        <a href="${site.url}" class="site-title">${site.title}</a>
+                                                        <div class="site-title">${site.title}</div>
                                                     </td>
                                                     <td width="33%">
                                                         <img src="${site.url}/ghost/assets/img/email/header-right.png" border="0" width="184" height="184" alt="" style="display: block;">
