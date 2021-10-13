@@ -980,7 +980,9 @@ ${ templateSettings.showBadge ? `
                                     <tr>
                                         <td class="${(templateSettings.bodyFontCategory === 'sans_serif') ? `post-content-sans-serif` : `post-content` }">
                                             <!-- POST CONTENT START -->
+                                            <!-- ATLANTIC_TOP_AD -->
                                             ${post.html}
+                                            <!-- ATLANTIC_BOTTOM_AD -->
                                             <!-- POST CONTENT END -->
                                         </td>
                                     </tr>
