@@ -964,6 +964,35 @@ figure blockquote p {
 /* ----- ENDIF THE BROWSER ----- */
 
 </style>
+<style type="text/css">
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-style: normal;
+            font-weight: 400;
+            src: url("https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+        ​
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-style: normal;
+            font-weight: 600;
+            src: url("https://newsletters.theatlantic.com/stlawrenceriver/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+        ​
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-stretch: normal;
+            font-style: normal;
+            font-weight: 700;
+            src: url("https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+</style>
 </head>
 
 <body class="">
@@ -1002,13 +1031,13 @@ figure blockquote p {
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
                                                 <tr>
                                                     <td width="33%">
-                                                        <img src="${site.url}/ghost/assets/img/email/header-left.png" border="0" width="184" height="184" alt="" style="display: block;">
+                                                        <img src="${site.url}ghost/assets/img/email/header-left.png" border="0" width="184" height="184" alt="" style="display: block;">
                                                     </td>
                                                     <td width="34%" align="center" valign="middle" style="border-right: 0; border-left: 0;">
                                                         <div class="site-title">${site.title}</div>
                                                     </td>
                                                     <td width="33%">
-                                                        <img src="${site.url}/ghost/assets/img/email/header-right.png" border="0" width="184" height="184" alt="" style="display: block;">
+                                                        <img src="${site.url}ghost/assets/img/email/header-right.png" border="0" width="184" height="184" alt="" style="display: block;">
                                                     </td>
                                                 </tr>
                                             </table>
@@ -1068,8 +1097,8 @@ figure blockquote p {
                                     </tr>
                                     <tr>
                                         <td class="footer footer-icons">
-                                            <a href="https://facebook.org/"><img src="${site.url}/ghost/assets/img/email/icon-facebook.svg" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
-                                            <a href="https://twitter.com/"><img src="${site.url}/ghost/assets/img/email/icon-twitter.svg" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                            <a href="https://facebook.org/"><img src="${site.url}ghost/assets/img/email/icon-facebook.svg" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                            <a href="https://twitter.com/"><img src="${site.url}ghost/assets/img/email/icon-twitter.svg" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
                                         </td>
                                     </tr>
 
