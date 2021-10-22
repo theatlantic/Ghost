@@ -369,6 +369,21 @@ figure blockquote p {
     color: #15212A;
 }
 
+.site-sub-title {
+    font-family: Adobe Garamond Pro, sans-serif;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 24px;
+    line-height: 125%;
+    text-align: center;
+    color: #000000;
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+    margin: 4px 0px;
+}
+
 .post-title {
     padding-top: 30px;
     padding-bottom: 24px;
@@ -1034,7 +1049,8 @@ figure blockquote p {
                                                         <img src="${site.url}ghost/assets/img/email/header-left.png" border="0" width="184" height="184" alt="" style="display: block;">
                                                     </td>
                                                     <td width="34%" align="center" valign="middle" style="border-right: 0; border-left: 0;">
-                                                        <div class="site-title">${site.title}</div>
+                                                        <div class="site-title">The X Files</div>
+                                                        <div class="site-sub-title">Lil Nas X</div>
                                                     </td>
                                                     <td width="33%">
                                                         <img src="${site.url}ghost/assets/img/email/header-right.png" border="0" width="184" height="184" alt="" style="display: block;">
