@@ -131,7 +131,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
   <body class="" style="background-color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
     <table border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #FFFFFF;">
         <tr>
-            <td colspan="3" style="text-align: center; padding-bottom: 40px; padding-ещз: 32px;">
+            <td colspan="3" style="text-align: center; padding-bottom: 20px; padding-top: 32px;">
               <img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/atlantic-logo.png" border="0" width="129" height="20" title="Atlantic" alt="Atlantic" />
             </td>
         </tr>
