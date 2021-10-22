@@ -132,7 +132,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
     <table border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #FFFFFF;">
         <tr>
             <td colspan="3" style="text-align: center; padding-bottom: 40px;">
-                <img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/atlantic-logo.svg" border="0" width="129" height="20" title="Atlantic" alt="Atlantic" style="display: block;">
+              <img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/atlantic-logo.svg" border="0" width="129" height="20" title="Atlantic" alt="Atlantic" />
             </td>
         </tr>
       <tr>
