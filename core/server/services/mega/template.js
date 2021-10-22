@@ -1037,7 +1037,7 @@ figure blockquote p {
 
                                     <tr class="email-content">
                                         <td class="header-date" width="100%" align="center">
-                                            ${post.published_at} • Presented By partner brand
+                                            ${post.published_at} <!-- ATLANTIC_PRESENTED_BY -->
                                         </td>
                                     </tr>
 
@@ -1087,7 +1087,6 @@ figure blockquote p {
                                     <tr class="email-content">
                                         <td class="post-content">
                                             <!-- POST CONTENT START -->
-                                            <!-- ATLANTIC_TOP_AD -->
                                             ${post.html}
                                             <!-- ATLANTIC_BOTTOM_AD -->
                                             <!-- POST CONTENT END -->
