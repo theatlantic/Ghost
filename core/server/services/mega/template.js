@@ -1113,8 +1113,8 @@ figure blockquote p {
                                     </tr>
                                     <tr>
                                         <td class="footer footer-icons">
-                                            <a href="https://facebook.org/"><img src="${site.url}ghost/assets/img/email/icon-facebook.svg" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
-                                            <a href="https://twitter.com/"><img src="${site.url}ghost/assets/img/email/icon-twitter.svg" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                            <a href="https://facebook.org/"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                            <a href="https://twitter.com/"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
                                         </td>
                                     </tr>
 
