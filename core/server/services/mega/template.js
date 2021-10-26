@@ -1041,24 +1041,13 @@ figure blockquote p {
                                         </td>
                                     </tr>
 
+                                    ${ templateSettings.headerImage ? `
                                     <tr class="email-content">
                                         <td class="header-image" width="100%" align="center">
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
-                                                <tr>
-                                                    <td width="33%">
-                                                        <img src="${site.url}ghost/assets/img/email/header-left.png" border="0" width="184" height="184" alt="" style="display: block;">
-                                                    </td>
-                                                    <td width="34%" align="center" valign="middle" style="border-right: 0; border-left: 0;">
-                                                        <div class="site-title">The X Files</div>
-                                                        <div class="site-sub-title">Lil Nas X</div>
-                                                    </td>
-                                                    <td width="33%">
-                                                        <img src="${site.url}ghost/assets/img/email/header-right.png" border="0" width="184" height="184" alt="" style="display: block;">
-                                                    </td>
-                                                </tr>
-                                            </table>
+                                            <img src="${templateSettings.headerImage}"${templateSettings.headerImageWidth ? ` width="${templateSettings.headerImageWidth}"` : ''}>
                                         </td>
                                     </tr>
+                                    ` : ''}
 
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
