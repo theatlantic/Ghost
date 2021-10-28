@@ -11,8 +11,6 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
         ------------------------------------- */
         @media only screen and (max-width: 620px) {
             table[class=body] h1 {
-                font-size: 28px !important;
-                margin-bottom: 10px !important;
             }
             table[class=body] p,
             table[class=body] ul,
@@ -20,14 +18,14 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
             table[class=body] td,
             table[class=body] span,
             table[class=body] a {
-                font-size: 16px !important;
+
             }
             table[class=body] .wrapper,
             table[class=body] .article {
                 padding: 10px !important;
             }
             table[class=body] .content {
-                padding: 0 !important;
+                padding: 10px;
             }
             table[class=body] .container {
                 padding: 0 !important;
@@ -38,20 +36,10 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                 border-radius: 0 !important;
                 border-right-width: 0 !important;
             }
-            table[class=body] .btn table {
-                width: 100% !important;
-            }
-            table[class=body] .btn a {
-                width: 100% !important;
-            }
             table[class=body] .img-responsive {
                 height: auto !important;
                 max-width: 100% !important;
                 width: auto !important;
-            }
-            table[class=body] p[class=small],
-            table[class=body] a[class=small] {
-                font-size: 11px !important;
             }
         }
         /* -------------------------------------
@@ -133,7 +121,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
     <tr>
         <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top;">&nbsp;</td>
         <td class="container" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top; display: block; Margin: 0 auto; padding: 10px;">
-            <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 600px; padding: 30px 24px; background: #F8F7F3;">
+            <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 600px; width: 600px; padding: 30px 24px; background: #F8F7F3;">
 
                 <!-- START CENTERED WHITE CONTAINER -->
                 <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; border-radius: 8px;">
