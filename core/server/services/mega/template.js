@@ -1051,8 +1051,7 @@ figure blockquote p {
 
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
-                                            This is a free edition of the x files. to receive subscriber-exclusive editions of the x files,
-                                            <a href="${site.url}/#/portal/signup">become a subscriber</a>.
+                                            Through November 30, subscriber newsletters are available to everyone. For unlimited access to this newsletter and all of The Atlantic, <a href="${site.url}/#/portal/signup">become a subscriber</a>.
                                         </td>
                                     </tr>
 

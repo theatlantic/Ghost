@@ -4,7 +4,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
 <head>
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>📫 Confirm your subscription to ${siteTitle}</title>
+    <title>Confirm your email address</title>
     <style>
         /* -------------------------------------
             RESPONSIVE AND MOBILE FRIENDLY STYLES
@@ -131,33 +131,29 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
 <body class="" style="background-color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
 <table border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #FFFFFF;">
     <tr>
-        <td colspan="3" style="text-align: center; padding-bottom: 0; padding-top: 32px;">
-            <img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/atlantic-logo.png" border="0" width="129" height="20" title="Atlantic" alt="Atlantic" />
-        </td>
-    </tr>
-    <tr>
         <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top;">&nbsp;</td>
-        <td class="container" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top; display: block; Margin: 0 auto; max-width: 540px; padding: 10px; width: 540px;">
-            <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 600px; padding: 30px 20px;">
+        <td class="container" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top; display: block; Margin: 0 auto; padding: 10px;">
+            <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 600px; padding: 30px 24px; background: #F8F7F3;">
 
                 <!-- START CENTERED WHITE CONTAINER -->
-                <span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">You're one tap away from subscribing to ${siteTitle}!</span>
-                <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #ffffff; border-radius: 8px;">
+                <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; border-radius: 8px;">
 
                     <!-- START MAIN CONTENT AREA -->
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding-bottom: 40px;">
+                            <img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/atlantic-logo.png" border="0" width="129" height="20" title="Atlantic" alt="Atlantic" />
+                        </td>
+                    </tr>
                     <tr>
                         <td class="wrapper" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top; box-sizing: border-box;">
                             <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                                 <tr>
                                     <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top;">
-                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 24px; color: #15212A; font-weight: bold; line-height: 25px; margin: 0; margin-bottom: 15px;">
-                                            Please confirm your email subscription.
+                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 32px; color: #15212A; font-weight: bold; line-height: 25px; margin: 0; margin-bottom: 25px;">
+                                            Confirm your email address
                                         </p>
-                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 32px;">
-                                            Thank you for signing up! We need to make sure you want to receive emails from us.
-                                        </p>
-                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 32px;">
-                                            Please verify your email below to join my email list now.
+                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 32px;">
+                                            We want to make sure that all your newsletters go to the right inbox. Please confirm this is your preferred email address to start receiving the newsletters you signed up for.
                                         </p>
                                         <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
                                             <tbody>
@@ -166,8 +162,8 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                                     <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
                                                         <tbody>
                                                         <tr>
-                                                            <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; vertical-align: top; background-color: ${accentColor}; border-radius: 5px; text-align: center;"> <a href="${url}" target="_blank" style="display: inline-block; color: #ffffff; background-color: ${accentColor}; border: solid 1px ${accentColor}; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 16px; font-weight: normal; margin: 0; padding: 9px 22px 10px; border-color: ${accentColor};">
-                                                                Verify my email
+                                                            <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; vertical-align: top; background-color: #21272C; border-radius: 4px; text-align: center; padding: 12px 24px;"> <a href="${url}" target="_blank" style="display: inline-block; color: #ffffff; background-color: #21272C; border: solid 1px #21272C; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 16px; font-weight: normal; margin: 0; padding: 0; border-color: #21272C;">
+                                                                Confirm
                                                             </a> </td>
                                                         </tr>
                                                         </tbody>
@@ -176,10 +172,17 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                             </tr>
                                             </tbody>
                                         </table>
-                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 25px;">For your security, the link will expire in 24 hours time.</p>
-                                        <hr/>
-                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 15px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 5px;">You can also copy & paste this URL into your browser:</p>
-                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 15px; line-height: 25px; margin-top: 0; color: #3A464C;">${url}</p>
+                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 5px;">You can also copy & paste this URL into your browser:</p>
+                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; line-height: 25px; margin-top: 0; color: #3A464C;">${url}</p>
+
+                                        <hr style="position: static; width: 552px; height: 1px; left: 0px; top: 105px; background: #D3DCE6; flex: none; order: 1; flex-grow: 0;margin: 32px 0px;"/>
+
+                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 25px;">
+                                            For your security, this URL will expire in 24 hours. If you need assistance, or if you think you received this email in error, contact our Customer Care team.
+                                        </p>
+
+                                        <hr style="position: static; width: 552px; height: 1px; left: 0px; top: 105px; background: #D3DCE6; flex: none; order: 1; flex-grow: 0;margin: 32px 0px;"/>
+
                                     </td>
                                 </tr>
                             </table>
@@ -190,7 +193,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
 
                     <tr>
                         <td class="wrapper" align="center">
-                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 30px; border-top: 1px solid #D3DCE6;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 20px;">
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;text-transform: uppercase; color: #5E6A74;padding-top: 10px;">Share The Atlantic Newsletter:</td>
                                 </tr>
