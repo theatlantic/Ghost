@@ -3,6 +3,13 @@ const iff = (cond, yes, no) => (cond ? yes : no);
 module.exports = ({post, site, templateSettings}) => {
     const date = new Date();
     const hasFeatureImageCaption = templateSettings.showFeatureImage && post.feature_image && post.feature_image_caption;
+
+    // find site slug for build subscription url
+    const parsedUrl = new URL(site.url);
+    const siteSlug = parsedUrl.pathname.split('/')[1];
+
+    const ctaUrl = `https://accounts.theatlantic.com/products/?referral=${siteSlug}&utm_source=${siteSlug}`;
+
     return `<!doctype html>
 <html>
 
@@ -1051,7 +1058,9 @@ figure blockquote p {
 
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
-                                            Through November 30, subscriber newsletters are available to everyone. For unlimited access to this newsletter and all of The Atlantic, <a href="${site.url}/#/portal/signup">become a subscriber</a>.
+                                            Through November 30, subscriber newsletters are available to everyone.
+                                            For unlimited access to this newsletter and all of The Atlantic,
+                                            <a href="${ctaUrl}">become a subscriber</a>.
                                         </td>
                                     </tr>
 
