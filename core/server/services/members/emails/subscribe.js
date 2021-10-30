@@ -83,7 +83,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
             border-bottom-color: #EEF5F8;
         }
         a {
-            color: #3A464C;
+            color: #5E6A74;
         }
     </style>
     <style type="text/css">
@@ -116,7 +116,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
         }
     </style>
 </head>
-<body class="" style="background-color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
+<body class="" style="background-color: #FFFFFF; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
 <table border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #FFFFFF;">
     <tr>
         <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top;">&nbsp;</td>
@@ -137,20 +137,21 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                             <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                                 <tr>
                                     <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 14px; vertical-align: top;">
-                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 32px; color: #15212A; font-weight: bold; line-height: 25px; margin: 0; margin-bottom: 25px;">
+                                        <p style="font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 32px; font-weight: 400; line-height: 40px; color: #000000; margin: 0; padding-bottom: 24px;">
                                             Confirm your email address
                                         </p>
-                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 32px;">
+                                        <p style="font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; font-weight: normal; margin: 0;">
                                             We want to make sure that all your newsletters go to the right inbox. Please confirm this is your preferred email address to start receiving the newsletters you signed up for.
                                         </p>
                                         <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
                                             <tbody>
                                             <tr>
-                                                <td align="center" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; vertical-align: top; padding-bottom: 35px;">
+                                                <td align="center" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; vertical-align: top; padding-top: 40px;padding-bottom: 40px;">
                                                     <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
                                                         <tbody>
                                                         <tr>
-                                                            <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 16px; vertical-align: top; background-color: #21272C; border-radius: 4px; text-align: center; padding: 12px 24px;"> <a href="${url}" target="_blank" style="display: inline-block; color: #ffffff; background-color: #21272C; border: solid 1px #21272C; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 16px; font-weight: normal; margin: 0; padding: 0; border-color: #21272C;">
+                                                            <td style="font-family: Arial, sans-serif; font-size: 16px; vertical-align: top; background-color: #21272C; border-radius: 4px; text-align: center; padding: 12px 24px;">
+                                                                <a href="${url}" target="_blank" style="display: inline-block; color: #ffffff; background-color: #21272C; border: solid 1px #21272C; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 16px; font-weight: normal; margin: 0; padding: 0; border-color: #21272C;">
                                                                 Confirm
                                                             </a> </td>
                                                         </tr>
@@ -160,12 +161,12 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                             </tr>
                                             </tbody>
                                         </table>
-                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 5px;">You can also copy & paste this URL into your browser:</p>
-                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; line-height: 25px; margin-top: 0; color: #3A464C;">${url}</p>
+                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; margin: 0; padding-bottom: 16px;">You can also copy & paste this URL into your browser:</p>
+                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; margin-top: 0;">${url}</p>
 
                                         <hr style="position: static; width: 552px; height: 1px; left: 0px; top: 105px; background: #D3DCE6; flex: none; order: 1; flex-grow: 0;margin: 32px 0px;"/>
 
-                                        <p style="font-family: Adobe Garamond Pro, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 19px; color: #3A464C; font-weight: normal; margin: 0; line-height: 25px; margin-bottom: 25px;">
+                                        <p style="font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; font-weight: normal; margin: 0; margin-bottom: 25px;">
                                             For your security, this URL will expire in 24 hours. If you need assistance, or if you think you received this email in error, contact our Customer Care team.
                                         </p>
 
