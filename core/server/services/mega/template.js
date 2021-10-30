@@ -100,8 +100,8 @@ ul,
 ol,
 dl,
 blockquote {
-    margin: 0 0 1.5em 0;
-    line-height: 1.6em;
+    margin: 0 0 16px 0;
+    line-height: 28.5px;
 }
 
 ol,
@@ -133,7 +133,7 @@ ol {
 li {
     margin: 0.5em 0;
     padding-left: 0.3em;
-    line-height: 1.6em;
+    line-height: 28.5px;
 }
 
 dt {
@@ -156,7 +156,7 @@ blockquote {
     border-left: ${templateSettings.accentColor || '#15212A'} 2px solid;
     font-size: 17px;
     font-weight: 500;
-    line-height: 1.6em;
+    line-height: 28.5px;
     letter-spacing: -0.2px;
 }
 
@@ -198,15 +198,21 @@ h6 {
 }
 
 h1 {
-    margin: 1.5em 0 0.5em 0;
-    font-size: 42px;
-    font-weight: 600;
+    border-top: 1px solid #000000;
+    font-size: 32px;
+    line-height: 40px;
+    padding-bottom: 24px;
+    padding-top: 16px;
+    margin: 0;
 }
 
 h2 {
-    margin: 1.5em 0 0.5em 0;
+    border-top: 1px solid #000000;
     font-size: 32px;
-    line-height: 1.22em;
+    line-height: 40px;
+    padding-bottom: 24px;
+    padding-top: 16px;
+    margin: 0;
 }
 
 h3 {
@@ -287,7 +293,7 @@ figure blockquote p {
 }
 
 .header-image .site-title {
-    font-family: Adobe Garamond Pro, sans-serif;
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-style: normal;
     font-weight: normal;
     font-size: 24px;
@@ -306,7 +312,7 @@ figure blockquote p {
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #5E6A74;
-    padding: 16px;
+    padding: 16px 16px 12px;
 }
 
 .header-info {
@@ -330,7 +336,7 @@ figure blockquote p {
 }
 
 .post-content {
-    font-family: Adobe Garamond Pro, sans-serif;
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-style: normal;
     font-size: 19px;
     line-height: 150%;
@@ -377,7 +383,7 @@ figure blockquote p {
 }
 
 .site-sub-title {
-    font-family: Adobe Garamond Pro, sans-serif;
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-style: italic;
     font-weight: normal;
     font-size: 24px;
@@ -394,7 +400,7 @@ figure blockquote p {
 .post-title {
     padding-top: 30px;
     padding-bottom: 24px;
-    font-family: Adobe Garamond Pro, sans-serif;
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-style: normal;
     font-weight: normal;
     font-size: 32px;
@@ -651,15 +657,6 @@ figure blockquote p {
     padding-top: 10px;
 }
 
-.footer-icons {
-    padding-top: 16px;
-    padding-bottom: 16px;
-}
-
-.footer-icons .footer-social {
-    padding-left: 8px;
-    padding-right: 8px;
-}
 
 .footer {
     font-family: Arial, sans-serif;
@@ -669,14 +666,24 @@ figure blockquote p {
     line-height: 150%;
     text-align: center;
     color: #5E6A74;
-    padding-bottom: 13px;
+    padding-bottom: 12px;
 }
 
 .footer a {
-    color: #738a94;
+    color: #5E6A74;
     text-decoration: underline;
     padding-left: 5px;
     padding-right: 5px;
+}
+
+.footer-icons {
+    padding-top: 17px;
+    padding-bottom: 24px;
+}
+
+.footer-icons .footer-social {
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 /* -------------------------------------
@@ -918,7 +925,7 @@ figure blockquote p {
 
     table.body blockquote {
         font-size: 17px !important;
-        line-height: 1.6em !important;
+        line-height: 28.5px !important;
         margin-bottom: 0 !important;
         padding-left: 15px !important;
     }
@@ -1040,7 +1047,7 @@ figure blockquote p {
                         <!-- START MAIN CONTENT AREA -->
                         <tr>
                             <td class="wrapper">
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 0.5px solid #000000;">
 
                                     <tr class="email-content">
                                         <td class="header-date" width="100%" align="center">
@@ -1090,51 +1097,46 @@ figure blockquote p {
                                         </td>
                                     </tr>
 
+                                    <tr>
+                                        <td class="wrapper" align="center">
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 40px; border-top: 1px solid #D3DCE6;">
+                                                <tr>
+                                                    <td class="footer-top">Share The Atlantic Newsletter:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="footer footer-icons">
+                                                        <a href="https://facebook.org/"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                                        <a href="https://twitter.com/"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="footer">600 New Hampshire Avenue NW ∙ Washington, DC 20037</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="footer">
+                                                        <a href="#">Subscribe to The Atlantic</a>  |
+                                                        <a href="#">Get The Atlantic’s iOS app</a>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="footer">
+                                                        <a href="#">See all of our newsletters</a>  |
+                                                        <a href="%recipient.unsubscribe_url%">Unsubscribe</a>  |
+                                                        <a href="#">Privacy Policy</a>  |
+                                                        <a href="#">Customer Care</a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
                                 </table>
                             </td>
                         </tr>
 
                         <!-- END MAIN CONTENT AREA -->
-
-                        <tr class="email-white-delimiter">
-                            <td>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="wrapper" align="center">
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 30px; border-top: 1px solid #D3DCE6;">
-                                    <tr>
-                                        <td class="footer-top">Share The Atlantic Newsletter:</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="footer footer-icons">
-                                            <a href="https://facebook.org/"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
-                                            <a href="https://twitter.com/"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="footer">600 New Hampshire Avenue NW ∙ Washington, DC 20037</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="footer">
-                                            <a href="#">Subscribe to The Atlantic</a>  |
-                                            <a href="#">Get The Atlantic’s iOS app</a>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="footer">
-                                            <a href="#">See all of our newsletters</a>  |
-                                            <a href="%recipient.unsubscribe_url%">Unsubscribe</a>  |
-                                            <a href="#">Privacy Policy</a>  |
-                                            <a href="#">Customer Care</a>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
 
                     </table>
                     <!-- END CENTERED WHITE CONTAINER -->
