@@ -1105,8 +1105,8 @@ figure blockquote p {
                                                 </tr>
                                                 <tr>
                                                     <td class="footer footer-icons">
-                                                        <a href="https://facebook.org/"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
-                                                        <a href="https://twitter.com/"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                                        <a href="https://www.facebook.com/TheAtlantic/"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                                        <a href="https://twitter.com/TheAtlantic"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
                                                     </td>
                                                 </tr>
 
@@ -1115,17 +1115,17 @@ figure blockquote p {
                                                 </tr>
                                                 <tr>
                                                     <td class="footer">
-                                                        <a href="#">Subscribe to The Atlantic</a>  |
-                                                        <a href="#">Get The Atlantic’s iOS app</a>
+                                                        <a href="${ctaUrl}">Subscribe to The Atlantic</a>  |
+                                                        <a href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">Get The Atlantic’s iOS app</a>
                                                     </td>
                                                 </tr>
 
                                                 <tr>
                                                     <td class="footer">
-                                                        <a href="#">See all of our newsletters</a>  |
+                                                        <a href="https://www.theatlantic.com/newsletters/">See all of our newsletters</a>  |
                                                         <a href="%recipient.unsubscribe_url%">Unsubscribe</a>  |
-                                                        <a href="#">Privacy Policy</a>  |
-                                                        <a href="#">Customer Care</a>
+                                                        <a href="https://www.theatlantic.com/privacy-policy/">Privacy Policy</a>  |
+                                                        <a href="https://support.theatlantic.com/hc/en-us/requests/new">Customer Care</a>
                                                     </td>
                                                 </tr>
                                             </table>

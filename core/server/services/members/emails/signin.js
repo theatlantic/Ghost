@@ -1,4 +1,12 @@
-module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, siteUrl}) => `
+module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, siteUrl}) => {
+
+    // find site slug for build subscription url
+    const parsedUrl = new URL(siteUrl);
+    const siteSlug = parsedUrl.pathname.split('/')[1];
+
+    const ctaUrl = `https://accounts.theatlantic.com/products/?referral=${siteSlug}&utm_source=${siteSlug}`;
+
+    return `
 <!doctype html>
 <html>
 <head>
@@ -188,8 +196,8 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                 </tr>
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;padding-top: 16px;padding-bottom: 16px;">
-                                        <a href="https://facebook.org/"><img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Facebook"></a>
-                                        <a href="https://twitter.com/"><img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Twitter"></a>
+                                        <a href="https://www.facebook.com/TheAtlantic/"><img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Facebook"></a>
+                                        <a href="https://twitter.com/TheAtlantic"><img src="https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Twitter"></a>
                                     </td>
                                 </tr>
 
@@ -198,16 +206,16 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                 </tr>
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;">
-                                        <a href="#">Subscribe to The Atlantic</a>  |
-                                        <a href="#">Get The Atlantic’s iOS app</a>
+                                        <a href="${ctaUrl}">Subscribe to The Atlantic</a>  |
+                                        <a href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">Get The Atlantic’s iOS app</a>
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;">
-                                        <a href="#">See all of our newsletters</a>  |
-                                        <a href="#">Privacy Policy</a>  |
-                                        <a href="#">Customer Care</a>
+                                        <a href="https://www.theatlantic.com/newsletters/">See all of our newsletters</a>  |
+                                        <a href="https://www.theatlantic.com/privacy-policy/">Privacy Policy</a>  |
+                                        <a href="https://support.theatlantic.com/hc/en-us/requests/new">Customer Care</a>
                                     </td>
                                 </tr>
                             </table>
@@ -229,3 +237,4 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
 </body>
 </html>
 `;
+};
