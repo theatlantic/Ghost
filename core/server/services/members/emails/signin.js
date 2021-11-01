@@ -149,7 +149,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                             Confirm your email address
                                         </p>
                                         <p style="font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; font-weight: normal; margin: 0;">
-                                            We want to make sure that all your newsletters go to the right inbox. Please confirm this is your preferred email address to start receiving the newsletters you signed up for.
+                                            We want to make sure that all your newsletters go to the right inbox. Please confirm this is your preferred email address:
                                         </p>
                                         <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
                                             <tbody>
@@ -169,13 +169,13 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                             </tr>
                                             </tbody>
                                         </table>
-                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; margin: 0; padding-bottom: 16px;">You can also copy & paste this URL into your browser:</p>
+                                        <p style="word-break: break-all; font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; margin: 0; padding-bottom: 16px;">Or you can copy and paste this URL into your browser:</p>
                                         <p style="word-break: break-all; font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; margin-top: 0;">${url}</p>
 
                                         <hr style="position: static; width: 552px; height: 1px; left: 0px; top: 105px; background: #D3DCE6; flex: none; order: 1; flex-grow: 0;margin: 32px 0px;"/>
 
                                         <p style="font-family: Adobe Garamond Pro, Times New Roman, serif; font-size: 19px; line-height: 28.5px; color: #000000; font-weight: normal; margin: 0; margin-bottom: 25px;">
-                                            For your security, this URL will expire in 24 hours. If you need assistance, or if you think you received this email in error, contact our Customer Care team.
+                                            If you need assistance confirming your email, please <a href="https://support.theatlantic.com/hc/en-us/requests/new">contact</a> our Customer Care team.
                                         </p>
 
                                         <hr style="position: static; width: 552px; height: 1px; left: 0px; top: 105px; background: #D3DCE6; flex: none; order: 1; flex-grow: 0;margin: 32px 0px;"/>
@@ -206,16 +206,16 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                 </tr>
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;">
-                                        <a href="${ctaUrl}">Subscribe to The Atlantic</a>  |
-                                        <a href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">Get The Atlantic’s iOS app</a>
+                                        <a style="color: #5E6A74" href="${ctaUrl}">Subscribe to The Atlantic</a>  |
+                                        <a style="color: #5E6A74" href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">Get The Atlantic’s iOS app</a>
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;">
-                                        <a href="https://www.theatlantic.com/newsletters/">See all of our newsletters</a>  |
-                                        <a href="https://www.theatlantic.com/privacy-policy/">Privacy Policy</a>  |
-                                        <a href="https://support.theatlantic.com/hc/en-us/requests/new">Customer Care</a>
+                                        <a style="color: #5E6A74" href="https://www.theatlantic.com/newsletters/">See all of our newsletters</a>  |
+                                        <a style="color: #5E6A74" href="https://www.theatlantic.com/privacy-policy/">Privacy Policy</a>  |
+                                        <a style="color: #5E6A74" href="https://support.theatlantic.com/hc/en-us/requests/new">Customer Care</a>
                                     </td>
                                 </tr>
                             </table>
