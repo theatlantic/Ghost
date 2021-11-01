@@ -32,7 +32,7 @@ img {
 
 body {
     background-color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     -webkit-font-smoothing: antialiased;
     font-size: 18px;
     line-height: 1.4;
@@ -51,7 +51,7 @@ table {
 }
 
 table td {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-size: 18px;
     vertical-align: top;
     color: #15212A;
@@ -191,7 +191,7 @@ h4,
 h5,
 h6 {
     margin-top: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     line-height: 1.15em;
     font-weight: 600;
     text-rendering: optimizeLegibility;
@@ -204,6 +204,7 @@ h1 {
     padding-bottom: 24px;
     padding-top: 16px;
     margin: 0;
+    font-weight: 400;
 }
 
 h2 {
@@ -251,7 +252,7 @@ figure {
 
 figcaption {
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-size: 14px;
     padding-top: 5px;
     line-height: 1.5em;
@@ -325,6 +326,8 @@ figure blockquote p {
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #000000;
+    padding-right: 20px;
+    padding-left: 20px;
     padding-top: 24px;
     padding-bottom: 24px;
     background-color: #ffffff;
@@ -817,7 +820,6 @@ figure blockquote p {
     table.body ol,
     table.body td,
     table.body span {
-        font-size: 16px !important;
     }
 
     table.body pre {
@@ -864,28 +866,6 @@ figure blockquote p {
         height: 40px !important;
     }
 
-    table.body .site-url a {
-        font-size: 14px !important;
-        padding-bottom: 15px !important;
-    }
-
-    table.body .post-meta {
-        white-space: normal !important;
-        font-size: 12px !important;
-        line-height: 1.5em;
-    }
-
-    table.body .view-online-link,
-    table.body .footer,
-    table.body .footer a {
-        font-size: 12px !important;
-    }
-
-    table.body .post-title a {
-        font-size: 32px !important;
-        line-height: 1.15em !important;
-    }
-
     table.body .kg-bookmark-card {
         width: 90vw !important;
     }
@@ -900,56 +880,6 @@ figure blockquote p {
 
     table.body .kg-embed-card {
         max-width: 90vw !important;
-    }
-
-    table.body h1 {
-        font-size: 32px !important;
-        line-height: 1.3em !important;
-    }
-
-    table.body h2 {
-        font-size: 26px !important;
-        line-height: 1.22em !important;
-    }
-
-    table.body h3 {
-        font-size: 21px !important;
-        line-height: 1.25em !important;
-    }
-
-    table.body h4 {
-        font-size: 19px !important;
-        line-height: 1.3em !important;
-    }
-
-    table.body h5 {
-        font-size: 16px !important;
-        line-height: 1.4em !important;
-    }
-
-    table.body h6 {
-        font-size: 16px !important;
-        line-height: 1.4em !important;
-    }
-
-    table.body blockquote {
-        font-size: 17px !important;
-        line-height: 28.5px !important;
-        margin-bottom: 0 !important;
-        padding-left: 15px !important;
-    }
-
-    table.body blockquote + * {
-        margin-top: 1.5em !important;
-    }
-
-    table.body hr {
-        margin: 2em 0 !important;
-    }
-
-    table.body figcaption,
-    table.body figcaption a {
-        font-size: 13px !important;
     }
 
 }
