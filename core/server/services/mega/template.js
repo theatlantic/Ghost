@@ -342,7 +342,7 @@ figure blockquote p {
     line-height: 150%;
     color: #000000;
     padding-bottom: 30px;
-    padding-top: 20px;
+    padding-top: 24px;
 }
 
 .email-white-delimiter {
@@ -398,8 +398,8 @@ figure blockquote p {
 }
 
 .post-title {
-    padding-top: 30px;
-    padding-bottom: 24px;
+    padding-top: 40px;
+    padding-bottom: 0;
     font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-style: normal;
     font-weight: normal;
@@ -407,6 +407,15 @@ figure blockquote p {
     line-height: 40px;
     color: #21272C;
 }
+
+.post-title h1 {
+    padding-bottom: 0;
+}
+
+.post-title div {
+    border-top: 1px solid #000000;
+}
+
 .post-title-serif {
     font-family: Georgia, serif;
 }
@@ -1083,9 +1092,7 @@ figure blockquote p {
                                     ` : ``}
 
                                     <tr class="email-content">
-                                        <td class="post-title">
-                                            ${post.title}
-                                        </td>
+                                        <td class="post-title"><h1>${post.title}</h1></td>
                                     </tr>
 
                                     <tr class="email-content">
@@ -1098,7 +1105,7 @@ figure blockquote p {
                                     </tr>
 
                                     <tr>
-                                        <td class="wrapper" align="center">
+                                        <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 40px; border-top: 1px solid #D3DCE6;">
                                                 <tr>
                                                     <td class="footer-top">Share The Atlantic Newsletter:</td>
