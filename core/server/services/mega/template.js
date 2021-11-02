@@ -938,7 +938,7 @@ figure blockquote p {
             font-family: "Adobe Garamond Pro";
             font-style: normal;
             font-weight: 400;
-            src: url("https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
+            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
             mso-font-alt: "Georgia";
         }
         ​
@@ -947,7 +947,7 @@ figure blockquote p {
             font-family: "Adobe Garamond Pro";
             font-style: normal;
             font-weight: 600;
-            src: url("https://newsletters.theatlantic.com/stlawrenceriver/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
+            src: url("https://newsletters.theatlantic.com/peacefield/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
         ​
@@ -957,7 +957,7 @@ figure blockquote p {
             font-stretch: normal;
             font-style: normal;
             font-weight: 700;
-            src: url("https://newsletters.theatlantic.com/stlawrenceriver/ghost/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
+            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
 </style>
