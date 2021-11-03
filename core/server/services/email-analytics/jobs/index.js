@@ -25,11 +25,11 @@ module.exports = {
             if (emailCount > 0) {
                 // use a random seconds value to avoid spikes to external APIs on the minute
                 const s = Math.floor(Math.random() * 60); // 0-59
-                // run every 5 minutes, on 1,6,11..., 2,7,12..., 3,8,13..., etc
-                const m = Math.floor(Math.random() * 5); // 0-4
+                // run every 15 minutes, on 1,16,31..., 2,17,32..., 3,18,33..., etc
+                const m = Math.floor(Math.random() * 15); // 0-14
 
                 jobsService.addJob({
-                    at: `${s} ${m}/5 * * * *`,
+                    at: `${s} ${m}/15 * * * *`,
                     job: path.resolve(__dirname, 'fetch-latest.js'),
                     name: 'email-analytics-fetch-latest'
                 });
