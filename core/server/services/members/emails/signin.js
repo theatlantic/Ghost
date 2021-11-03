@@ -197,13 +197,14 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;">
                                         <a style="color: #5E6A74" href="${ctaUrl}">Subscribe to The Atlantic</a>  |
-                                        <a style="color: #5E6A74" href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">Get The Atlantic’s iOS app</a>
+                                        <span style="padding-left: 5px;color: #5E6A74;">Download The Atlantic app for <a style="padding: 0;color: #5E6A74;" href="https://play.google.com/store/apps/details?id=com.theatlantic.newsstand">Android</a> and <a style="padding: 0;color: #5E6A74;" href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">iOS</a></span>
                                     </td>
                                 </tr>
 
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;">
                                         <a style="color: #5E6A74" href="https://www.theatlantic.com/newsletters/">See all of our newsletters</a>  |
+                                        <a style="color: #5E6A74" href="%unsubscribe_url%">Unsubscribe</a>  |
                                         <a style="color: #5E6A74" href="https://www.theatlantic.com/privacy-policy/">Privacy Policy</a>  |
                                         <a style="color: #5E6A74" href="https://support.theatlantic.com/hc/en-us/requests/new">Customer Care</a>
                                     </td>

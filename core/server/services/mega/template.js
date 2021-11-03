@@ -1053,7 +1053,7 @@ figure blockquote p {
                                                 <tr>
                                                     <td class="footer">
                                                         <a href="${ctaUrl}">Subscribe to The Atlantic</a>  |
-                                                        <a href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">Get The Atlantic’s iOS app</a>
+                                                        <span style="padding-left: 5px;color: #5E6A74;">Download The Atlantic app for <a style="padding: 0;color: #5E6A74;" href="https://play.google.com/store/apps/details?id=com.theatlantic.newsstand">Android</a> and <a style="padding: 0;color: #5E6A74;" href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">iOS</a></span>
                                                     </td>
                                                 </tr>
 
