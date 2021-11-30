@@ -1004,9 +1004,8 @@ figure blockquote p {
 
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
-                                            Through November 30, subscriber newsletters are available to everyone.
-                                            For unlimited access to this newsletter and all of The Atlantic,
-                                            <a href="${ctaUrl}">become a subscriber</a>.
+                                            This is a free edition of The X Files. To receive all emails, including ones
+                                            exclusively available to Atlantic subscribers, <a href="${ctaUrl}">start your subscription today</a>.
                                         </td>
                                     </tr>
 
