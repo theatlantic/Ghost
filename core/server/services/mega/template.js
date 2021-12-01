@@ -1001,14 +1001,14 @@ figure blockquote p {
                                         </td>
                                     </tr>
                                     ` : ''}
-
+                                    <!--
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
                                             This is a free edition of ${site.title}. To receive all emails, including ones
                                             exclusively available to Atlantic subscribers, <a href="${ctaUrl}">start your subscription today</a>.
                                         </td>
                                     </tr>
-
+                                    -->
                                     ${ templateSettings.showFeatureImage && post.feature_image ? `
                                     <tr class="email-content">
                                         <td class="feature-image ${hasFeatureImageCaption ? 'feature-image-with-caption' : ''}"><img src="${post.feature_image}"${post.feature_image_width ? ` width="${post.feature_image_width}"` : ''}${post.feature_image_alt ? ` alt="${post.feature_image_alt}"` : ''}></td>
