@@ -1004,7 +1004,7 @@ figure blockquote p {
 
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
-                                            This is a free edition of The X Files. To receive all emails, including ones
+                                            This is a free edition of ${site.title}. To receive all emails, including ones
                                             exclusively available to Atlantic subscribers, <a href="${ctaUrl}">start your subscription today</a>.
                                         </td>
                                     </tr>
