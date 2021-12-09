@@ -43,7 +43,7 @@ const getAtlanticMemberCookie = async function (req, res) {
                 console.log('premium user');
 
                 try {
-                    const publicKeyPath = path.resolve(__dirname, '../../../../content/keys/atlantic.pem');
+                    const publicKeyPath = path.resolve(__dirname, '../../../../content/keys/jwt_cookie_cert.pem');
                     const publicKey = fs.readFileSync(publicKeyPath);
                     jwt.verify(atlanticCookie, publicKey);
                     console.log('cookie valid');
