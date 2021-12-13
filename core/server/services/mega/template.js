@@ -151,18 +151,18 @@ dd {
 }
 
 blockquote {
-    margin: 2em 0;
-    padding: 0 25px 0 25px;
-    border-left: ${templateSettings.accentColor || '#15212A'} 2px solid;
-    font-size: 17px;
+    margin: 16px 0;
+    padding: 0 16px 0 16px;
+    border-left: #5E6A74 1px solid;
+    font-size: 19px;
     font-weight: 500;
     line-height: 28.5px;
     letter-spacing: -0.2px;
 }
 
 blockquote p {
-    margin: 0.8em 0;
-    font-size: 1em;
+    margin: 16px 0;
+    font-size: 19px;
 }
 
 blockquote small {
