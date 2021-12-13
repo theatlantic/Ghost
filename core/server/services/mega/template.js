@@ -207,6 +207,10 @@ h1 {
     font-weight: 400;
 }
 
+h1 a {
+    text-decoration: none;
+}
+
 h2 {
     border-top: 1px solid #000000;
     font-size: 32px;
@@ -997,7 +1001,9 @@ figure blockquote p {
                                     ${ templateSettings.headerImage ? `
                                     <tr class="email-content">
                                         <td class="header-image" width="100%" align="center">
-                                            <img src="${templateSettings.headerImage}"${templateSettings.headerImageWidth ? ` width="${templateSettings.headerImageWidth}"` : ''}>
+                                            <a href="${site.url}">
+                                                <img src="${templateSettings.headerImage}"${templateSettings.headerImageWidth ? ` width="${templateSettings.headerImageWidth}"` : ''}>
+                                            </a>
                                         </td>
                                     </tr>
                                     ` : ''}
@@ -1021,7 +1027,7 @@ figure blockquote p {
                                     ` : ``}
 
                                     <tr class="email-content">
-                                        <td class="post-title"><h1>${post.title}</h1></td>
+                                        <td class="post-title"><h1><a class="post-title" href="${post.url}">${post.title}</a></h1></td>
                                     </tr>
 
                                     <tr class="email-content">
