@@ -182,6 +182,15 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                         <td class="wrapper" align="center">
                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 20px;">
                                 <tr>
+                                    <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;text-transform: uppercase; color: #5E6A74;padding-top: 5px;">Share The Atlantic Newsletter:</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;padding-top: 16px;padding-bottom: 16px;">
+                                        <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.theatlantic.com%2Fsubscriber-newsletters%2F"><img src="https://newsletters.theatlantic.com/peacefield/ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Facebook"></a>
+                                        <a href="https://twitter.com/share?url=https%3A%2F%2Fwww.theatlantic.com%2Fsubscriber-newsletters%2F"><img src="https://newsletters.theatlantic.com/peacefield/ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Twitter"></a>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px; padding-top: 5px;">600 New Hampshire Avenue NW ∙ Washington, DC 20037</td>
                                 </tr>
                                 <tr>

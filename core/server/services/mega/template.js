@@ -9,6 +9,7 @@ module.exports = ({post, site, templateSettings}) => {
     const siteSlug = parsedUrl.pathname.split('/')[1];
 
     const ctaUrl = `https://accounts.theatlantic.com/products/?referral=${siteSlug}&utm_source=${siteSlug}`;
+    const encodedPageUrl = encodeURIComponent(post.url);
 
     return `<!doctype html>
 <html>
@@ -1047,8 +1048,8 @@ figure blockquote p {
                                                 </tr>
                                                 <tr>
                                                     <td class="footer footer-icons">
-                                                        <a href="https://www.facebook.com/TheAtlantic/"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
-                                                        <a href="https://twitter.com/TheAtlantic"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedPageUrl}"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                                        <a href="https://twitter.com/share?url=${encodedPageUrl}"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
                                                     </td>
                                                 </tr>
 
