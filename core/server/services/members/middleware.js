@@ -8,18 +8,60 @@ const settingsCache = require('../../../shared/settings-cache');
 const {formattedMemberResponse} = require('./utils');
 const labsService = require('../../../shared/labs');
 const config = require('../../../shared/config');
+const createCookies = require('cookies');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 // @TODO: This piece of middleware actually belongs to the frontend, not to the member app
 // Need to figure a way to separate these things (e.g. frontend actually talks to members API)
 const loadMemberSession = async function (req, res, next) {
     try {
-        const member = await membersService.ssr.getMemberDataFromSession(req, res);
+        // check if we have Atlantic cookie with premium access
+        let member = await getAtlanticMemberCookie(req, res);
+        if (!member) {
+            member = await membersService.ssr.getMemberDataFromSession(req, res);
+        }
+
         Object.assign(req, {member});
         res.locals.member = req.member;
         next();
     } catch (err) {
         Object.assign(req, {member: null});
         next();
+    }
+};
+
+const getAtlanticMemberCookie = async function (req, res) {
+    const cookies = createCookies(req, res);
+    const atlanticCookie = cookies.get('atljwt');
+
+    if (atlanticCookie) {
+        const atlanticCookieDecoded = jwt.decode(atlanticCookie, {complete: true});
+
+        if (atlanticCookieDecoded && atlanticCookieDecoded.payload) {
+            if (atlanticCookieDecoded.payload.paymeter_access === true) {
+                console.log('premium user');
+
+                try {
+                    const publicKeyPath = path.resolve(__dirname, '../../../../content/keys/jwt_cookie_cert.pem');
+                    const publicKey = fs.readFileSync(publicKeyPath);
+                    jwt.verify(atlanticCookie, publicKey);
+                    console.log('cookie valid');
+
+                    return {
+                        uuid: 'PREMIUM_UID',
+                        email: 'member@theatlantic.com',
+                        name: '',
+                        subscribed: '',
+                        subscriptions: '',
+                        status: 'paid'
+                    };
+                } catch (err) {
+                    console.log('cookie NOT verified');
+                }
+            }
+        }
     }
 };
 

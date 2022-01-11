@@ -3,6 +3,14 @@ const iff = (cond, yes, no) => (cond ? yes : no);
 module.exports = ({post, site, templateSettings}) => {
     const date = new Date();
     const hasFeatureImageCaption = templateSettings.showFeatureImage && post.feature_image && post.feature_image_caption;
+
+    // find site slug for build subscription url
+    const parsedUrl = new URL(site.url);
+    const siteSlug = parsedUrl.pathname.split('/')[1];
+
+    const ctaUrl = `https://accounts.theatlantic.com/products/?referral=${siteSlug}&utm_source=${siteSlug}`;
+    const encodedPageUrl = encodeURIComponent(post.url);
+
     return `<!doctype html>
 <html>
 
@@ -25,7 +33,7 @@ img {
 
 body {
     background-color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     -webkit-font-smoothing: antialiased;
     font-size: 18px;
     line-height: 1.4;
@@ -44,7 +52,7 @@ table {
 }
 
 table td {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-size: 18px;
     vertical-align: top;
     color: #15212A;
@@ -74,10 +82,6 @@ table td {
     max-width: 600px;
 }
 
-.content a {
-    overflow-wrap: anywhere;
-}
-
 /* -------------------------------------
     POST CONTENT
 ------------------------------------- */
@@ -97,8 +101,8 @@ ul,
 ol,
 dl,
 blockquote {
-    margin: 0 0 1.5em 0;
-    line-height: 1.6em;
+    margin: 0 0 16px 0;
+    line-height: 28.5px;
 }
 
 ol,
@@ -130,7 +134,7 @@ ol {
 li {
     margin: 0.5em 0;
     padding-left: 0.3em;
-    line-height: 1.6em;
+    line-height: 28.5px;
 }
 
 dt {
@@ -148,27 +152,18 @@ dd {
 }
 
 blockquote {
-    margin: 2em 0 2em 0;
-    padding: 0 25px 0 25px;
-    border-left: ${templateSettings.accentColor || '#15212A'} 2px solid;
-    font-size: 17px;
+    margin: 16px 0;
+    padding: 0 16px 0 16px;
+    border-left: #5E6A74 1px solid;
+    font-size: 19px;
     font-weight: 500;
-    line-height: 1.6em;
+    line-height: 28.5px;
     letter-spacing: -0.2px;
 }
 
-blockquote.kg-blockquote-alt {
-    border-left: 0 none;
-    padding: 0 50px 0 50px;
-    text-align: center;
-    font-size: 1.2em;
-    font-style: italic;
-    color: #999999;
-}
-
 blockquote p {
-    margin: 0.8em 0;
-    font-size: 1em;
+    margin: 16px 0;
+    font-size: 19px;
 }
 
 blockquote small {
@@ -186,8 +181,8 @@ blockquote cite a {
 }
 
 a {
-    color: ${templateSettings.accentColor || '#15212A'};
-    text-decoration: none;
+    color: #000000;
+    text-decoration: underline;
 }
 
 h1,
@@ -197,22 +192,33 @@ h4,
 h5,
 h6 {
     margin-top: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     line-height: 1.15em;
     font-weight: 600;
     text-rendering: optimizeLegibility;
 }
 
 h1 {
-    margin: 1.5em 0 0.5em 0;
-    font-size: 42px;
-    font-weight: 600;
+    border-top: 1px solid #000000;
+    font-size: 32px;
+    line-height: 40px;
+    padding-bottom: 24px;
+    padding-top: 16px;
+    margin: 0;
+    font-weight: 400;
+}
+
+h1 a {
+    text-decoration: none;
 }
 
 h2 {
-    margin: 1.5em 0 0.5em 0;
+    border-top: 1px solid #000000;
     font-size: 32px;
-    line-height: 1.22em;
+    line-height: 40px;
+    padding-bottom: 24px;
+    padding-top: 16px;
+    margin: 0;
 }
 
 h3 {
@@ -251,7 +257,7 @@ figure {
 
 figcaption {
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
     font-size: 14px;
     padding-top: 5px;
     line-height: 1.5em;
@@ -282,7 +288,74 @@ figure blockquote p {
 }
 
 .header-image {
-    padding-top: 16px;
+    padding-top: 0;
+    padding-bottom: 40px;
+}
+
+.header-image td {
+    border: 0.5px solid #000000;
+    height: 184px;
+    vertical-align: middle;
+}
+
+.header-image .site-title {
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 24px;
+    line-height: 125%;
+    text-align: center;
+    color: #000000;
+}
+
+.header-date {
+    font-family: Courier, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5E6A74;
+    padding: 16px 16px 12px;
+}
+
+.header-info {
+    font-family: Courier,sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 150%;
+    text-align: center;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #000000;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    background-color: #ffffff;
+}
+
+.email-content>td {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.post-content {
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
+    font-style: normal;
+    font-size: 19px;
+    line-height: 150%;
+    color: #000000;
+    padding-bottom: 30px;
+    padding-top: 24px;
+}
+
+.email-white-delimiter {
+    background-color: #ffffff;
+    height: 40px;
 }
 
 .site-icon {
@@ -317,13 +390,40 @@ figure blockquote p {
     color: #15212A;
 }
 
-.post-title {
-    padding-bottom: 10px;
-    font-size: 42px;
-    line-height: 1.1em;
-    font-weight: 600;
+.site-sub-title {
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 24px;
+    line-height: 125%;
     text-align: center;
+    color: #000000;
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+    margin: 4px 0px;
 }
+
+.post-title {
+    padding-top: 40px;
+    padding-bottom: 0;
+    font-family: Adobe Garamond Pro, Times New Roman, serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 32px;
+    line-height: 40px;
+    color: #21272C;
+}
+
+.post-title h1 {
+    padding-bottom: 0;
+}
+
+.post-title div {
+    border-top: 1px solid #000000;
+}
+
 .post-title-serif {
     font-family: Georgia, serif;
 }
@@ -335,7 +435,6 @@ figure blockquote p {
     color: #15212A;
     display: block;
     text-align: center;
-    margin-top: 50px;
 }
 .post-title-link-left {
     text-align: left;
@@ -366,30 +465,23 @@ figure blockquote p {
 }
 
 .feature-image {
-    padding-bottom: 30px;
+    padding-top: 40px;
     width: 100%;
 }
 
 .feature-image-with-caption {
-    padding-bottom: 10px;
+    padding-bottom: 3px;
 }
 
 .feature-image-caption {
-    width: 100%;
-    padding-bottom: 30px;
-    text-align: center;
-    font-size: 13px;
-    color: #738a94;
-}
-
-.post-content {
-    max-width: 600px !important;
-    font-family: Georgia, serif;
-    font-size: 18px;
-    line-height: 1.5em;
-    color: #23323D;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #e5eff5;
+    font-family: Courier, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5E6A74;
 }
 
 .post-content-sans-serif {
@@ -403,12 +495,8 @@ figure blockquote p {
 
 .post-content a,
 .post-content-sans-serif a {
-    color: ${templateSettings.accentColor || '#08121A'};
+    color: #000000;
     text-decoration: underline;
-}
-
-a[data-flickr-embed] img {
-    height: auto;
 }
 
 .kg-bookmark-card {
@@ -530,12 +618,10 @@ a[data-flickr-embed] img {
     display: block;
     text-decoration: none !important;
 }
-
 .kg-video-preview table {
     background-size: cover;
     min-height: 200px; /* for when images aren't loaded */
 }
-
 .kg-video-play-button {
     height: 2em;
     width: 3em;
@@ -545,7 +631,6 @@ a[data-flickr-embed] img {
     font-size: 1em; /* change this to resize */
     background-color: rgba(0,0,0,0.85);
 }
-
 .kg-video-play-button div {
     display: block;
     width: 0;
@@ -557,211 +642,19 @@ a[data-flickr-embed] img {
     border-width: 0.8em 0 0.8em 1.5em;
 }
 
-.kg-nft-link {
-    display: block;
-    text-decoration: none !important;
-    color: #15212A !important;
-    font-family: inherit !important;
-    font-size: 14px;
-    line-height: 1.3em;
-    padding-top: 4px;
-    padding-right: 20px;
-    padding-left: 20px;
-    padding-bottom: 4px;
-}
-
-.kg-twitter-link {
-    display: block;
-    text-decoration: none !important;
-    color: #15212A !important;
-    font-family: inherit !important;
-    font-size: 15px;
-    padding: 8px;
-    line-height: 1.3em;
-}
-
-.kg-audio-thumbnail.placeholder {
-    background: ${templateSettings.accentColor || '#15212A'} !important;
-}
-
-.kg-callout-card {
-    display: flex;
-    margin: 0 0 1.5em 0;
-    padding: 20px 28px;
-    border-radius: 3px;
-}
-
-.kg-callout-card p {
-    margin: 0
-}
-
-.kg-callout-card-grey {
-    background: #eef0f2;
-}
-
-.kg-callout-card-white {
-    background: #fff;
-    box-shadow: inset 0 0 0 1px #dddedf;
-}
-
-.kg-callout-card-blue {
-    background: #E9F6FB;
-}
-
-.kg-callout-card-green {
-    background: #E8F8EA;
-}
-
-.kg-callout-card-yellow {
-    background: #FCF4E3;
-}
-
-.kg-callout-card-red {
-    background: #FBE9E9;
-}
-
-.kg-callout-card-pink {
-    background: #FCEEF8;
-}
-
-.kg-callout-card-purple {
-    background: #F2EDFC;
-}
-
-.kg-callout-card-accent {
-    background: ${templateSettings.accentColor || '#15212A'};
-    color: #fff;
-}
-
-.kg-callout-card-accent a {
-    color: #fff;
-}
-
-.kg-callout-emoji {
-    padding-right: 12px;
-    font-size: 20px;
-}
-
-.kg-header-card {
-    margin: 0 0 1.5em 0;
-    padding: 110px 35px 110px 35px;
-    text-align: center;
-}
-
-.kg-header-card.kg-size-small {
-    padding-top: 75px;
-    padding-bottom: 75px;
-}
-
-.kg-header-card.kg-size-large {
-    padding-top: 140px;
-    padding-bottom: 140px;
-}
-
-.kg-header-card.kg-align-left {
-    text-align: left;
-}
-
-.kg-header-card.kg-style-dark {
-    background: #15171a;
-    color: #ffffff;
-}
-
-.kg-header-card.kg-style-light {
-    background-color: #F9F9FA;
-}
-
-.kg-header-card.kg-style-accent {
-    background: ${templateSettings.accentColor || '#15171a'};
-    color: #ffffff;
-}
-
-.kg-header-card.kg-style-image {
-    background-color: #e7e7eb;
-    background-size: cover;
-    background-position: center center;
-    color: #ffffff;
-}
-
-.kg-header-card h2 {
-    font-size: 3em;
-    font-weight: 700;
-    line-height: 1.1em;
-    margin: 0 0 0.125em;
-}
-
-.kg-header-card h2 strong {
-    font-weight: 800;
-}
-
-.kg-header-card.kg-size-small h2 {
-    font-size: 2.5em;
-}
-
-.kg-header-card.kg-size-large h2 {
-    font-size: 3.5em;
-}
-
-.kg-header-card h3 {
-    font-size: 1.125em;
-    font-weight: 500;
-    line-height: 1.3em;
-    margin: 0;
-}
-
-.kg-header-card h3 strong {
-    font-weight: 600;
-}
-
-.kg-header-card.kg-size-large h3 {
-    font-size: 1.25em;
-}
-
-.kg-header-card.kg-size-small h3 {
-    font-size: 1em;
-}
-
-.kg-header-card-button {
-    margin-top: 1.75em;
-    background: #ffffff;
-    border-radius: 5px;
-    box-sizing: border-box;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 14px;
-    font-weight: bold;
-    margin: 0;
-    padding: 8px 16px;
-    text-decoration: none !important;
-    color: #15171A !important;
-}
-
-.kg-size-large .kg-header-card-button {
-    margin-top: 2em;
-}
-
-.kg-size-small .kg-header-card-button {
-    margin-top: 1.5em;
-}
-
-.kg-style-light .kg-header-card-button {
-    background: ${templateSettings.accentColor || '#15212A'} !important;
-    color: #ffffff !important;
-}
-
 
 /* -------------------------------------
     HEADER, FOOTER, MAIN
 ------------------------------------- */
 .main {
-    background: #ffffff;
+    background: #F8F7F3;
     border-radius: 3px;
     width: 100%;
 }
 
 .wrapper {
     box-sizing: border-box;
-    padding: 0 20px;
+    padding: 0;
 }
 
 .content-block {
@@ -769,21 +662,45 @@ a[data-flickr-embed] img {
     padding-top: 10px;
 }
 
-.footer {
-    color: #738a94;
-    margin-top: 20px;
+.footer-top {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 150%;
     text-align: center;
-    font-size: 13px;
-    padding-bottom: 10px;
+    text-transform: uppercase;
+    color: #5E6A74;
     padding-top: 10px;
-    padding-left: 30px;
-    padding-right: 30px;
-    line-height: 1.5em;
+}
+
+
+.footer {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 150%;
+    text-align: center;
+    color: #5E6A74;
+    padding-bottom: 12px;
 }
 
 .footer a {
-    color: #738a94;
+    color: #5E6A74;
     text-decoration: underline;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.footer-icons {
+    padding-top: 17px;
+    padding-bottom: 24px;
+}
+
+.footer-icons .footer-social {
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 /* -------------------------------------
@@ -822,6 +739,7 @@ a[data-flickr-embed] img {
     margin: 0;
     padding: 12px 25px;
     text-decoration: none;
+    text-transform: capitalize;
 }
 
 .btn-primary table td {
@@ -907,7 +825,6 @@ a[data-flickr-embed] img {
     table.body ol,
     table.body td,
     table.body span {
-        font-size: 16px !important;
     }
 
     table.body pre {
@@ -954,28 +871,6 @@ a[data-flickr-embed] img {
         height: 40px !important;
     }
 
-    table.body .site-url a {
-        font-size: 14px !important;
-        padding-bottom: 15px !important;
-    }
-
-    table.body .post-meta {
-        white-space: normal !important;
-        font-size: 12px !important;
-        line-height: 1.5em;
-    }
-
-    table.body .view-online-link,
-    table.body .footer,
-    table.body .footer a {
-        font-size: 12px !important;
-    }
-
-    table.body .post-title a {
-        font-size: 32px !important;
-        line-height: 1.15em !important;
-    }
-
     table.body .kg-bookmark-card {
         width: 90vw !important;
     }
@@ -990,63 +885,6 @@ a[data-flickr-embed] img {
 
     table.body .kg-embed-card {
         max-width: 90vw !important;
-    }
-
-    table.body h1 {
-        font-size: 32px !important;
-        line-height: 1.3em !important;
-    }
-
-    table.body h2 {
-        font-size: 26px !important;
-        line-height: 1.22em !important;
-    }
-
-    table.body h3 {
-        font-size: 21px !important;
-        line-height: 1.25em !important;
-    }
-
-    table.body h4 {
-        font-size: 19px !important;
-        line-height: 1.3em !important;
-    }
-
-    table.body h5 {
-        font-size: 16px !important;
-        line-height: 1.4em !important;
-    }
-
-    table.body h6 {
-        font-size: 16px !important;
-        line-height: 1.4em !important;
-    }
-
-    table.body blockquote {
-        font-size: 17px;
-        line-height: 1.6em;
-        margin-bottom: 0;
-        padding-left: 15px;
-    }
-
-    table.body blockquote.kg-blockquote-alt {
-        border-left: 0 none !important;
-        margin: 0 0 2.5em 0 !important;
-        padding: 0 50px 0 50px !important;
-        font-size: 1.2em;
-    }
-
-    table.body blockquote + * {
-        margin-top: 1.5em !important;
-    }
-
-    table.body hr {
-        margin: 2em 0 !important;
-    }
-
-    table.body figcaption,
-    table.body figcaption a {
-        font-size: 13px !important;
     }
 
 }
@@ -1096,24 +934,41 @@ a[data-flickr-embed] img {
     }
 }
 
+/* ----- ENDIF THE BROWSER ----- */
 
-${ templateSettings.showBadge ? `
-.footer-powered {
-    text-align: center;
-    padding-top: 70px;
-    padding-bottom: 40px;
-}
-
-.gh-powered {
-    width: 142px;
-    height: 30px;
-}
-` : ''}
-
+</style>
+<style type="text/css">
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-style: normal;
+            font-weight: 400;
+            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+        ​
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-style: normal;
+            font-weight: 600;
+            src: url("https://newsletters.theatlantic.com/peacefield/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+        ​
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-stretch: normal;
+            font-style: normal;
+            font-weight: 700;
+            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
+            mso-font-alt: "Georgia";
+        }
 </style>
 </head>
 
-<body>
+<body class="">
     <span class="preheader">${ post.excerpt ? post.excerpt : `${post.title} – ` }</span>
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" width="100%">
 
@@ -1136,97 +991,99 @@ ${ templateSettings.showBadge ? `
                         <!-- START MAIN CONTENT AREA -->
                         <tr>
                             <td class="wrapper">
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 0.5px solid #000000;">
+
+                                    <tr class="email-content">
+                                        <td class="header-date" width="100%" align="center">
+                                            ${post.published_at} <!-- ATLANTIC_PRESENTED_BY -->
+                                        </td>
+                                    </tr>
 
                                     ${ templateSettings.headerImage ? `
-                                    <tr>
-                                        <td class="header-image" width="100%" align="center"><img src="${templateSettings.headerImage}"${templateSettings.headerImageWidth ? ` width="${templateSettings.headerImageWidth}"` : ''}></td>
-                                    </tr>
-                                    ` : ''}
-
-
-                                    ${ templateSettings.showHeaderIcon || templateSettings.showHeaderTitle ? `
-                                    <tr>
-                                        <td class="site-info" width="100%" align="center">
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                                ${ templateSettings.showHeaderIcon && site.iconUrl ? `
-                                                <tr>
-                                                    <td class="site-icon"><a href="${site.url}"><img src="${site.iconUrl}" border="0"></a></td>
-                                                </tr>
-                                                ` : ``}
-                                                ${ templateSettings.showHeaderTitle ? `
-                                                <tr>
-                                                    <td class="site-url"><div style="width: 100% !important;"><a href="${site.url}" class="site-title">${site.title}</a></div></td>
-                                                </tr>
-                                                ` : ``}
-                                            </table>
+                                    <tr class="email-content">
+                                        <td class="header-image" width="100%" align="center">
+                                            <a href="${site.url}">
+                                                <img src="${templateSettings.headerImage}"${templateSettings.headerImageWidth ? ` width="${templateSettings.headerImageWidth}"` : ''}>
+                                            </a>
                                         </td>
                                     </tr>
                                     ` : ''}
-
-
+                                    <!--
                                     <tr>
-                                        <td class="post-title ${templateSettings.titleFontCategory === 'serif' ? `post-title-serif` : `` } ${templateSettings.titleAlignment === 'left' ? `post-title-left` : ``}">
-                                            <a href="${post.url}" class="post-title-link ${templateSettings.titleAlignment === 'left' ? `post-title-link-left` : ``}">${post.title}</a>
+                                        <td class="header-info" width="100%" align="center">
+                                            This is a free edition of ${site.title}. To receive all emails, including ones
+                                            exclusively available to Atlantic subscribers, <a href="${ctaUrl}">start your subscription today</a>.
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td>
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                <tr>
-                                                    <td class="post-meta ${templateSettings.titleAlignment === 'left' ? `post-meta-left` : ``}">
-                                                        By ${post.authors} –
-                                                        ${post.published_at} –
-                                                        <a href="${post.url}" class="view-online-link">View online →</a>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </td>
-                                    </tr>
+                                    -->
                                     ${ templateSettings.showFeatureImage && post.feature_image ? `
-                                    <tr>
+                                    <tr class="email-content">
                                         <td class="feature-image ${hasFeatureImageCaption ? 'feature-image-with-caption' : ''}"><img src="${post.feature_image}"${post.feature_image_width ? ` width="${post.feature_image_width}"` : ''}${post.feature_image_alt ? ` alt="${post.feature_image_alt}"` : ''}></td>
                                     </tr>
                                     ` : ``}
                                     ${ hasFeatureImageCaption ? `
-                                    <tr>
-                                        <td class="feature-image-caption" align="center">${post.feature_image_caption}</td>
+                                    <tr class="email-content">
+                                        <td class="feature-image-caption" align="left">${post.feature_image_caption}</td>
                                     </tr>
                                     ` : ``}
-                                    <tr>
-                                        <td class="${(templateSettings.bodyFontCategory === 'sans_serif') ? `post-content-sans-serif` : `post-content` }">
+
+                                    <tr class="email-content">
+                                        <td class="post-title"><h1><a class="post-title" href="${post.url}">${post.title}</a></h1></td>
+                                    </tr>
+
+                                    <tr class="email-content">
+                                        <td class="post-content">
                                             <!-- POST CONTENT START -->
-                                            <!-- ATLANTIC_TOP_AD -->
                                             ${post.html}
                                             <!-- ATLANTIC_BOTTOM_AD -->
                                             <!-- POST CONTENT END -->
                                         </td>
                                     </tr>
+
+                                    <tr>
+                                        <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 40px; border-top: 1px solid #D3DCE6;">
+                                                <tr>
+                                                    <td class="footer-top">Share The Atlantic Newsletter:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="footer footer-icons">
+                                                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedPageUrl}"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                                        <a href="https://twitter.com/share?url=${encodedPageUrl}"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="footer">600 New Hampshire Avenue NW ∙ Washington, DC 20037</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="footer">
+                                                        <a href="${ctaUrl}">Subscribe to The Atlantic</a>  |
+                                                        <span style="padding-left: 5px;color: #5E6A74;">Download The Atlantic app for <a style="padding: 0;color: #5E6A74;" href="https://play.google.com/store/apps/details?id=com.theatlantic.newsstand">Android</a> and <a style="padding: 0;color: #5E6A74;" href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">iOS</a></span>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="footer">
+                                                        <a href="https://www.theatlantic.com/newsletters/">See all of our newsletters</a>  |
+                                                        <a href="%recipient.unsubscribe_url%">Unsubscribe</a>  |
+                                                        <a href="https://www.theatlantic.com/privacy-policy/">Privacy Policy</a>  |
+                                                        <a href="https://support.theatlantic.com/hc/en-us/requests/new">Customer Care</a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
                                 </table>
                             </td>
                         </tr>
 
                         <!-- END MAIN CONTENT AREA -->
 
-                        <tr>
-                            <td class="wrapper" align="center">
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 40px; padding-bottom: 30px;">
-                                    ${iff(!!templateSettings.footerContent, `<tr><td class="footer">${templateSettings.footerContent}</td></tr>`, '')}
-                                    <tr>
-                                        <td class="footer">${site.title} &copy; ${date.getFullYear()} – <a href="%recipient.unsubscribe_url%">Unsubscribe</a></td>
-                                    </tr>
-
-                                    ${ templateSettings.showBadge ? `
-                                    <tr>
-                                        <td class="footer-powered"><a href="https://ghost.org/"><img src="https://static.ghost.org/v4.0.0/images/powered.png" border="0" width="142" height="30" class="gh-powered" alt="Publish with Ghost"></a></td>
-                                    </tr>
-                                    ` : '' }
-                                </table>
-                            </td>
-                        </tr>
-
                     </table>
                     <!-- END CENTERED WHITE CONTAINER -->
+
                 </div>
             </td>
             <td>&nbsp;</td>
