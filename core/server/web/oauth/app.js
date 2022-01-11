@@ -1,10 +1,7 @@
 const debug = require('@tryghost/debug')('web:oauth:app');
 const {URL} = require('url');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const express = require('../../../shared/express');
 const urlUtils = require('../../../shared/url-utils');
-const shared = require('../shared');
 const settingsCache = require('../../../shared/settings-cache');
 const models = require('../../models');
 const auth = require('../../services/auth');
@@ -26,9 +23,6 @@ module.exports = function setupOAuthApp() {
     }
     oauthApp.use(labsMiddleware);
 
-    // send 503 json response in case of maintenance
-    oauthApp.use(shared.middlewares.maintenance);
-
     /**
      * Configure the passport.authenticate middleware
      * We need to configure it on each request because clientId and secret
@@ -36,6 +30,10 @@ module.exports = function setupOAuthApp() {
      */
     function googleOAuthMiddleware(clientId, secret) {
         return (req, res, next) => {
+            // Lazy-required to save boot time
+            const passport = require('passport');
+            const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
             const adminURL = urlUtils.urlFor('admin', true);
 
             //Create the callback url to be sent to Google

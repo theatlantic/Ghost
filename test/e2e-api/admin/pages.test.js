@@ -10,7 +10,7 @@ describe('Pages API', function () {
     let request;
 
     before(async function () {
-        await testUtils.startGhost();
+        await localUtils.startGhost();
         request = supertest.agent(config.get('url'));
         await localUtils.doAuth(request, 'users:extra', 'posts');
     });
@@ -97,6 +97,38 @@ describe('Pages API', function () {
 
         should.exist(res2.headers['x-cache-invalidate']);
         localUtils.API.checkResponse(res2.body.pages[0], 'page');
+
+        const model = await models.Post.findOne({
+            id: res2.body.pages[0].id
+        }, testUtils.context.internal);
+
+        model.get('type').should.eql('page');
+    });
+
+    it('Can update a page with restricted access to specific tier', async function () {
+        const page = {
+            title: 'updated page',
+            page: false
+        };
+
+        const res = await request
+            .get(localUtils.API.getApiQuery(`pages/${testUtils.DataGenerator.Content.posts[5].id}/`))
+            .set('Origin', config.get('url'))
+            .expect(200);
+
+        page.updated_at = res.body.pages[0].updated_at;
+        page.visibility = 'filter';
+        page.visibility_filter = 'product:default-product';
+
+        const res2 = await request.put(localUtils.API.getApiQuery('pages/' + testUtils.DataGenerator.Content.posts[5].id))
+            .set('Origin', config.get('url'))
+            .send({pages: [page]})
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(200);
+
+        should.exist(res2.headers['x-cache-invalidate']);
+        localUtils.API.checkResponse(res2.body.pages[0], 'page', ['visibility_filter']);
 
         const model = await models.Post.findOne({
             id: res2.body.pages[0].id

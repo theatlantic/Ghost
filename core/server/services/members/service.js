@@ -13,7 +13,6 @@ const labsService = require('../../../shared/labs');
 const settingsCache = require('../../../shared/settings-cache');
 const config = require('../../../shared/config');
 const models = require('../../models');
-const ghostVersion = require('@tryghost/version');
 const _ = require('lodash');
 const {GhostMailer} = require('../mail');
 const jobsService = require('../jobs');
@@ -35,9 +34,7 @@ const ghostMailer = new GhostMailer();
 const membersConfig = new MembersConfigProvider({
     config,
     settingsCache,
-    urlUtils,
-    logging,
-    ghostVersion
+    urlUtils
 });
 
 let membersApi;
@@ -61,7 +58,8 @@ function reconfigureMembersAPI() {
  */
 const fetchImportThreshold = async () => {
     const membersTotal = await membersService.stats.getTotalMembers();
-    const volumeThreshold = _.get(config.get('hostSettings'), 'emailVerification.importThreshold') || Infinity;
+    const configThreshold = _.get(config.get('hostSettings'), 'emailVerification.importThreshold');
+    const volumeThreshold = (configThreshold === undefined) ? Infinity : configThreshold;
     const threshold = Math.max(membersTotal, volumeThreshold);
 
     return threshold;
@@ -127,24 +125,6 @@ const processImport = async (options) => {
     return result;
 };
 
-const debouncedReconfigureMembersAPI = _.debounce(reconfigureMembersAPI, 600);
-
-// Bind to events to automatically keep subscription info up-to-date from settings
-events.on('settings.edited', function updateSettingFromModel(settingModel) {
-    if (![
-        'members_signup_access',
-        'members_from_address',
-        'members_support_address',
-        'members_reply_address',
-        'stripe_product_name',
-        'stripe_plans'
-    ].includes(settingModel.get('key'))) {
-        return;
-    }
-
-    debouncedReconfigureMembersAPI();
-});
-
 events.on('services.stripe.reconfigured', reconfigureMembersAPI);
 
 const membersService = {
@@ -158,12 +138,16 @@ const membersService = {
             }
 
             if (stripeService.api.configured && stripeService.api.mode === 'live') {
-                throw new errors.IncorrectUsageError(tpl(messages.noLiveKeysInDevelopment));
+                throw new errors.IncorrectUsageError({
+                    message: tpl(messages.noLiveKeysInDevelopment)
+                });
             }
         } else {
             const siteUrl = urlUtils.getSiteUrl();
             if (!/^https/.test(siteUrl) && stripeService.api.configured) {
-                throw new errors.IncorrectUsageError(tpl(messages.sslRequiredForStripe));
+                throw new errors.IncorrectUsageError({
+                    message: tpl(messages.sslRequiredForStripe)
+                });
             }
         }
         if (!membersApi) {
@@ -173,6 +157,15 @@ const membersService = {
                 logging.error(err);
             });
         }
+
+        (async () => {
+            try {
+                const collection = await models.SingleUseToken.fetchAll();
+                await collection.invokeThen('destroy');
+            } catch (err) {
+                logging.error(err);
+            }
+        })();
     },
     contentGating: require('./content-gating'),
 

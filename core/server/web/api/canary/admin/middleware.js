@@ -44,7 +44,7 @@ const notImplemented = function (req, res, next) {
         }
     }
 
-    next(new errors.GhostError({
+    next(new errors.InternalServerError({
         errorType: 'NotImplementedError',
         message: tpl(messages.notImplemented),
         statusCode: '501'
@@ -59,8 +59,8 @@ module.exports.authAdminApi = [
     auth.authorize.authorizeAdminApi,
     apiMw.updateUserLastSeen,
     apiMw.cors,
-    shared.middlewares.urlRedirects.adminSSLAndHostRedirect,
-    shared.middlewares.prettyUrls,
+    shared.middleware.urlRedirects.adminSSLAndHostRedirect,
+    shared.middleware.prettyUrls,
     notImplemented
 ];
 
@@ -73,8 +73,8 @@ module.exports.authAdminApiWithUrl = [
     auth.authorize.authorizeAdminApi,
     apiMw.updateUserLastSeen,
     apiMw.cors,
-    shared.middlewares.urlRedirects.adminSSLAndHostRedirect,
-    shared.middlewares.prettyUrls,
+    shared.middleware.urlRedirects.adminSSLAndHostRedirect,
+    shared.middleware.prettyUrls,
     notImplemented
 ];
 
@@ -83,7 +83,7 @@ module.exports.authAdminApiWithUrl = [
  */
 module.exports.publicAdminApi = [
     apiMw.cors,
-    shared.middlewares.urlRedirects.adminSSLAndHostRedirect,
-    shared.middlewares.prettyUrls,
+    shared.middleware.urlRedirects.adminSSLAndHostRedirect,
+    shared.middleware.prettyUrls,
     notImplemented
 ];

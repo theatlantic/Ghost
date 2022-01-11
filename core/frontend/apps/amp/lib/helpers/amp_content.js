@@ -8,7 +8,7 @@
 // there if available. The cacheId is a combination of `updated_at` and the `slug`.
 const Promise = require('bluebird');
 
-const moment = require('moment');
+const {DateTime, Interval} = require('luxon');
 const errors = require('@tryghost/errors');
 const logging = require('@tryghost/logging');
 
@@ -119,19 +119,31 @@ function getAmperizeHTML(html, post) {
     }
 
     let Amperize = require('amperize');
-    let startedAtMoment = moment();
 
     amperize = amperize || new Amperize();
 
-    if (!amperizeCache[post.id] || moment(new Date(amperizeCache[post.id].updated_at)).diff(new Date(post.updated_at)) < 0) {
+    const startedAtMoment = DateTime.now();
+
+    let cacheDateTime;
+    let postDateTime;
+
+    if (amperizeCache[post.id]) {
+        const {updated_at: ampCacheUpdatedAt} = amperizeCache[post.id];
+        const {updated_at: postUpdatedAt} = post;
+
+        cacheDateTime = DateTime.fromJSDate(new Date(ampCacheUpdatedAt));
+        postDateTime = DateTime.fromJSDate(new Date(postUpdatedAt));
+    }
+
+    if (!amperizeCache[post.id] || cacheDateTime.diff(postDateTime).valueOf() < 0) {
         return new Promise((resolve) => {
             amperize.parse(html, (err, res) => {
-                logging.info('amp.parse', post.url, moment().diff(startedAtMoment, 'ms') + 'ms');
+                logging.info('amp.parse', post.url, Interval.fromDateTimes(startedAtMoment, DateTime.now()).length('milliseconds') + 'ms');
 
                 if (err) {
                     if (err.src) {
                         // This is a valid 500 GhostError because it means the amperize parser is unable to handle some Ghost HTML.
-                        logging.error(new errors.GhostError({
+                        logging.error(new errors.InternalServerError({
                             message: `AMP HTML couldn't be parsed: ${err.src}`,
                             code: 'AMP_PARSER_ERROR',
                             err: err,
@@ -139,7 +151,7 @@ function getAmperizeHTML(html, post) {
                             help: 'Please share this error on GitHub or https://forum.ghost.org'
                         }));
                     } else {
-                        logging.error(new errors.GhostError({err, code: 'AMP_PARSER_ERROR'}));
+                        logging.error(new errors.InternalServerError({err, code: 'AMP_PARSER_ERROR'}));
                     }
 
                     // save it in cache to prevent multiple calls to Amperize until

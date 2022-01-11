@@ -5,11 +5,14 @@ const crypto = require('crypto');
 const fs = require('fs-extra');
 const path = require('path');
 const {config} = require('../../../../utils/configUtils');
-const schema = require('../../../../../core/server/data/schema');
-const fixtures = require('../../../../../core/server/data/schema/fixtures');
+const schema = require('../../../../../core/server/data/schema/schema');
+const fixtures = require('../../../../../core/server/data/schema/fixtures/fixtures.json');
+const defaultSettings = require('../../../../../core/server/data/schema/default-settings.json');
+
+// Routes are yaml so we can require the file directly
 const routeSettings = require('../../../../../core/server/services/route-settings');
+routeSettings.init();
 const validateRouteSettings = require('../../../../../core/server/services/route-settings/validate');
-const defaultSettings = require('../../../../../core/server/data/schema/default-settings');
 
 /**
  * @NOTE
@@ -32,9 +35,9 @@ const defaultSettings = require('../../../../../core/server/data/schema/default-
  */
 describe('DB version integrity', function () {
     // Only these variables should need updating
-    const currentSchemaHash = 'c1c45b460f39504a01b26fcd7a62f395';
-    const currentFixturesHash = 'c064a1b57c594e6a8d36f9e884df0a2a';
-    const currentSettingsHash = 'aa3fcbc8ab119b630aeda7366ead5493';
+    const currentSchemaHash = 'e649797a5de92d417744f6f2623c79cf';
+    const currentFixturesHash = '07d4b0c4cf159b34344a6b5e88c74e9f';
+    const currentSettingsHash = 'b06316ebbf62381158e1c46c97c0b77a';
     const currentRoutesHash = '3d180d52c663d173a6be791ef411ed01';
 
     // If this test is failing, then it is likely a change has been made that requires a DB version bump,
@@ -43,7 +46,7 @@ describe('DB version integrity', function () {
         const routesPath = path.join(config.get('paths').defaultSettings, 'default-routes.yaml');
         const defaultRoutes = validateRouteSettings(yaml.load(fs.readFileSync(routesPath, 'utf-8')));
 
-        const tablesNoValidation = _.cloneDeep(schema.tables);
+        const tablesNoValidation = _.cloneDeep(schema);
         let schemaHash;
         let fixturesHash;
         let settingsHash;

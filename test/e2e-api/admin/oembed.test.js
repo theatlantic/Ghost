@@ -13,7 +13,7 @@ describe('Oembed API', function () {
     let request;
 
     before(async function () {
-        await testUtils.startGhost();
+        await localUtils.startGhost();
         request = supertest.agent(config.get('url'));
         await localUtils.doAuth(request);
     });
@@ -70,7 +70,7 @@ describe('Oembed API', function () {
                     {'content-type': 'text/html'}
                 );
 
-            const url = encodeURIComponent('http://example.com');
+            const url = encodeURIComponent(' http://example.com\t '); // Whitespaces are to make sure urls are trimmed
             const res = await request.get(localUtils.API.getApiQuery(`oembed/?url=${url}&type=bookmark`))
                 .set('Origin', config.get('url'))
                 .expect('Content-Type', /json/)
@@ -149,7 +149,17 @@ describe('Oembed API', function () {
 
             pageMock.isDone().should.be.true();
             should.exist(res.body.errors);
-            res.body.errors[0].context.should.match(/insufficient metadata/i);
+        });
+
+        it('errors when fetched url is incorrect', async function () {
+            const url = encodeURIComponent('example.com');
+            const res = await request.get(localUtils.API.getApiQuery(`oembed/?type=bookmark&url=${url}`))
+                .set('Origin', config.get('url'))
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(422);
+
+            should.exist(res.body.errors);
         });
     });
 

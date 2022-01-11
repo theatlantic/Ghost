@@ -2,8 +2,10 @@ const debug = require('@tryghost/debug')('web:api:canary:content:app');
 const boolParser = require('express-query-boolean');
 const bodyParser = require('body-parser');
 const express = require('../../../../../shared/express');
+const sentry = require('../../../../../shared/sentry');
 const shared = require('../../../shared');
 const routes = require('./routes');
+const errorHandler = require('@tryghost/mw-error-handler');
 
 module.exports = function setupApiApp() {
     debug('Content API canary setup start');
@@ -17,18 +19,15 @@ module.exports = function setupApiApp() {
     // Query parsing
     apiApp.use(boolParser());
 
-    // send 503 json response in case of maintenance
-    apiApp.use(shared.middlewares.maintenance);
-
     // API shouldn't be cached
-    apiApp.use(shared.middlewares.cacheControl('private'));
+    apiApp.use(shared.middleware.cacheControl('private'));
 
     // Routing
     apiApp.use(routes());
 
     // API error handling
-    apiApp.use(shared.middlewares.errorHandler.resourceNotFound);
-    apiApp.use(shared.middlewares.errorHandler.handleJSONResponse);
+    apiApp.use(errorHandler.resourceNotFound);
+    apiApp.use(errorHandler.handleJSONResponse(sentry));
 
     debug('Content API canary setup end');
 

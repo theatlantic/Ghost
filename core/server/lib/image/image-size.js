@@ -6,6 +6,7 @@ const path = require('path');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const errors = require('@tryghost/errors');
+const tpl = require('@tryghost/tpl');
 
 const messages = {
     invalidDimensions: 'Could not fetch image dimensions.'
@@ -17,9 +18,8 @@ const FETCH_ONLY_FORMATS = [
 ];
 
 class ImageSize {
-    constructor({config, tpl, storage, storageUtils, validator, urlUtils, request}) {
+    constructor({config, storage, storageUtils, validator, urlUtils, request}) {
         this.config = config;
-        this.tpl = tpl;
         this.storage = storage;
         this.storageUtils = storageUtils;
         this.validator = validator;
@@ -177,7 +177,7 @@ class ImageSize {
                 context: err.url || imagePath
             }));
         }).catch(function (err) {
-            if (errors.utils.isIgnitionError(err)) {
+            if (errors.utils.isGhostError(err)) {
                 return Promise.reject(err);
             }
 
@@ -214,9 +214,9 @@ class ImageSize {
         imagePath = this.urlUtils.urlFor('image', {image: imagePath}, true);
 
         // get the storage readable filePath
-        filePath = this.storageUtils.getLocalFileStoragePath(imagePath);
+        filePath = this.storageUtils.getLocalImagesStoragePath(imagePath);
 
-        return this.storage.getStorage()
+        return this.storage.getStorage('images')
             .read({path: filePath})
             .then((buf) => {
                 debug('Image fetched (storage):', filePath);
@@ -241,7 +241,7 @@ class ImageSize {
                     }
                 }));
             }).catch((err) => {
-                if (errors.utils.isIgnitionError(err)) {
+                if (errors.utils.isGhostError(err)) {
                     return Promise.reject(err);
                 }
 
@@ -267,7 +267,7 @@ class ImageSize {
         }
 
         const originalImagePath = path.join(dir, `${imageName}_o${imageNumber || ''}${ext}`);
-        const originalImageExists = await this.storage.getStorage().exists(originalImagePath);
+        const originalImageExists = await this.storage.getStorage('images').exists(originalImagePath);
 
         return this.getImageSizeFromStoragePath(originalImageExists ? originalImagePath : imagePath);
     }
@@ -320,7 +320,7 @@ class ImageSize {
                 });
             } catch (err) {
                 return reject(new errors.ValidationError({
-                    message: this.tpl(messages.invalidDimensions, {
+                    message: tpl(messages.invalidDimensions, {
                         file: imagePath,
                         error: err.message
                     })

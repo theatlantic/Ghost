@@ -1,5 +1,4 @@
 const url = require('url');
-const _ = require('lodash');
 const testUtils = require('../../../../utils');
 
 const API_URL = '/ghost/api/canary/admin/';
@@ -202,6 +201,15 @@ module.exports = {
 
     doAuth(...args) {
         return testUtils.API.doAuth(`${API_URL}session/`, ...args);
+    },
+
+    async startGhost(overrides = {}) {
+        const defaults = {
+            backend: true,
+            frontend: false
+        };
+
+        return await testUtils.startGhost(Object.assign(defaults, overrides));
     },
 
     getValidAdminToken(endpoint, key) {

@@ -29,7 +29,7 @@ const expectedProperties = {
 
     action: ['id', 'resource_type', 'actor_type', 'event', 'created_at', 'actor'],
 
-    config: ['version', 'environment', 'database', 'mail', 'labs', 'clientExtensions', 'enableDeveloperExperiments', 'useGravatar', 'stripeDirect', 'emailAnalytics'],
+    config: ['version', 'environment', 'database', 'mail', 'labs', 'clientExtensions', 'enableDeveloperExperiments', 'useGravatar', 'stripeDirect', 'emailAnalytics', 'tenor'],
 
     post: [
         'id',
@@ -207,5 +207,14 @@ module.exports = {
             Buffer.from(testUtils.DataGenerator.Content.api_keys[0].secret, 'hex'),
             JWT_OPTIONS
         );
+    },
+
+    async startGhost(overrides = {}) {
+        const defaults = {
+            backend: true,
+            frontend: false
+        };
+
+        return await testUtils.startGhost(Object.assign(defaults, overrides));
     }
 };

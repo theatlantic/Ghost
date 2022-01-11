@@ -10,7 +10,7 @@
         "internalAppPath": "core/frontend/apps/",
         "internalAdaptersPath": "core/server/adapters/",
         "migrationPath": "core/server/data/migrations",
-        "publicFilePath": "core/server/public"
+        "publicFilePath": "core/frontend/public"
     },
     "apps": {
         "internal": [
@@ -27,6 +27,24 @@
             "contentTypes": ["text/csv", "application/csv", "application/octet-stream", "application/vnd.ms-excel"]
         },
         "images": {
+            "extensions": [".jpg", ".jpeg", ".gif", ".png", ".svg", ".svgz", ".ico", ".webp"],
+            "contentTypes": ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/x-icon", "image/vnd.microsoft.icon", "image/webp"]
+        },
+        "media": {
+            "extensions": [".mp4",".webm", ".ogv", ".mp3", ".wav", ".ogg"],
+            "contentTypes": [
+                "video/mp4",
+                "video/webm",
+                "video/ogg",
+                "audio/mpeg",
+                "audio/vnd.wav",
+                "audio/wave",
+                "audio/wav",
+                "audio/x-wav",
+                "audio/ogg"
+            ]
+        },
+        "thumbnails": {
             "extensions": [".jpg", ".jpeg", ".gif", ".png", ".svg", ".svgz", ".ico", ".webp"],
             "contentTypes": ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/x-icon", "image/vnd.microsoft.icon", "image/webp"]
         },

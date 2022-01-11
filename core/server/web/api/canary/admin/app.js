@@ -4,6 +4,8 @@ const express = require('../../../../../shared/express');
 const bodyParser = require('body-parser');
 const shared = require('../../../shared');
 const apiMw = require('../../middleware');
+const errorHandler = require('@tryghost/mw-error-handler');
+const sentry = require('../../../../../shared/sentry');
 const routes = require('./routes');
 
 module.exports = function setupApiApp() {
@@ -19,22 +21,19 @@ module.exports = function setupApiApp() {
     // Query parsing
     apiApp.use(boolParser());
 
-    // send 503 json response in case of maintenance
-    apiApp.use(shared.middlewares.maintenance);
-
     // Check version matches for API requests, depends on res.locals.safeVersion being set
     // Therefore must come after themeHandler.ghostLocals, for now
     apiApp.use(apiMw.versionMatch);
 
     // Admin API shouldn't be cached
-    apiApp.use(shared.middlewares.cacheControl('private'));
+    apiApp.use(shared.middleware.cacheControl('private'));
 
     // Routing
     apiApp.use(routes());
 
     // API error handling
-    apiApp.use(shared.middlewares.errorHandler.resourceNotFound);
-    apiApp.use(shared.middlewares.errorHandler.handleJSONResponseV2);
+    apiApp.use(errorHandler.resourceNotFound);
+    apiApp.use(errorHandler.handleJSONResponseV2(sentry));
 
     debug('Admin API canary setup end');
 

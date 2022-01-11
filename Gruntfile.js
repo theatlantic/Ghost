@@ -74,6 +74,7 @@ module.exports = function (grunt) {
                     'core/server/**/*.js',
                     'core/shared/**/*.js',
                     'core/frontend/**/*.js',
+                    'core/frontend/src/**/*.css',
                     'core/*.js',
                     'index.js',
                     'config.*.json',
@@ -219,7 +220,7 @@ module.exports = function (grunt) {
                     ]
                 },
                 files: {
-                    'core/server/public/ghost.min.css': 'core/server/public/ghost.css'
+                    'core/server/frontend/ghost.min.css': 'core/frontend/public/ghost.css'
                 }
             }
         },

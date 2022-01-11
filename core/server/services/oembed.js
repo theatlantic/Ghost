@@ -1,5 +1,7 @@
-const Promise = require('bluebird');
 const errors = require('@tryghost/errors');
+const tpl = require('@tryghost/tpl');
+const logging = require('@tryghost/logging');
+const sentry = require('../../shared/sentry');
 const {extract, hasProvider} = require('oembed-parser');
 const cheerio = require('cheerio');
 const _ = require('lodash');
@@ -10,6 +12,10 @@ const messages = {
     insufficientMetadata: 'URL contains insufficient metadata.'
 };
 
+/**
+ * @param {string} url
+ * @returns {{url: string, provider: boolean}}
+ */
 const findUrlWithProvider = (url) => {
     let provider;
 
@@ -35,10 +41,6 @@ const findUrlWithProvider = (url) => {
 };
 
 /**
- * @typedef {(string: string) => string} ITpl
- */
-
-/**
  * @typedef {Object} IConfig
  * @prop {(key: string) => string} get
  */
@@ -47,45 +49,66 @@ const findUrlWithProvider = (url) => {
  * @typedef {(url: string, config: Object) => Promise} IExternalRequest
  */
 
+/**
+ * @typedef {object} ICustomProvider
+ * @prop {(url: URL) => Promise<boolean>} canSupportRequest
+ * @prop {(url: URL, externalRequest: IExternalRequest) => Promise<import('oembed-parser').OembedData>} getOEmbedData
+ */
+
 class OEmbed {
     /**
      *
      * @param {Object} dependencies
-     * @param {ITpl} dependencies.tpl
      * @param {IConfig} dependencies.config
      * @param {IExternalRequest} dependencies.externalRequest
      */
-    constructor({config, externalRequest, tpl}) {
+    constructor({config, externalRequest}) {
         this.config = config;
-        this.externalRequest = externalRequest;
-        this.tpl = tpl;
+
+        /** @type {IExternalRequest} */
+        this.externalRequest = async (url, requestConfig) => {
+            if (this.isIpOrLocalhost(url)) {
+                return this.unknownProvider(url);
+            }
+            const response = await externalRequest(url, requestConfig);
+            if (this.isIpOrLocalhost(response.url)) {
+                return this.unknownProvider(url);
+            }
+            return response;
+        };
+
+        /** @type {ICustomProvider[]} */
+        this.customProviders = [];
     }
 
-    unknownProvider(url) {
-        return Promise.reject(new errors.ValidationError({
-            message: this.tpl(messages.unknownProvider),
+    /**
+     * @param {ICustomProvider} provider
+     */
+    registerProvider(provider) {
+        this.customProviders.push(provider);
+    }
+
+    /**
+     * @param {string} url
+     */
+    async unknownProvider(url) {
+        throw new errors.ValidationError({
+            message: tpl(messages.unknownProvider),
             context: url
-        }));
-    }
-
-    knownProvider(url) {
-        return extract(url).catch((err) => {
-            return Promise.reject(new errors.InternalServerError({
-                message: err.message
-            }));
         });
     }
 
-    errorHandler(url) {
-        return (err) => {
-            // allow specific validation errors through for better error messages
-            if (errors.utils.isIgnitionError(err) && err.errorType === 'ValidationError') {
-                return Promise.reject(err);
-            }
-
-            // default to unknown provider to avoid leaking any app specifics
-            return this.unknownProvider(url);
-        };
+    /**
+     * @param {string} url
+     */
+    async knownProvider(url) {
+        try {
+            return await extract(url);
+        } catch (err) {
+            throw new errors.InternalServerError({
+                message: err.message
+            });
+        }
     }
 
     async fetchBookmarkData(url) {
@@ -102,18 +125,17 @@ class OEmbed {
 
         let scraperResponse;
 
-        try {
-            const cookieJar = new CookieJar();
-            const response = await this.externalRequest(url, {cookieJar});
+        const cookieJar = new CookieJar();
+        const response = await this.externalRequest(url, {cookieJar});
 
-            if (this.isIpOrLocalhost(response.url)) {
-                scraperResponse = {};
-            } else {
-                const html = response.body;
-                scraperResponse = await metascraper({html, url});
-            }
+        const html = response.body;
+        try {
+            scraperResponse = await metascraper({html, url});
         } catch (err) {
-            return Promise.reject(err);
+            // Log to avoid being blind to errors happenning in metascraper
+            sentry.captureException(err);
+            logging.error(err);
+            return this.unknownProvider(url);
         }
 
         const metadata = Object.assign({}, scraperResponse, {
@@ -124,20 +146,25 @@ class OEmbed {
         delete metadata.image;
         delete metadata.logo;
 
-        if (metadata.title) {
-            return Promise.resolve({
-                type: 'bookmark',
-                url,
-                metadata
+        if (!metadata.title) {
+            throw new errors.ValidationError({
+                message: tpl(messages.insufficientMetadata),
+                context: url
             });
         }
 
-        return Promise.reject(new errors.ValidationError({
-            message: this.tpl(messages.insufficientMetadata),
-            context: url
-        }));
+        return {
+            version: '1.0',
+            type: 'bookmark',
+            url,
+            metadata
+        };
     }
 
+    /**
+     * @param {string} url
+     * @returns {boolean}
+     */
     isIpOrLocalhost(url) {
         try {
             const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -168,14 +195,7 @@ class OEmbed {
      *
      * @returns {Promise<Object>}
      */
-    fetchOembedData(_url, cardType) {
-        // parse the url then validate the protocol and host to make sure it's
-        // http(s) and not an IP address or localhost to avoid potential access to
-        // internal network endpoints
-        if (this.isIpOrLocalhost(_url)) {
-            return this.unknownProvider();
-        }
-
+    async fetchOembedData(_url, cardType) {
         // check against known oembed list
         let {url, provider} = findUrlWithProvider(_url);
         if (provider) {
@@ -185,88 +205,81 @@ class OEmbed {
         // url not in oembed list so fetch it in case it's a redirect or has a
         // <link rel="alternate" type="application/json+oembed"> element
         const cookieJar = new CookieJar();
-        return this.externalRequest(url, {
+        const pageResponse = await this.externalRequest(url, {
             method: 'GET',
             timeout: 2 * 1000,
             followRedirect: true,
             cookieJar
-        }).then((pageResponse) => {
-            // url changed after fetch, see if we were redirected to a known oembed
-            if (pageResponse.url !== url) {
-                ({url, provider} = findUrlWithProvider(pageResponse.url));
-                if (provider) {
-                    return this.knownProvider(url);
-                }
+        });
+        // url changed after fetch, see if we were redirected to a known oembed
+        if (pageResponse.url !== url) {
+            ({url, provider} = findUrlWithProvider(pageResponse.url));
+            if (provider) {
+                return this.knownProvider(url);
+            }
+        }
+
+        // check for <link rel="alternate" type="application/json+oembed"> element
+        let oembedUrl;
+        try {
+            oembedUrl = cheerio('link[type="application/json+oembed"]', pageResponse.body).attr('href');
+        } catch (e) {
+            return this.unknownProvider(url);
+        }
+
+        if (oembedUrl) {
+            // for standard WP oembed's we want to insert a bookmark card rather than their blockquote+script
+            // which breaks in the editor and most Ghost themes. Only fallback if card type was not explicitly chosen
+            if (!cardType && oembedUrl.match(/wp-json\/oembed/)) {
+                return;
             }
 
-            // check for <link rel="alternate" type="application/json+oembed"> element
-            let oembedUrl;
-            try {
-                oembedUrl = cheerio('link[type="application/json+oembed"]', pageResponse.body).attr('href');
-            } catch (e) {
-                return this.unknownProvider(url);
-            }
+            // fetch oembed response from embedded rel="alternate" url
+            const oembedResponse = await this.externalRequest(oembedUrl, {
+                method: 'GET',
+                json: true,
+                timeout: 2 * 1000,
+                followRedirect: true,
+                cookieJar
+            });
+            // validate the fetched json against the oembed spec to avoid
+            // leaking non-oembed responses
+            const body = oembedResponse.body;
+            const hasRequiredFields = body.type && body.version;
+            const hasValidType = ['photo', 'video', 'link', 'rich'].includes(body.type);
 
-            if (oembedUrl) {
-                // make sure the linked url is not an ip address or localhost
-                if (this.isIpOrLocalhost(oembedUrl)) {
-                    return this.unknownProvider(oembedUrl);
+            if (hasRequiredFields && hasValidType) {
+                // extract known oembed fields from the response to limit leaking of unrecognised data
+                const knownFields = [
+                    'type',
+                    'version',
+                    'html',
+                    'url',
+                    'title',
+                    'width',
+                    'height',
+                    'author_name',
+                    'author_url',
+                    'provider_name',
+                    'provider_url',
+                    'thumbnail_url',
+                    'thumbnail_width',
+                    'thumbnail_height'
+                ];
+                const oembed = _.pick(body, knownFields);
+
+                // ensure we have required data for certain types
+                if (oembed.type === 'photo' && !oembed.url) {
+                    return;
                 }
-
-                // for standard WP oembed's we want to insert a bookmark card rather than their blockquote+script
-                // which breaks in the editor and most Ghost themes. Only fallback if card type was not explicitly chosen
-                if (!cardType && oembedUrl.match(/wp-json\/oembed/)) {
+                if ((oembed.type === 'video' || oembed.type === 'rich') && (!oembed.html || !oembed.width || !oembed.height)) {
                     return;
                 }
 
-                // fetch oembed response from embedded rel="alternate" url
-                return this.externalRequest(oembedUrl, {
-                    method: 'GET',
-                    json: true,
-                    timeout: 2 * 1000,
-                    followRedirect: true,
-                    cookieJar
-                }).then((oembedResponse) => {
-                    // validate the fetched json against the oembed spec to avoid
-                    // leaking non-oembed responses
-                    const body = oembedResponse.body;
-                    const hasRequiredFields = body.type && body.version;
-                    const hasValidType = ['photo', 'video', 'link', 'rich'].includes(body.type);
-
-                    if (hasRequiredFields && hasValidType) {
-                        // extract known oembed fields from the response to limit leaking of unrecognised data
-                        const knownFields = [
-                            'type',
-                            'version',
-                            'html',
-                            'url',
-                            'title',
-                            'width',
-                            'height',
-                            'author_name',
-                            'author_url',
-                            'provider_name',
-                            'provider_url',
-                            'thumbnail_url',
-                            'thumbnail_width',
-                            'thumbnail_height'
-                        ];
-                        const oembed = _.pick(body, knownFields);
-
-                        // ensure we have required data for certain types
-                        if (oembed.type === 'photo' && !oembed.url) {
-                            return;
-                        }
-                        if ((oembed.type === 'video' || oembed.type === 'rich') && (!oembed.html || !oembed.width || !oembed.height)) {
-                            return;
-                        }
-
-                        // return the extracted object, don't pass through the response body
-                        return oembed;
-                    }
-                }).catch(() => {});
+                // return the extracted object, don't pass through the response body
+                return oembed;
             }
-        });
+        }
     }
 
     /**
@@ -276,26 +289,55 @@ class OEmbed {
      * @returns {Promise<Object>}
      */
     async fetchOembedDataFromUrl(url, type) {
-        let data;
-
         try {
+            const urlObject = new URL(url);
+
+            // Trimming solves the difference of url validation between `new URL(url)`
+            // and metascraper.
+            url = url.trim();
+
+            for (const provider of this.customProviders) {
+                if (await provider.canSupportRequest(urlObject)) {
+                    const result = await provider.getOEmbedData(urlObject, this.externalRequest);
+                    if (result !== null) {
+                        return result;
+                    }
+                }
+            }
+
+            // fetch only bookmark when explicitly requested
             if (type === 'bookmark') {
                 return this.fetchBookmarkData(url);
             }
 
-            data = await this.fetchOembedData(url);
+            // attempt to fetch oembed
+            let data = await this.fetchOembedData(url);
 
+            // fallback to bookmark when we can't get oembed
             if (!data && !type) {
                 data = await this.fetchBookmarkData(url);
             }
 
+            // couldn't get anything, throw a validation error
             if (!data) {
-                data = await this.unknownProvider(url);
+                return this.unknownProvider(url);
             }
 
             return data;
-        } catch (e) {
-            return this.errorHandler(url);
+        } catch (err) {
+            // allow specific validation errors through for better error messages
+            if (errors.utils.isGhostError(err) && err.errorType === 'ValidationError') {
+                throw err;
+            }
+
+            // log the real error because we're going to throw a generic "Unknown provider" error
+            logging.error(new errors.InternalServerError({
+                message: 'Encountered error when fetching oembed',
+                err
+            }));
+
+            // default to unknown provider to avoid leaking any app specifics
+            return this.unknownProvider(url);
         }
     }
 }

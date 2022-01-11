@@ -31,18 +31,6 @@ if (parentPort) {
 (async () => {
     const updateCheck = require('./update-check');
 
-    const logging = {
-        info(message) {
-            postParentPortMessage(message);
-        },
-        warn(message) {
-            postParentPortMessage(message);
-        },
-        error(message) {
-            postParentPortMessage(message);
-        }
-    };
-
     // INIT required services
     const models = require('./models');
     models.init();
@@ -52,12 +40,9 @@ if (parentPort) {
 
     const settings = require('./services/settings');
     await settings.init();
-
-    const i18n = require('../shared/i18n');
-    i18n.init();
     // Finished INIT
 
-    await updateCheck({logging});
+    await updateCheck();
 
     postParentPortMessage(`Ran update check`);
 

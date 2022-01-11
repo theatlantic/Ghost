@@ -6,7 +6,7 @@ const moment = require('moment');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const {sequence} = require('@tryghost/promise');
-const urlService = require('../../../core/frontend/services/url');
+const urlService = require('../../../core/server/services/url');
 const ghostBookshelf = require('../../../core/server/models/base');
 const models = require('../../../core/server/models');
 const db = require('../../../core/server/data/db');
@@ -308,7 +308,7 @@ describe('Post Model', function () {
                 }).then(function () {
                     done(new Error('expected validation error'));
                 }).catch(function (err) {
-                    (err[0] instanceof errors.ValidationError).should.eql(true);
+                    err[0].name.should.eql('ValidationError');
                     done();
                 });
             });

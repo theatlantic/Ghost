@@ -74,6 +74,10 @@ table td {
     max-width: 600px;
 }
 
+.content a {
+    overflow-wrap: anywhere;
+}
+
 /* -------------------------------------
     POST CONTENT
 ------------------------------------- */
@@ -144,13 +148,22 @@ dd {
 }
 
 blockquote {
-    margin: 2em 0;
+    margin: 2em 0 2em 0;
     padding: 0 25px 0 25px;
     border-left: ${templateSettings.accentColor || '#15212A'} 2px solid;
     font-size: 17px;
     font-weight: 500;
     line-height: 1.6em;
     letter-spacing: -0.2px;
+}
+
+blockquote.kg-blockquote-alt {
+    border-left: 0 none;
+    padding: 0 50px 0 50px;
+    text-align: center;
+    font-size: 1.2em;
+    font-style: italic;
+    color: #999999;
 }
 
 blockquote p {
@@ -394,6 +407,10 @@ figure blockquote p {
     text-decoration: underline;
 }
 
+a[data-flickr-embed] img {
+    height: auto;
+}
+
 .kg-bookmark-card {
     width: 100%;
     background: #ffffff;
@@ -513,10 +530,12 @@ figure blockquote p {
     display: block;
     text-decoration: none !important;
 }
+
 .kg-video-preview table {
     background-size: cover;
     min-height: 200px; /* for when images aren't loaded */
 }
+
 .kg-video-play-button {
     height: 2em;
     width: 3em;
@@ -526,6 +545,7 @@ figure blockquote p {
     font-size: 1em; /* change this to resize */
     background-color: rgba(0,0,0,0.85);
 }
+
 .kg-video-play-button div {
     display: block;
     width: 0;
@@ -535,6 +555,198 @@ figure blockquote p {
     border-color: transparent transparent transparent white;
     border-style: solid;
     border-width: 0.8em 0 0.8em 1.5em;
+}
+
+.kg-nft-link {
+    display: block;
+    text-decoration: none !important;
+    color: #15212A !important;
+    font-family: inherit !important;
+    font-size: 14px;
+    line-height: 1.3em;
+    padding-top: 4px;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-bottom: 4px;
+}
+
+.kg-twitter-link {
+    display: block;
+    text-decoration: none !important;
+    color: #15212A !important;
+    font-family: inherit !important;
+    font-size: 15px;
+    padding: 8px;
+    line-height: 1.3em;
+}
+
+.kg-audio-thumbnail.placeholder {
+    background: ${templateSettings.accentColor || '#15212A'} !important;
+}
+
+.kg-callout-card {
+    display: flex;
+    margin: 0 0 1.5em 0;
+    padding: 20px 28px;
+    border-radius: 3px;
+}
+
+.kg-callout-card p {
+    margin: 0
+}
+
+.kg-callout-card-grey {
+    background: #eef0f2;
+}
+
+.kg-callout-card-white {
+    background: #fff;
+    box-shadow: inset 0 0 0 1px #dddedf;
+}
+
+.kg-callout-card-blue {
+    background: #E9F6FB;
+}
+
+.kg-callout-card-green {
+    background: #E8F8EA;
+}
+
+.kg-callout-card-yellow {
+    background: #FCF4E3;
+}
+
+.kg-callout-card-red {
+    background: #FBE9E9;
+}
+
+.kg-callout-card-pink {
+    background: #FCEEF8;
+}
+
+.kg-callout-card-purple {
+    background: #F2EDFC;
+}
+
+.kg-callout-card-accent {
+    background: ${templateSettings.accentColor || '#15212A'};
+    color: #fff;
+}
+
+.kg-callout-card-accent a {
+    color: #fff;
+}
+
+.kg-callout-emoji {
+    padding-right: 12px;
+    font-size: 20px;
+}
+
+.kg-header-card {
+    margin: 0 0 1.5em 0;
+    padding: 110px 35px 110px 35px;
+    text-align: center;
+}
+
+.kg-header-card.kg-size-small {
+    padding-top: 75px;
+    padding-bottom: 75px;
+}
+
+.kg-header-card.kg-size-large {
+    padding-top: 140px;
+    padding-bottom: 140px;
+}
+
+.kg-header-card.kg-align-left {
+    text-align: left;
+}
+
+.kg-header-card.kg-style-dark {
+    background: #15171a;
+    color: #ffffff;
+}
+
+.kg-header-card.kg-style-light {
+    background-color: #F9F9FA;
+}
+
+.kg-header-card.kg-style-accent {
+    background: ${templateSettings.accentColor || '#15171a'};
+    color: #ffffff;
+}
+
+.kg-header-card.kg-style-image {
+    background-color: #e7e7eb;
+    background-size: cover;
+    background-position: center center;
+    color: #ffffff;
+}
+
+.kg-header-card h2 {
+    font-size: 3em;
+    font-weight: 700;
+    line-height: 1.1em;
+    margin: 0 0 0.125em;
+}
+
+.kg-header-card h2 strong {
+    font-weight: 800;
+}
+
+.kg-header-card.kg-size-small h2 {
+    font-size: 2.5em;
+}
+
+.kg-header-card.kg-size-large h2 {
+    font-size: 3.5em;
+}
+
+.kg-header-card h3 {
+    font-size: 1.125em;
+    font-weight: 500;
+    line-height: 1.3em;
+    margin: 0;
+}
+
+.kg-header-card h3 strong {
+    font-weight: 600;
+}
+
+.kg-header-card.kg-size-large h3 {
+    font-size: 1.25em;
+}
+
+.kg-header-card.kg-size-small h3 {
+    font-size: 1em;
+}
+
+.kg-header-card-button {
+    margin-top: 1.75em;
+    background: #ffffff;
+    border-radius: 5px;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+    padding: 8px 16px;
+    text-decoration: none !important;
+    color: #15171A !important;
+}
+
+.kg-size-large .kg-header-card-button {
+    margin-top: 2em;
+}
+
+.kg-size-small .kg-header-card-button {
+    margin-top: 1.5em;
+}
+
+.kg-style-light .kg-header-card-button {
+    background: ${templateSettings.accentColor || '#15212A'} !important;
+    color: #ffffff !important;
 }
 
 
@@ -610,7 +822,6 @@ figure blockquote p {
     margin: 0;
     padding: 12px 25px;
     text-decoration: none;
-    text-transform: capitalize;
 }
 
 .btn-primary table td {
@@ -812,10 +1023,17 @@ figure blockquote p {
     }
 
     table.body blockquote {
-        font-size: 17px !important;
-        line-height: 1.6em !important;
-        margin-bottom: 0 !important;
-        padding-left: 15px !important;
+        font-size: 17px;
+        line-height: 1.6em;
+        margin-bottom: 0;
+        padding-left: 15px;
+    }
+
+    table.body blockquote.kg-blockquote-alt {
+        border-left: 0 none !important;
+        margin: 0 0 2.5em 0 !important;
+        padding: 0 50px 0 50px !important;
+        font-size: 1.2em;
     }
 
     table.body blockquote + * {
@@ -892,12 +1110,10 @@ ${ templateSettings.showBadge ? `
 }
 ` : ''}
 
-/* ----- ENDIF THE BROWSER ----- */
-
 </style>
 </head>
 
-<body class="">
+<body>
     <span class="preheader">${ post.excerpt ? post.excerpt : `${post.title} – ` }</span>
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" width="100%">
 

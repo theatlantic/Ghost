@@ -19,7 +19,46 @@ module.exports = {
         {
             files: 'core/server/api/canary/*',
             rules: {
-                'ghost/ghost-custom/max-api-complexity': 'warn'
+                'ghost/ghost-custom/max-api-complexity': 'error'
+            }
+        },
+        {
+            files: 'core/server/data/migrations/versions/**',
+            excludedFiles: [
+                'core/server/data/migrations/versions/1.*/*',
+                'core/server/data/migrations/versions/2.*/*',
+                'core/server/data/migrations/versions/3.*/*'
+            ],
+            rules: {
+                'ghost/filenames/match-regex': ['error', '^(?:\\d{2}|\\d{4}(?:-\\d{2}){4})(?:-[a-zA-Z]+)+$', true]
+            }
+        },
+        {
+            files: 'core/server/data/migrations/versions/**',
+            rules: {
+                'no-restricted-syntax': ['warn', {
+                    selector: 'ForStatement',
+                    message: 'For statements can perform badly in migrations'
+                }, {
+                    selector: 'ForOfStatement',
+                    message: 'For statements can perform badly in migrations'
+                }, {
+                    selector: 'ForInStatement',
+                    message: 'For statements can perform badly in migrations'
+                }, {
+                    selector: 'WhileStatement',
+                    message: 'While statements can perform badly in migrations'
+                }, {
+                    selector: 'CallExpression[callee.property.name=\'forEach\']',
+                    message: 'Loop constructs like forEach can perform badly in migrations'
+                }, {
+                    selector: 'CallExpression[callee.object.name=\'_\'][callee.property.name=\'each\']',
+                    message: 'Loop constructs like _.each can perform badly in migrations'
+                }, {
+                    selector: 'CallExpression[callee.property.name=/join|innerJoin|leftJoin/] CallExpression[callee.property.name=/join|innerJoin|leftJoin/] CallExpression[callee.name=\'knex\']',
+                    message: 'Use of multiple join statements in a single knex block'
+                }],
+                'ghost/no-return-in-loop/no-return-in-loop': ['error']
             }
         },
         {
@@ -37,6 +76,12 @@ module.exports = {
                 ]]
             }
         },
+        {
+            files: 'core/server/api/**/utils/validators/**/index.js',
+            rules: {
+                'max-lines': ['off']
+            }
+        },
         /**
          * @TODO: enable these soon
          */
@@ -44,15 +89,15 @@ module.exports = {
             files: 'core/frontend/**',
             rules: {
                 'ghost/node/no-restricted-require': ['off', [
+                    // If we make the frontend entirely independent, these have to be solved too
+                    // {
+                    //     name: path.resolve(__dirname, 'core/shared/**'),
+                    //     message: 'Invalid require of core/shared from core/frontend.'
+                    // },
                     // These are critical refactoring issues that we need to tackle ASAP
                     {
-                        name: path.resolve(__dirname, 'core/server/**'),
+                        name: [path.resolve(__dirname, 'core/server/**')],
                         message: 'Invalid require of core/server from core/frontend.'
-                    },
-                    // If we make the frontend entirely independent, these have to be solved too
-                    {
-                        name: path.resolve(__dirname, 'core/shared/**'),
-                        message: 'Invalid require of core/shared from core/frontend.'
                     }
                 ]]
             }
@@ -60,9 +105,10 @@ module.exports = {
         {
             files: 'core/server/**',
             rules: {
-                'ghost/node/no-restricted-require': ['off', [
+                'ghost/node/no-restricted-require': ['warn', [
                     {
-                        name: path.resolve(__dirname, 'core/frontend/**'),
+                        // Throw an error for all requires of the frontend, _except_ the url service which will be moved soon
+                        name: [path.resolve(__dirname, 'core/frontend/**')],
                         message: 'Invalid require of core/frontend from core/server.'
                     }
                 ]]

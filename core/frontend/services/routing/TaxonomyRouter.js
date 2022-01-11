@@ -4,17 +4,14 @@ const ParentRouter = require('./ParentRouter');
 const RSSRouter = require('./RSSRouter');
 const urlUtils = require('../../../shared/url-utils');
 const controllers = require('./controllers');
-const middlewares = require('./middlewares');
-
-// This emits its own routing events
-const events = require('../../../server/lib/common/events');
+const middleware = require('./middleware');
 
 /**
  * @description Taxonomies are groupings of posts based on a common relation.
  * Taxonomies do not change the url of a resource.
  */
 class TaxonomyRouter extends ParentRouter {
-    constructor(key, permalinks, RESOURCE_CONFIG) {
+    constructor(key, permalinks, RESOURCE_CONFIG, routerCreated) {
         super('Taxonomy');
 
         this.taxonomyKey = key;
@@ -27,6 +24,8 @@ class TaxonomyRouter extends ParentRouter {
         this.permalinks.getValue = () => {
             return this.permalinks.value;
         };
+
+        this.routerCreated = routerCreated;
 
         debug(this.permalinks);
 
@@ -52,7 +51,7 @@ class TaxonomyRouter extends ParentRouter {
         this.mountRoute(this.permalinks.getValue(), controllers.channel);
 
         // REGISTER: enable pagination for each taxonomy by default
-        this.router().param('page', middlewares.pageParam);
+        this.router().param('page', middleware.pageParam);
         this.mountRoute(urlUtils.urlJoin(this.permalinks.value, 'page', ':page(\\d+)'), controllers.channel);
 
         // REGISTER: edit redirect to admin client e.g. /tag/:slug/edit
@@ -60,11 +59,11 @@ class TaxonomyRouter extends ParentRouter {
             this.mountRoute(urlUtils.urlJoin(this.permalinks.value, 'edit'), this._redirectEditOption.bind(this));
         }
 
-        events.emit('router.created', this);
+        this.routerCreated(this);
     }
 
     /**
-     * @description Prepare context for routing middlewares/controllers.
+     * @description Prepare context for routing middleware/controllers.
      * @param {Object} req
      * @param {Object} res
      * @param {Function} next

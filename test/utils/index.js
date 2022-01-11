@@ -2,6 +2,8 @@ require('../../core/server/overrides');
 
 // Utility Packages
 const {sequence} = require('@tryghost/promise');
+const debug = require('@tryghost/debug')('test:utils');
+
 const _ = require('lodash');
 
 // Ghost Internals
@@ -12,7 +14,7 @@ const e2eUtils = require('./e2e-utils');
 const APIUtils = require('./api');
 const dbUtils = require('./db-utils');
 const fixtureUtils = require('./fixture-utils');
-const oldIntegrationUtils = require('./old-integration-utils');
+const oldIntegrationUtils = require('../regression/mock-express-style/utils/setup');
 const redirects = require('./redirects');
 const cacheRules = require('./fixtures/cache-rules');
 const context = require('./fixtures/context');
@@ -47,8 +49,13 @@ const setup = function setup() {
     const args = arguments;
 
     return function innerSetup() {
+        debug('setup start');
         models.init();
-        return initFixtures.apply(self, args);
+        return initFixtures
+            .apply(self, args)
+            .finally(() => {
+                debug('setup end');
+            });
     };
 };
 
@@ -103,8 +110,6 @@ module.exports = {
     createUser: createUser,
     createPost: createPost,
     createEmailedPost,
-
-    integrationTesting: oldIntegrationUtils,
 
     /**
      * renderObject:    res.render(view, dbResponse)

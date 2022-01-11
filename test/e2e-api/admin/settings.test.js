@@ -6,19 +6,19 @@ const fs = require('fs-extra');
 const config = require('../../../core/shared/config');
 const testUtils = require('../../utils');
 const localUtils = require('./utils');
+const labs = require('../../../core/shared/labs');
 
 describe('Settings API', function () {
     let request;
-    let ghostServer;
 
     before(async function () {
-        ghostServer = await testUtils.startGhost();
+        await localUtils.startGhost();
         request = supertest.agent(config.get('url'));
         await localUtils.doAuth(request);
     });
 
     after(function () {
-        return ghostServer.stop();
+        return testUtils.stopGhost();
     });
 
     it('Can request all settings', async function () {
@@ -221,7 +221,7 @@ describe('Settings API', function () {
         should.equal(putBody.settings[13].value, 'ua');
 
         putBody.settings[14].key.should.eql('labs');
-        should.equal(putBody.settings[14].value, JSON.stringify({}));
+        should.equal(putBody.settings[14].value, JSON.stringify(labs.getAll()));
 
         putBody.settings[15].key.should.eql('timezone');
         should.equal(putBody.settings[15].value, 'Pacific/Auckland');
@@ -261,6 +261,6 @@ describe('Settings API', function () {
             .expect(200);
 
         res.headers['x-cache-invalidate'].should.eql('/*');
-        await ghostServer.stop();
+        await testUtils.stopGhost();
     });
 });

@@ -9,7 +9,6 @@
 
 const debug = require('@tryghost/debug')('routing:parent-router');
 
-const EventEmitter = require('events').EventEmitter;
 const express = require('../../../shared/express');
 const _ = require('lodash');
 const url = require('url');
@@ -46,10 +45,8 @@ function GhostRouter(options) {
     return innerRouter;
 }
 
-class ParentRouter extends EventEmitter {
+class ParentRouter {
     constructor(name) {
-        super();
-
         this.identifier = security.identifier.uid(10);
 
         this.name = name;
@@ -181,14 +178,6 @@ class ParentRouter extends EventEmitter {
      */
     getPermalinks() {
         return this.permalinks;
-    }
-
-    /**
-     * @description Get configured filter of this router.
-     * @returns {String}
-     */
-    getFilter() {
-        return this.filter;
     }
 
     /**

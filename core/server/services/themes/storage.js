@@ -83,7 +83,7 @@ module.exports = {
             // CASE: if this is the active theme, we are overriding
             if (overrideTheme) {
                 debug('setFromZip Theme is active already');
-                activator.activateFromAPIOverride(themeName, loadedTheme, checkedTheme);
+                await activator.activateFromAPIOverride(themeName, loadedTheme, checkedTheme);
             }
 
             // @TODO: unify the name across gscan and Ghost!
@@ -112,7 +112,7 @@ module.exports = {
             if (checkedTheme) {
                 fs.remove(checkedTheme.path)
                     .catch((err) => {
-                        logging.error(new errors.GhostError({err: err}));
+                        logging.error(new errors.InternalServerError({err: err}));
                     });
             }
 
@@ -120,7 +120,7 @@ module.exports = {
             getStorage()
                 .delete(backupName)
                 .catch((err) => {
-                    logging.error(new errors.GhostError({err: err}));
+                    logging.error(new errors.InternalServerError({err: err}));
                 });
         }
     },

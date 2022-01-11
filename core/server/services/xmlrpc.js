@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const xml = require('xml');
 const config = require('../../shared/config');
-const urlService = require('../../frontend/services/url');
+const urlService = require('./url');
 const errors = require('@tryghost/errors');
 const tpl = require('@tryghost/tpl');
 const logging = require('@tryghost/logging');
@@ -87,7 +87,7 @@ function ping(post) {
                 if (!goodResponse.test(res.body)) {
                     const matches = res.body.match(errorMessage);
                     const message = matches ? matches[1] : res.body;
-                    throw new errors.GhostError({message});
+                    throw new errors.InternalServerError({message});
                 }
             })
             .catch(function (err) {
@@ -100,7 +100,7 @@ function ping(post) {
                         help: tpl(messages.requestFailedHelp, {url: 'https://ghost.org/docs/'})
                     });
                 } else {
-                    error = new errors.GhostError({
+                    error = new errors.InternalServerError({
                         err: err,
                         message: err.message,
                         context: tpl(messages.requestFailedError, {service: 'xmlrpc'}),

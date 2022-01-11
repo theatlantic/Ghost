@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const logging = require('@tryghost/logging');
 const StripeAPIService = require('@tryghost/members-stripe-service');
 
 const config = require('../../../shared/config');
@@ -9,7 +8,6 @@ const events = require('../../lib/common/events');
 const {getConfig} = require('./config');
 
 const api = new StripeAPIService({
-    logger: logging,
     config: {}
 });
 
@@ -27,7 +25,10 @@ function configureApi() {
     }
 }
 
-const debouncedConfigureApi = _.debounce(configureApi, 600);
+const debouncedConfigureApi = _.debounce(() => {
+    configureApi();
+    events.emit('services.stripe.reconfigured');
+}, 600);
 
 module.exports = {
     async init() {
@@ -37,7 +38,6 @@ module.exports = {
                 return;
             }
             debouncedConfigureApi();
-            events.emit('services.stripe.reconfigured');
         });
     },
 

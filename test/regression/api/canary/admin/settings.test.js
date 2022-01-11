@@ -5,7 +5,6 @@ const config = require('../../../../../core/shared/config');
 const testUtils = require('../../../../utils');
 const localUtils = require('./utils');
 const db = require('../../../../../core/server/data/db');
-const ghost = testUtils.startGhost;
 
 // NOTE: in future iterations these fields should be fetched from a central module.
 //       Have put a list as is here for the lack of better place for it.
@@ -426,6 +425,11 @@ const defaultSettingsKeyTypes = [
         group: 'editor'
     },
     {
+        key: 'editor_is_launch_complete',
+        type: 'boolean',
+        group: 'editor'
+    },
+    {
         key: 'labs',
         type: 'object',
         group: 'labs'
@@ -433,19 +437,13 @@ const defaultSettingsKeyTypes = [
 ];
 
 describe('Settings API (canary)', function () {
-    let ghostServer;
     let request;
 
     describe('As Owner', function () {
-        before(function () {
-            return ghost()
-                .then(function (_ghostServer) {
-                    ghostServer = _ghostServer;
-                    request = supertest.agent(config.get('url'));
-                })
-                .then(function () {
-                    return localUtils.doAuth(request);
-                });
+        before(async function () {
+            await localUtils.startGhost();
+            request = supertest.agent(config.get('url'));
+            await localUtils.doAuth(request);
         });
 
         it('Can request all settings', function () {
@@ -1028,9 +1026,9 @@ describe('Settings API (canary)', function () {
             testUtils.API.checkResponseValue(jsonResponse.settings[0], ['id', 'group', 'key', 'value', 'type', 'flags', 'created_at', 'updated_at']);
             jsonResponse.settings[0].key.should.eql('labs');
 
-            jsonResponse.settings[0].value.should.eql(JSON.stringify({
-                activitypub: true
-            }));
+            const responseObj = JSON.parse(jsonResponse.settings[0].value);
+
+            should.not.exist(responseObj.gibberish);
         });
 
         it('Can\'t edit non existent setting', function () {
@@ -1264,51 +1262,33 @@ describe('Settings API (canary)', function () {
     });
 
     describe('As Admin', function () {
-        before(function () {
-            return ghost()
-                .then(function (_ghostServer) {
-                    ghostServer = _ghostServer;
-                    request = supertest.agent(config.get('url'));
-                })
-                .then(function () {
-                    // create admin
-                    return testUtils.createUser({
-                        user: testUtils.DataGenerator.forKnex.createUser({email: 'admin+1@ghost.org'}),
-                        role: testUtils.DataGenerator.Content.roles[0].name
-                    });
-                })
-                .then(function (admin) {
-                    request.user = admin;
+        before(async function () {
+            await localUtils.startGhost();
+            request = supertest.agent(config.get('url'));
 
-                    // by default we login with the owner
-                    return localUtils.doAuth(request);
-                });
+            // create admin
+            const admin = await testUtils.createUser({
+                user: testUtils.DataGenerator.forKnex.createUser({email: 'admin+1@ghost.org'}),
+                role: testUtils.DataGenerator.Content.roles[0].name
+            });
+            request.user = admin;
+            // by default we login with the owner
+            await localUtils.doAuth(request);
         });
     });
 
     describe('As Editor', function () {
-        let editor;
+        before(async function () {
+            await localUtils.startGhost();
+            request = supertest.agent(config.get('url'));
+            // create editor
+            request.user = await testUtils.createUser({
+                user: testUtils.DataGenerator.forKnex.createUser({email: 'test+1@ghost.org'}),
+                role: testUtils.DataGenerator.Content.roles[1].name
+            });
 
-        before(function () {
-            return ghost()
-                .then(function (_ghostServer) {
-                    ghostServer = _ghostServer;
-                    request = supertest.agent(config.get('url'));
-                })
-                .then(function () {
-                    // create editor
-                    return testUtils.createUser({
-                        user: testUtils.DataGenerator.forKnex.createUser({email: 'test+1@ghost.org'}),
-                        role: testUtils.DataGenerator.Content.roles[1].name
-                    });
-                })
-                .then(function (_user1) {
-                    editor = _user1;
-                    request.user = editor;
-
-                    // by default we login with the owner
-                    return localUtils.doAuth(request);
-                });
+            // by default we login with the owner
+            await localUtils.doAuth(request);
         });
 
         it('should not be able to edit settings', function () {
@@ -1350,25 +1330,18 @@ describe('Settings API (canary)', function () {
     });
 
     describe('As Author', function () {
-        before(function () {
-            return ghost()
-                .then(function (_ghostServer) {
-                    ghostServer = _ghostServer;
-                    request = supertest.agent(config.get('url'));
-                })
-                .then(function () {
-                    // create author
-                    return testUtils.createUser({
-                        user: testUtils.DataGenerator.forKnex.createUser({email: 'test+2@ghost.org'}),
-                        role: testUtils.DataGenerator.Content.roles[2].name
-                    });
-                })
-                .then(function (author) {
-                    request.user = author;
+        before(async function () {
+            await localUtils.startGhost();
+            request = supertest.agent(config.get('url'));
 
-                    // by default we login with the owner
-                    return localUtils.doAuth(request);
-                });
+            // create author
+            request.user = await testUtils.createUser({
+                user: testUtils.DataGenerator.forKnex.createUser({email: 'test+2@ghost.org'}),
+                role: testUtils.DataGenerator.Content.roles[2].name
+            });
+
+            // by default we login with the owner
+            await localUtils.doAuth(request);
         });
 
         it('should not be able to edit settings', function () {

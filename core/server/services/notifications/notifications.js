@@ -3,6 +3,7 @@ const semver = require('semver');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const errors = require('@tryghost/errors');
+const ghostVersion = require('@tryghost/version');
 const tpl = require('@tryghost/tpl');
 const ObjectId = require('bson-objectid');
 
@@ -16,13 +17,10 @@ class Notifications {
      *
      * @param {Object} options
      * @param {Object} options.settingsCache - settings cache instance
-     * @param {Object} options.ghostVersion
-     * @param {String} options.ghostVersion.full - Ghost instance version in "full" format - major.minor.patch
      * @param {Object} options.SettingsModel - Ghost's Setting model instance
      */
-    constructor({settingsCache, ghostVersion, SettingsModel}) {
+    constructor({settingsCache, SettingsModel}) {
         this.settingsCache = settingsCache;
-        this.ghostVersion = ghostVersion;
         this.SettingsModel = SettingsModel;
     }
 
@@ -75,40 +73,45 @@ class Notifications {
     browse({user}) {
         let allNotifications = this.fetchAllNotifications();
         allNotifications = _.orderBy(allNotifications, 'addedAt', 'desc');
+        const blogVersion = ghostVersion.full.match(/^(\d+\.)(\d+\.)(\d+)/);
 
         allNotifications = allNotifications.filter((notification) => {
-            // NOTE: Filtering by version below is just a patch for bigger problem - notifications are not removed
-            //       after Ghost update. Logic below should be removed when Ghost upgrade detection
-            //       is done (https://github.com/TryGhost/Ghost/issues/10236) and notifications are
-            //       be removed permanently on upgrade event.
-            const ghostMajorRegEx = /Ghost (?<major>\d).0 is now available/gi;
-            const ghostSec43 = /GHSA-9fgx-q25h-jxrg/gi;
+            if (notification.createdAtVersion && !this.wasSeen(notification, user)) {
+                return semver.gte(notification.createdAtVersion, blogVersion[0]);
+            } else {
+                // NOTE: Filtering by version below is just a patch for bigger problem - notifications are not removed
+                //       after Ghost update. Logic below should be removed when Ghost upgrade detection
+                //       is done (https://github.com/TryGhost/Ghost/issues/10236) and notifications are
+                //       be removed permanently on upgrade event.
+                // NOTE: this whole else block can be removed with the first version after Ghost v5.0
+                //       as the "createdAtVersion" mechanism will be enough to detect major version updates.
+                const ghostMajorRegEx = /Ghost (?<major>\d).0 is now available/gi;
+                const ghostSec43 = /GHSA-9fgx-q25h-jxrg/gi;
 
-            // CASE: do not return old release notification
-            if (notification.message
-                && (!notification.custom || notification.message.match(ghostMajorRegEx) || notification.message.match(ghostSec43))) {
-                let notificationVersion = notification.message.match(/(\d+\.)(\d+\.)(\d+)/);
+                // CASE: do not return old release notification
+                if (notification.message
+                    && (!notification.custom || notification.message.match(ghostMajorRegEx) || notification.message.match(ghostSec43))) {
+                    let notificationVersion = notification.message.match(/(\d+\.)(\d+\.)(\d+)/);
 
-                if (!notificationVersion && notification.message.match(ghostSec43)) {
-                    // Treating "GHSA-9fgx-q25h-jxrg" notification as 4.3.3 because there's no way to detect version
-                    // from it's message. In the future we should consider having a separate field with version
-                    // coming with each notification
-                    notificationVersion = ['4.3.3'];
-                }
+                    if (!notificationVersion && notification.message.match(ghostSec43)) {
+                        // Treating "GHSA-9fgx-q25h-jxrg" notification as 4.3.3 because there's no way to detect version
+                        // from it's message. In the future we should consider having a separate field with version
+                        // coming with each notification
+                        notificationVersion = ['4.3.3'];
+                    }
 
-                const ghostMajorMatch = ghostMajorRegEx.exec(notification.message);
-                if (ghostMajorMatch && ghostMajorMatch.groups && ghostMajorMatch.groups.major) {
-                    notificationVersion = `${ghostMajorMatch.groups.major}.0.0`;
-                } else if (notificationVersion){
-                    notificationVersion = notificationVersion[0];
-                }
+                    const ghostMajorMatch = ghostMajorRegEx.exec(notification.message);
+                    if (ghostMajorMatch && ghostMajorMatch.groups && ghostMajorMatch.groups.major) {
+                        notificationVersion = `${ghostMajorMatch.groups.major}.0.0`;
+                    } else if (notificationVersion){
+                        notificationVersion = notificationVersion[0];
+                    }
 
-                const blogVersion = this.ghostVersion.full.match(/^(\d+\.)(\d+\.)(\d+)/);
-
-                if (notificationVersion && blogVersion && semver.gt(notificationVersion, blogVersion[0])) {
-                    return true;
-                } else {
-                    return false;
+                    if (notificationVersion && blogVersion && semver.gt(notificationVersion, blogVersion[0])) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             }
 
@@ -123,7 +126,8 @@ class Notifications {
             dismissible: true,
             location: 'bottom',
             status: 'alert',
-            id: ObjectId().toHexString()
+            id: ObjectId().toHexString(),
+            createdAtVersion: ghostVersion.full
         };
 
         const overrides = {

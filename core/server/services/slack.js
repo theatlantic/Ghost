@@ -4,7 +4,7 @@ const logging = require('@tryghost/logging');
 const request = require('@tryghost/request');
 const {blogIcon} = require('../lib/image');
 const urlUtils = require('../../shared/url-utils');
-const urlService = require('../../frontend/services/url');
+const urlService = require('./url');
 const settingsCache = require('../../shared/settings-cache');
 const schema = require('../data/schema').checks;
 const moment = require('moment');
@@ -136,7 +136,7 @@ function ping(post) {
                 'Content-type': 'application/json'
             }
         }).catch(function (err) {
-            logging.error(new errors.GhostError({
+            logging.error(new errors.InternalServerError({
                 err: err,
                 context: tpl(messages.requestFailedError, {service: 'slack'}),
                 help: tpl(messages.requestFailedHelp, {url: 'https://ghost.org/docs/'})
