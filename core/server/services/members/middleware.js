@@ -35,6 +35,7 @@ const loadMemberSession = async function (req, res, next) {
 const getAtlanticMemberCookie = async function (req, res) {
     const cookies = createCookies(req, res);
     const atlanticCookie = cookies.get('atljwt');
+    const atlanticPaywallHeaderName = 'X-Paywall';
 
     if (atlanticCookie) {
         const atlanticCookieDecoded = jwt.decode(atlanticCookie, {complete: true});
@@ -49,6 +50,8 @@ const getAtlanticMemberCookie = async function (req, res) {
                     jwt.verify(atlanticCookie, publicKey);
                     console.log('cookie valid');
 
+                    res.setHeader(atlanticPaywallHeaderName, 0);
+
                     return {
                         uuid: 'PREMIUM_UID',
                         email: 'member@theatlantic.com',
@@ -62,6 +65,8 @@ const getAtlanticMemberCookie = async function (req, res) {
                 }
             }
         }
+
+        res.setHeader(atlanticPaywallHeaderName, 1);
     }
 };
 
