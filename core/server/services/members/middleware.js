@@ -65,9 +65,9 @@ const getAtlanticMemberCookie = async function (req, res) {
                 }
             }
         }
-
-        res.setHeader(atlanticPaywallHeaderName, 1);
     }
+
+    res.setHeader(atlanticPaywallHeaderName, 1);
 };
 
 const getIdentityToken = async function (req, res) {
