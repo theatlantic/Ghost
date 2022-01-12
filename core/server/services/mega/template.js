@@ -1044,7 +1044,7 @@ figure blockquote p {
                                         <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 40px; border-top: 1px solid #D3DCE6;">
                                                 <tr>
-                                                    <td class="footer-top">Share The Atlantic Newsletter:</td>
+                                                    <td class="footer-top">Share This Newsletter:</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="footer footer-icons">
