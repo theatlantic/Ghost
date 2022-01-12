@@ -1,6 +1,6 @@
 {
   "name": "ghost",
-  "version": "4.32.1",
+  "version": "4.32.2",
   "description": "The professional publishing platform",
   "author": "Ghost Foundation",
   "homepage": "https://ghost.org",
@@ -80,8 +80,8 @@
     "@tryghost/logging": "2.0.0",
     "@tryghost/magic-link": "1.0.14",
     "@tryghost/members-api": "3.0.0",
-    "@tryghost/members-csv": "1.2.1",
-    "@tryghost/members-importer": "0.3.6",
+    "@tryghost/members-csv": "1.2.2",
+    "@tryghost/members-importer": "0.3.7",
     "@tryghost/members-offers": "0.10.4",
     "@tryghost/members-ssr": "1.0.17",
     "@tryghost/metrics": "1.0.1",
@@ -209,7 +209,7 @@
     "rewire": "5.0.0",
     "should": "13.2.3",
     "sinon": "11.1.2",
-    "supertest": "6.2.0",
+    "supertest": "6.2.1",
     "tmp": "0.2.1"
   },
   "resolutions": {
