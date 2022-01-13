@@ -987,6 +987,13 @@ figure blockquote p {
 
                     <!-- START CENTERED WHITE CONTAINER -->
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
+                        <tr>
+                            <td style="padding: 12px; background-color: white; text-align: center; line-height: 18px;">
+                                <a style="font-family: Arial, sans-serif; font-style: normal; font-weight: normal; font-size: 12px;" href="${post.url}">
+                                View and share the web version
+                                </a>
+                            </td>
+                        </tr>
 
                         <!-- START MAIN CONTENT AREA -->
                         <tr>
