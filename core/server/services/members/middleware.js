@@ -41,13 +41,16 @@ const getAtlanticMemberCookie = async function (req, res) {
         const atlanticCookieDecoded = jwt.decode(atlanticCookie, {complete: true});
 
         if (atlanticCookieDecoded && atlanticCookieDecoded.payload) {
-            if (atlanticCookieDecoded.payload.paymeter_access === true) {
-                console.log('premium user');
+            const atlanticCookiePayload = atlanticCookieDecoded.payload;
 
+            if (atlanticCookiePayload.paymeter_access === true) {
                 try {
+                    // we need to use custom expiration field, so we need to use "maxAge" option for cookie verification
+                    const cookieMaxAge = atlanticCookiePayload.refresh_exp - atlanticCookiePayload.iat;
+
                     const publicKeyPath = path.resolve(__dirname, '../../../../content/keys/jwt_cookie_cert.pem');
                     const publicKey = fs.readFileSync(publicKeyPath);
-                    jwt.verify(atlanticCookie, publicKey);
+                    jwt.verify(atlanticCookie, publicKey, {ignoreExpiration: true, maxAge: cookieMaxAge});
                     console.log('cookie valid');
 
                     res.setHeader(atlanticPaywallHeaderName, 0);
@@ -62,6 +65,7 @@ const getAtlanticMemberCookie = async function (req, res) {
                     };
                 } catch (err) {
                     console.log('cookie NOT verified');
+                    console.log(err);
                 }
             }
         }
