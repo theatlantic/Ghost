@@ -194,7 +194,7 @@ h6 {
     margin-top: 0;
     font-family: Adobe Garamond Pro, Times New Roman, serif;
     line-height: 1.15em;
-    font-weight: 600;
+    font-weight: 400;
     text-rendering: optimizeLegibility;
 }
 
