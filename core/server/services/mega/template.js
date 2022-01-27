@@ -943,7 +943,7 @@ figure blockquote p {
             font-family: "Adobe Garamond Pro";
             font-style: normal;
             font-weight: 400;
-            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
             mso-font-alt: "Georgia";
         }
         ​
@@ -952,7 +952,7 @@ figure blockquote p {
             font-family: "Adobe Garamond Pro";
             font-style: normal;
             font-weight: 600;
-            src: url("https://newsletters.theatlantic.com/peacefield/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
         ​
@@ -962,7 +962,7 @@ figure blockquote p {
             font-stretch: normal;
             font-style: normal;
             font-weight: 700;
-            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
 </style>
@@ -1055,8 +1055,8 @@ figure blockquote p {
                                                 </tr>
                                                 <tr>
                                                     <td class="footer footer-icons">
-                                                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedPageUrl}"><img src="${site.url}ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
-                                                        <a href="https://twitter.com/share?url=${encodedPageUrl}"><img src="${site.url}ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedPageUrl}"><img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                                        <a href="https://twitter.com/share?url=${encodedPageUrl}"><img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
                                                     </td>
                                                 </tr>
 

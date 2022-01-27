@@ -94,7 +94,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
             font-family: "Adobe Garamond Pro";
             font-style: normal;
             font-weight: 400;
-            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
             mso-font-alt: "Georgia";
         }
         ​
@@ -103,7 +103,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
             font-family: "Adobe Garamond Pro";
             font-style: normal;
             font-weight: 600;
-            src: url("https://newsletters.theatlantic.com/peacefield/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
         ​
@@ -113,7 +113,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
             font-stretch: normal;
             font-style: normal;
             font-weight: 700;
-            src: url("https://newsletters.theatlantic.com/peacefield/ghost/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
     </style>
@@ -131,7 +131,7 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                     <!-- START MAIN CONTENT AREA -->
                     <tr>
                         <td colspan="3" style="text-align: center; padding-bottom: 40px;">
-                            <img src="https://newsletters.theatlantic.com/peacefield/ghost/assets/img/email/atlantic-logo.png" border="0" width="129" height="20" title="Atlantic" alt="Atlantic" />
+                            <img src="https://assets.outpostpublishingcoop.com/assets/img/email/atlantic-logo.png" border="0" width="129" height="20" title="Atlantic" alt="Atlantic" />
                         </td>
                     </tr>
                     <tr>
@@ -186,8 +186,8 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
                                 </tr>
                                 <tr>
                                     <td style="font-family: Arial, sans-serif;font-style: normal;font-weight: normal;font-size: 12px;line-height: 150%;text-align: center;color: #5E6A74; padding-bottom: 13px;padding-top: 16px;padding-bottom: 16px;">
-                                        <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.theatlantic.com%2Fsubscriber-newsletters%2F"><img src="https://newsletters.theatlantic.com/peacefield/ghost/assets/img/email/icon-facebook.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Facebook"></a>
-                                        <a href="https://twitter.com/share?url=https%3A%2F%2Fwww.theatlantic.com%2Fsubscriber-newsletters%2F"><img src="https://newsletters.theatlantic.com/peacefield/ghost/assets/img/email/icon-twitter.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Twitter"></a>
+                                        <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.theatlantic.com%2Fsubscriber-newsletters%2F"><img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-facebook.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Facebook"></a>
+                                        <a href="https://twitter.com/share?url=https%3A%2F%2Fwww.theatlantic.com%2Fsubscriber-newsletters%2F"><img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-twitter.png" border="0" width="16" height="16" style="padding-left: 8px;padding-right: 8px;" alt="Twitter"></a>
                                     </td>
                                 </tr>
                                 <tr>
