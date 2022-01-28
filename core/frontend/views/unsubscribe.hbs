@@ -41,11 +41,14 @@
                             {{else}}
                                 {{#if member}}
                                     <p>
-                                        <span class="gh-flow-em">{{member.email}}</span> has been successfully unsubscribed from emails.
-                                        <br>
-                                        Don't worry, this will not cancel your paid subscription to {{@site.title}}.
+                                        <span class="gh-flow-em">{{member.email}}</span> has been successfully unsubscribed from the {{@site.title}} newsletter.
                                     </p>
-                                    <p>Didn't mean to do this? Manage your account <a href="{{@site.url}}/#/portal/account">here</a>.</p>
+                                    <p>
+                                        This does not affect the status of paid Atlantic subscriptions, if you have one.
+                                    </p>
+                                    <p>
+                                        Didn't mean to do this? You can re-sign up <a href="{{@site.url}}">here</a>.
+                                    </p>
                                 {{/if}}
                             {{/if}}
                         </section>
