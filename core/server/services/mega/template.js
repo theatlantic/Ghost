@@ -1,4 +1,5 @@
 /* eslint indent: warn, no-irregular-whitespace: warn */
+const moment = require('moment');
 const iff = (cond, yes, no) => (cond ? yes : no);
 module.exports = ({post, site, templateSettings}) => {
     const date = new Date();
@@ -10,6 +11,8 @@ module.exports = ({post, site, templateSettings}) => {
 
     const ctaUrl = `https://accounts.theatlantic.com/products/?referral=${siteSlug}&utm_source=${siteSlug}`;
     const encodedPageUrl = encodeURIComponent(post.url);
+
+    const postPubDate = moment(post.published_at).format('MMMM D, YYYY');
 
     return `<!doctype html>
 <html>
@@ -987,6 +990,7 @@ figure blockquote p {
 
                     <!-- START CENTERED WHITE CONTAINER -->
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
+                        ${ post.email_only === false ? `
                         <tr>
                             <td style="padding: 12px; background-color: white; text-align: center; line-height: 18px;">
                                 <a style="font-family: Arial, sans-serif; font-style: normal; font-weight: normal; font-size: 12px;" href="${post.url}">
@@ -994,6 +998,7 @@ figure blockquote p {
                                 </a>
                             </td>
                         </tr>
+                        ` : ''}
 
                         <!-- START MAIN CONTENT AREA -->
                         <tr>
@@ -1002,7 +1007,7 @@ figure blockquote p {
 
                                     <tr class="email-content">
                                         <td class="header-date" width="100%" align="center">
-                                            ${post.published_at} <!-- ATLANTIC_PRESENTED_BY -->
+                                            ${postPubDate} <!-- ATLANTIC_PRESENTED_BY -->
                                         </td>
                                     </tr>
 
