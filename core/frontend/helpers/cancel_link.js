@@ -6,7 +6,7 @@
 //
 // Defaults to class="cancel-subscription-link" errorClass="cancel-subscription-error" cancelLabel="Cancel subscription" continueLabel="Continue subscription"
 const {labs} = require('../services/proxy');
-const {templates} = require('../services/rendering');
+const {templates} = require('../services/handlebars');
 
 const errors = require('@tryghost/errors');
 const tpl = require('@tryghost/tpl');
@@ -44,6 +44,6 @@ module.exports = function cancelLabsWrapper() {
         helperName: 'cancel_link',
         helpUrl: 'https://ghost.org/docs/themes/members/'
     }, () => {
-        return cancel_link.apply(self, args);
+        return cancel_link.apply(self, args); // eslint-disable-line camelcase
     });
 };

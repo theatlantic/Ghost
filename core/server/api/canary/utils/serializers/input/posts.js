@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const debug = require('@tryghost/debug')('api:canary:utils:serializers:input:posts');
-const mapNQLKeyValues = require('@nexes/nql').utils.mapKeyValues;
+const mapNQLKeyValues = require('@tryghost/nql').utils.mapKeyValues;
 const url = require('./utils/url');
 const slugFilterOrder = require('./utils/slug-filter-order');
 const localUtils = require('../../index');
@@ -38,7 +38,7 @@ function defaultRelations(frame) {
         return false;
     }
 
-    frame.options.withRelated = ['tags', 'authors', 'authors.roles', 'email'];
+    frame.options.withRelated = ['tags', 'authors', 'authors.roles', 'email', 'tiers'];
 }
 
 function setDefaultOrder(frame) {
@@ -109,13 +109,6 @@ const transformLegacyEmailRecipientFilters = (frame) => {
     if (frame.options.email_recipient_filter === 'paid') {
         frame.options.email_recipient_filter = 'status:-free';
     }
-};
-
-const transformPostVisibilityFilters = (frame) => {
-    if (frame.data.posts[0].visibility === 'filter' && frame.data.posts[0].visibility_filter) {
-        frame.data.posts[0].visibility = frame.data.posts[0].visibility_filter;
-    }
-    delete frame.data.posts[0].visibility_filter;
 };
 
 module.exports = {
@@ -212,7 +205,6 @@ module.exports = {
             });
         }
 
-        transformPostVisibilityFilters(frame);
         transformLegacyEmailRecipientFilters(frame);
         handlePostsMeta(frame);
         defaultFormat(frame);

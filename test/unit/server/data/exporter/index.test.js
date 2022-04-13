@@ -1,10 +1,9 @@
 const should = require('should');
 const sinon = require('sinon');
-const rewire = require('rewire');
 const Promise = require('bluebird');
 const errors = require('@tryghost/errors');
 const db = require('../../../../../core/server/data/db');
-const exporter = rewire('../../../../../core/server/data/exporter');
+const exporter = require('../../../../../core/server/data/exporter');
 const schema = require('../../../../../core/server/data/schema');
 const models = require('../../../../../core/server/models');
 const schemaTables = Object.keys(schema.tables);
@@ -191,7 +190,7 @@ describe('Exporter', function () {
             const {
                 SETTING_KEYS_BLOCKLIST
             } = require('../../../../../core/server/data/exporter/table-lists.js');
-            const defaultSettings = require('../../../../../core/server/data/schema/default-settings.json');
+            const defaultSettings = require('../../../../../core/server/data/schema/default-settings/default-settings.json');
 
             const totalKeysLength = Object.keys(defaultSettings).reduce((acc, curr, index) => {
                 return acc + Object.keys(defaultSettings[curr]).length;
@@ -199,7 +198,7 @@ describe('Exporter', function () {
 
             // NOTE: if default settings changed either modify the settings keys blocklist or increase allowedKeysLength
             //       This is a reminder to think about the importer/exporter scenarios ;)
-            const allowedKeysLength = 84;
+            const allowedKeysLength = 85;
             totalKeysLength.should.eql(SETTING_KEYS_BLOCKLIST.length + allowedKeysLength);
         });
     });

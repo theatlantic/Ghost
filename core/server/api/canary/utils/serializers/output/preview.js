@@ -1,9 +1,16 @@
-const mapper = require('./utils/mapper');
+const mappers = require('./mappers');
+const membersService = require('../../../../../services/members');
 
 module.exports = {
-    all(model, apiConfig, frame) {
+    async all(model, apiConfig, frame) {
+        const tiersModels = await membersService.api.productRepository.list({
+            withRelated: ['monthlyPrice', 'yearlyPrice']
+        });
+        const tiers = tiersModels.data ? tiersModels.data.map(tierModel => tierModel.toJSON()) : [];
+
+        const data = await mappers.posts(model, frame, {tiers});
         frame.response = {
-            preview: [mapper.mapPost(model, frame)]
+            preview: [data]
         };
         frame.response.preview[0].page = model.get('type') === 'page';
     }

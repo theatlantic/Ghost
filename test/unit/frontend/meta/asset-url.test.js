@@ -1,12 +1,11 @@
 const should = require('should');
 const sinon = require('sinon');
-const rewire = require('rewire');
 const imageLib = require('../../../../core/server/lib/image');
 const settingsCache = require('../../../../core/shared/settings-cache');
 const configUtils = require('../../../utils/configUtils');
 const config = configUtils.config;
 
-const getAssetUrl = rewire('../../../../core/frontend/meta/asset-url');
+const getAssetUrl = require('../../../../core/frontend/meta/asset-url');
 
 describe('getAssetUrl', function () {
     afterEach(function () {
@@ -32,6 +31,11 @@ describe('getAssetUrl', function () {
     it('should not add asset to url has public in it', function () {
         const testUrl = getAssetUrl('public/myfile.js');
         testUrl.should.equal('/public/myfile.js?v=' + config.get('assetHash'));
+    });
+
+    it('should return hash before #', function () {
+        const testUrl = getAssetUrl('myfile.svg#arrow-up');
+        testUrl.should.equal(`/assets/myfile.svg?v=${config.get('assetHash')}#arrow-up`);
     });
 
     describe('favicon', function () {

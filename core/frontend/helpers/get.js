@@ -2,7 +2,7 @@
 // Usage: `{{#get "posts" limit="5"}}`, `{{#get "tags" limit="all"}}`
 // Fetches data from the API
 const {config, api, prepareContextResource} = require('../services/proxy');
-const {hbs} = require('../services/rendering');
+const {hbs} = require('../services/handlebars');
 
 const logging = require('@tryghost/logging');
 const errors = require('@tryghost/errors');
@@ -31,6 +31,9 @@ const RESOURCES = {
     },
     authors: {
         alias: 'authorsPublic'
+    },
+    tiers: {
+        alias: 'tiersPublic'
     }
 };
 
@@ -153,6 +156,7 @@ module.exports = function get(resource, options) {
 
     // Parse the options we're going to pass to the API
     apiOptions = parseOptions(ghostGlobals, this, apiOptions);
+    apiOptions.context = {member: data.member};
 
     // @TODO: https://github.com/TryGhost/Ghost/issues/10548
     return controller[action](apiOptions).then(function success(result) {

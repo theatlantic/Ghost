@@ -3,7 +3,7 @@
 //
 // Formats a date using moment-timezone.js. Formats published_at by default but will also take a date as a parameter
 
-const {SafeString} = require('../services/rendering');
+const {SafeString} = require('../services/handlebars');
 const moment = require('moment-timezone');
 const _ = require('lodash');
 
@@ -25,12 +25,11 @@ module.exports = function (...attrs) {
     // ensure that date is undefined, not null, as that can cause errors
     date = date === null ? undefined : date;
 
-    const timezone = options.data.site.timezone;
-    const locale = options.data.site.locale;
-
     const {
         format = 'll',
-        timeago
+        timeago,
+        timezone = options.data.site.timezone,
+        locale = options.data.site.locale
     } = options.hash;
 
     const timeNow = moment().tz(timezone);

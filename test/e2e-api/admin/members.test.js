@@ -1,144 +1,302 @@
-const path = require('path');
+const {agentProvider, mockManager, fixtureManager, matchers} = require('../../utils/e2e-framework');
+const {anyEtag, anyObjectId, anyUuid, anyISODateTime, anyISODate, anyString, anyArray, anyLocationFor, anyErrorId} = matchers;
+
+const assert = require('assert');
+const nock = require('nock');
 const should = require('should');
-const supertest = require('supertest');
 const sinon = require('sinon');
 const testUtils = require('../../utils');
-const localUtils = require('./utils');
-const config = require('../../../core/shared/config');
-const labs = require('../../../core/shared/labs');
 const Papa = require('papaparse');
 
-describe('Members API', function () {
-    let request;
+const models = require('../../../core/server/models');
+const {Product} = require('../../../core/server/models/product');
 
-    afterEach(function () {
-        sinon.restore();
+async function assertMemberEvents({eventType, memberId, asserts}) {
+    const events = await models[eventType].where('member_id', memberId).fetchAll();
+    events.map(e => e.toJSON()).should.match(asserts);
+    assert.equal(events.length, asserts.length, `Only ${asserts.length} ${eventType} should have been added.`);
+}
+
+async function assertSubscription(subscriptionId, asserts) {
+    // eslint-disable-next-line dot-notation
+    const subscription = await models['StripeCustomerSubscription'].where('subscription_id', subscriptionId).fetch({require: true});
+
+    // We use the native toJSON to prevent calling the overriden serialize method
+    models.Base.Model.prototype.serialize.call(subscription).should.match(asserts);
+}
+
+async function getPaidProduct() {
+    return await Product.findOne({type: 'paid'});
+}
+
+const memberMatcherNoIncludes = {
+    id: anyObjectId,
+    uuid: anyUuid,
+    created_at: anyISODateTime,
+    updated_at: anyISODateTime
+};
+
+const memberMatcherShallowIncludes = {
+    id: anyObjectId,
+    uuid: anyUuid,
+    created_at: anyISODateTime,
+    updated_at: anyISODateTime,
+    subscriptions: anyArray,
+    labels: anyArray
+};
+
+const memberMatcherShallowIncludesForNewsletters = {
+    id: anyObjectId,
+    uuid: anyUuid,
+    created_at: anyISODateTime,
+    updated_at: anyISODateTime,
+    subscriptions: anyArray,
+    labels: anyArray,
+    newsletters: anyArray
+};
+
+let agent;
+
+describe('Members API without Stripe', function () {
+    before(async function () {
+        agent = await agentProvider.getAdminAPIAgent();
+        await fixtureManager.init();
+        await agent.loginAsOwner();
     });
 
     before(async function () {
-        await localUtils.startGhost();
-        request = supertest.agent(config.get('url'));
-        await localUtils.doAuth(request, 'members', 'members:emails');
-        sinon.stub(labs, 'isSet').withArgs('members').returns(true);
+        await agent
+            .delete('/settings/stripe/connect/')
+            .expectStatus(200);
     });
 
+    beforeEach(function () {
+        mockManager.mockMail();
+    });
+
+    afterEach(function () {
+        mockManager.restore();
+    });
+
+    it('Add should fail when comped flag is passed in but Stripe is not enabled', async function () {
+        const newMember = {
+            email: 'memberTestAdd@test.com',
+            comped: true
+        };
+
+        await agent
+            .post(`members/`)
+            .body({members: [newMember]})
+            .expectStatus(422)
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            })
+            .matchBodySnapshot({
+                errors: [{
+                    id: anyErrorId
+                }]
+            });
+    });
+});
+
+describe('Members API', function () {
+    before(async function () {
+        agent = await agentProvider.getAdminAPIAgent();
+        await fixtureManager.init('members');
+        await agent.loginAsOwner();
+    });
+
+    beforeEach(function () {
+        mockManager.mockLabsEnabled('multipleProducts');
+        mockManager.mockStripe();
+        mockManager.mockMail();
+    });
+
+    afterEach(function () {
+        mockManager.restore();
+    });
+
+    // List Members
+
     it('Can browse', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery('members/'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(8);
-        localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
-
-        testUtils.API.isISO8601(jsonResponse.members[0].created_at).should.be.true();
-        jsonResponse.members[0].created_at.should.be.an.instanceof(String);
-
-        jsonResponse.meta.pagination.should.have.property('page', 1);
-        jsonResponse.meta.pagination.should.have.property('limit', 15);
-        jsonResponse.meta.pagination.should.have.property('pages', 1);
-        jsonResponse.meta.pagination.should.have.property('total', 8);
-        jsonResponse.meta.pagination.should.have.property('next', null);
-        jsonResponse.meta.pagination.should.have.property('prev', null);
+        await agent
+            .get('/members/')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(8).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
     });
 
     it('Can browse with filter', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery('members/?filter=label:label-1'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(1);
-        localUtils.API.checkResponse(jsonResponse, 'members');
-        localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
-        localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
+        await agent
+            .get('/members/?filter=label:label-1')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
     });
 
     it('Can browse with search', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery('members/?search=member1'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(1);
-        jsonResponse.members[0].email.should.equal('member1@test.com');
-        localUtils.API.checkResponse(jsonResponse, 'members');
-        localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
-        localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
+        await agent
+            .get('/members/?search=member1')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
     });
 
     it('Can filter by paid status', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery('members/?filter=status:paid'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(5);
-        jsonResponse.members[0].email.should.equal('paid@test.com');
-        jsonResponse.members[1].email.should.equal('trialing@test.com');
-        localUtils.API.checkResponse(jsonResponse, 'members');
-        localUtils.API.checkResponse(jsonResponse.members[0], 'member', 'subscriptions');
-        localUtils.API.checkResponse(jsonResponse.meta.pagination, 'pagination');
+        await agent
+            .get('/members/?filter=status:paid')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(5).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
     });
 
-    it('Can read', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery(`members/${testUtils.DataGenerator.Content.members[0].id}/`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
+    it('Can filter using contains operators', async function () {
+        await agent
+            .get(`/members/?filter=name:~'Venkman'`)
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
 
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(1);
-        localUtils.API.checkResponse(jsonResponse.members[0], 'member', ['subscriptions', 'products']);
+    it('Can ignore any unknown includes', async function () {
+        await agent
+            .get('/members/?filter=status:paid&include=emailRecipients')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(5).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
+
+    it('Can order by email_open_rate', async function () {
+        await agent
+            .get('members/?order=email_open_rate%20desc')
+            .expectStatus(200)
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                'content-length': anyString
+            })
+            .matchBodySnapshot({
+                members: new Array(8).fill(memberMatcherShallowIncludes)
+            })
+            .expect(({body}) => {
+                const {members} = body;
+                assert.equal(members[0].email_open_rate > members[1].email_open_rate, true, 'Expected the first member to have a greater open rate than the second.');
+            });
+
+        await agent
+            .get('members/?order=email_open_rate%20asc')
+            .expectStatus(200)
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                'content-length': anyString
+            })
+            .matchBodySnapshot({
+                members: new Array(8).fill(memberMatcherShallowIncludes)
+            })
+            .expect(({body}) => {
+                const {members} = body;
+                assert.equal(members[0].email_open_rate < members[1].email_open_rate, true, 'Expected the first member to have a smaller open rate than the second.');
+            });
+    });
+
+    it('Search by case-insensitive name egg receives member with name Mr Egg', async function () {
+        await agent
+            .get('members/?search=egg')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: [memberMatcherShallowIncludes]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
+
+    it('Search by case-insensitive email MEMBER2 receives member with email member2@test.com', async function () {
+        await agent
+            .get('members/?search=MEMBER2')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: [memberMatcherShallowIncludes]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
+
+    it('Search for paid members retrieves member with email paid@test.com', async function () {
+        await agent
+            .get('members/?search=egon&paid=true')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: [memberMatcherShallowIncludes]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
+
+    it('Search for non existing member returns empty result set', async function () {
+        await agent
+            .get('members/?search=do_not_exist')
+            .expectStatus(200)
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            })
+            .matchBodySnapshot({
+                members: []
+            });
+    });
+
+    // Read a member
+
+    it('Can read', async function () {
+        await agent
+            .get(`/members/${testUtils.DataGenerator.Content.members[0].id}/`)
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
     });
 
     it('Can read and include email_recipients', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery(`members/${testUtils.DataGenerator.Content.members[0].id}/?include=email_recipients`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(1);
-        localUtils.API.checkResponse(jsonResponse.members[0], 'member', ['subscriptions', 'email_recipients', 'products']);
-        jsonResponse.members[0].email_recipients.length.should.equal(1);
-        localUtils.API.checkResponse(jsonResponse.members[0].email_recipients[0], 'email_recipient', ['email']);
-        localUtils.API.checkResponse(jsonResponse.members[0].email_recipients[0].email, 'email');
+        await agent
+            .get(`/members/${testUtils.DataGenerator.Content.members[0].id}/?include=email_recipients`)
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
     });
+
+    // Create a member
 
     it('Can add', async function () {
         const member = {
@@ -149,39 +307,679 @@ describe('Members API', function () {
             labels: ['test-label']
         };
 
-        const res = await request
-            .post(localUtils.API.getApiQuery(`members/`))
-            .send({members: [member]})
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201);
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [member]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+        const newMember = body.members[0];
 
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(1);
+        await agent
+            .post(`/members/`)
+            .body({members: [member]})
+            .expectStatus(422);
 
-        jsonResponse.members[0].name.should.equal(member.name);
-        jsonResponse.members[0].email.should.equal(member.email);
-        jsonResponse.members[0].note.should.equal(member.note);
-        jsonResponse.members[0].subscribed.should.equal(member.subscribed);
-        testUtils.API.isISO8601(jsonResponse.members[0].created_at).should.be.true();
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    from_status: null,
+                    to_status: 'free'
+                }
+            ]
+        });
+    });
 
-        jsonResponse.members[0].labels.length.should.equal(1);
-        jsonResponse.members[0].labels[0].name.should.equal('test-label');
+    it('Can add and send a signup confirmation email', async function () {
+        const member = {
+            name: 'Send Me Confirmation',
+            email: 'member_getting_confirmation@test.com',
+            subscribed: true
+        };
 
-        should.exist(res.headers.location);
-        res.headers.location.should.equal(`http://127.0.0.1:2369${localUtils.API.getApiQuery('members/')}${res.body.members[0].id}/`);
+        const queryParams = {
+            send_email: true,
+            email_type: 'signup'
+        };
 
-        await request
-            .post(localUtils.API.getApiQuery(`members/`))
-            .send({members: [member]})
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(422);
+        const {body} = await agent
+            .post('/members/?send_email=true&email_type=signup')
+            .body({members: [member]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: [memberMatcherNoIncludes]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyString
+            });
+
+        const newMember = body.members[0];
+
+        mockManager.assert.sentEmail({
+            subject: '🙌 Complete your sign up to Ghost!',
+            to: 'member_getting_confirmation@test.com'
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    from_status: null,
+                    to_status: 'free'
+                }
+            ]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    subscribed: true,
+                    source: 'admin'
+                }
+            ]
+        });
+
+        // @TODO: do we really need to delete this member here?
+        await agent
+            .delete(`members/${body.members[0].id}/`)
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            })
+            .expectStatus(204);
+
+        const events = await models.MemberSubscribeEvent.findAll();
+        assert.equal(events.models.length, 0, 'There should be no MemberSubscribeEvent remaining.');
+    });
+
+    it('Add should fail when passing incorrect email_type query parameter', async function () {
+        const newMember = {
+            name: 'test',
+            email: 'memberTestAdd@test.com'
+        };
+
+        await agent
+            .post(`members/?send_email=true&email_type=lel`)
+            .body({members: [newMember]})
+            .expectStatus(422)
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            })
+            .matchBodySnapshot({
+                errors: [{
+                    id: anyErrorId
+                }]
+            });
+
+        const statusEvents = await models.MemberStatusEvent.findAll();
+        assert.equal(statusEvents.models.length, 1, 'No MemberStatusEvent should have been added after failing to create a subscription.');
+    });
+
+    // Edit a member
+
+    it('Can add complimentary subscription (out of date)', async function () {
+        const stripeService = require('../../../core/server/services/stripe');
+        const fakePrice = {
+            id: 'price_1',
+            product: '',
+            active: true,
+            nickname: 'Complimentary',
+            unit_amount: 0,
+            currency: 'usd',
+            type: 'recurring',
+            recurring: {
+                interval: 'year'
+            }
+        };
+        const fakeSubscription = {
+            id: 'sub_1',
+            customer: 'cus_1',
+            status: 'active',
+            cancel_at_period_end: false,
+            metadata: {},
+            current_period_end: Date.now() / 1000,
+            start_date: Date.now() / 1000,
+            plan: fakePrice,
+            items: {
+                data: [{
+                    price: fakePrice
+                }]
+            }
+        };
+        sinon.stub(stripeService.api, 'createCustomer').callsFake(async function (data) {
+            return {
+                id: 'cus_1',
+                email: data.email
+            };
+        });
+        sinon.stub(stripeService.api, 'createPrice').resolves(fakePrice);
+        sinon.stub(stripeService.api, 'createSubscription').resolves(fakeSubscription);
+        sinon.stub(stripeService.api, 'getSubscription').resolves(fakeSubscription);
+        const initialMember = {
+            name: 'Name',
+            email: 'compedtest@test.com',
+            subscribed: true
+        };
+
+        const compedPayload = {
+            comped: true
+        };
+
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [initialMember]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+
+        const newMember = body.members[0];
+
+        const {body: body2} = await agent
+            .put(`/members/${newMember.id}/`)
+            .body({members: [compedPayload]})
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [{
+                from_status: null,
+                to_status: 'free'
+            }]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [{
+                subscribed: true,
+                source: 'admin'
+            }]
+        });
+    });
+
+    it('Can add complimentary subscription by assigning a product to a member', async function () {
+        const initialMember = {
+            name: 'Name',
+            email: 'compedtest2@test.com',
+            subscribed: true
+        };
+
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [initialMember]})
+            .expectStatus(201);
+
+        const newMember = body.members[0];
+        assert.equal(newMember.status, 'free', 'A new member should have the free status');
+
+        const product = await getPaidProduct();
+
+        const compedPayload = {
+            id: newMember.id,
+            email: newMember.email,
+            products: [
+                {
+                    id: product.id
+                }
+            ]
+        };
+
+        const {body: body2} = await agent
+            .put(`/members/${newMember.id}/`)
+            .body({members: [compedPayload]})
+            .expectStatus(200);
+
+        const updatedMember = body2.members[0];
+        assert.equal(updatedMember.status, 'comped', 'A comped member should have the comped status');
+        assert.equal(updatedMember.products.length, 1, 'The member should have one product');
+
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    from_status: null,
+                    to_status: 'free'
+                },
+                {
+                    from_status: 'free',
+                    to_status: 'comped'
+                }
+            ]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [{
+                subscribed: true,
+                source: 'admin'
+            }]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberPaidSubscriptionEvent',
+            memberId: newMember.id,
+            asserts: []
+        });
+    });
+
+    it('Can end a complimentary subscription by removing a product from a member', async function () {
+        const product = await getPaidProduct();
+        const initialMember = {
+            name: 'Name',
+            email: 'compedtest3@test.com',
+            subscribed: true,
+            products: [
+                {
+                    id: product.id
+                }
+            ]
+        };
+
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [initialMember]})
+            .expectStatus(201);
+
+        const newMember = body.members[0];
+        assert.equal(newMember.status, 'comped', 'The new member should have the comped status');
+        assert.equal(newMember.products.length, 1, 'The member should have 1 product');
+
+        // Remove it
+        const removePayload = {
+            id: newMember.id,
+            email: newMember.email,
+            products: []
+        };
+
+        const {body: body2} = await agent
+            .put(`/members/${newMember.id}/`)
+            .body({members: [removePayload]})
+            .expectStatus(200);
+
+        const updatedMember = body2.members[0];
+        assert.equal(updatedMember.status, 'free', 'The member should have the free status');
+        assert.equal(updatedMember.products.length, 0, 'The member should have 0 products');
+
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    from_status: null,
+                    to_status: 'comped'
+                },
+                {
+                    from_status: 'comped',
+                    to_status: 'free'
+                }
+            ]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    subscribed: true,
+                    source: 'admin'
+                }
+            ]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberPaidSubscriptionEvent',
+            memberId: newMember.id,
+            asserts: []
+        });
+    });
+
+    it('Can create a new member with a product (complementary)', async function () {
+        const product = await getPaidProduct();
+        const initialMember = {
+            name: 'Name',
+            email: 'compedtest4@test.com',
+            subscribed: true,
+            products: [
+                {
+                    id: product.id
+                }
+            ]
+        };
+
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [initialMember]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: new Array(1).fill({
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    labels: anyArray,
+                    subscriptions: anyArray,
+                    products: new Array(1).fill({
+                        id: anyObjectId,
+                        monthly_price_id: anyObjectId,
+                        yearly_price_id: anyObjectId,
+                        created_at: anyISODateTime,
+                        updated_at: anyISODateTime
+                    })
+                })
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+
+        const newMember = body.members[0];
+        assert.equal(newMember.status, 'comped', 'The newly imported member should have the comped status');
+
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [{
+                from_status: null,
+                to_status: 'comped'
+            }]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [{
+                subscribed: true,
+                source: 'admin'
+            }]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberPaidSubscriptionEvent',
+            memberId: newMember.id,
+            asserts: []
+        });
+    });
+
+    it('Can create a member with an existing complimentary subscription', async function () {
+        const fakePrice = {
+            id: 'price_1',
+            product: '',
+            active: true,
+            nickname: 'Complimentary',
+            unit_amount: 0,
+            currency: 'usd',
+            type: 'recurring',
+            recurring: {
+                interval: 'year'
+            }
+        };
+
+        const fakeSubscription = {
+            id: 'sub_1',
+            customer: 'cus_1234',
+            status: 'active',
+            cancel_at_period_end: false,
+            metadata: {},
+            current_period_end: Date.now() / 1000 + 1000,
+            start_date: Date.now() / 1000,
+            plan: fakePrice,
+            items: {
+                data: [{
+                    price: fakePrice
+                }]
+            }
+        };
+
+        const fakeCustomer = {
+            id: 'cus_1234',
+            name: 'Test Member',
+            email: 'create-member-comped-test@email.com',
+            subscriptions: {
+                type: 'list',
+                data: [fakeSubscription]
+            }
+        };
+        nock('https://api.stripe.com')
+            .persist()
+            .get(/v1\/.*/)
+            .reply((uri, body) => {
+                const [match, resource, id] = uri.match(/\/?v1\/(\w+)\/?(\w+)/) || [null];
+
+                if (!match) {
+                    return [500];
+                }
+
+                if (resource === 'customers') {
+                    return [200, fakeCustomer];
+                }
+
+                if (resource === 'subscriptions') {
+                    return [200, fakeSubscription];
+                }
+            });
+
+        const initialMember = {
+            name: fakeCustomer.name,
+            email: fakeCustomer.email,
+            subscribed: true,
+            stripe_customer_id: fakeCustomer.id
+        };
+
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [initialMember]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: new Array(1).fill({
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    labels: anyArray,
+                    subscriptions: anyArray,
+                    products: anyArray
+                })
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+
+        const newMember = body.members[0];
+        assert.equal(newMember.status, 'comped', 'The created member should have the comped status');
+
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    from_status: null,
+                    to_status: 'free'
+                },
+                {
+                    from_status: 'free',
+                    to_status: 'comped'
+                }
+            ]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    subscribed: true,
+                    source: 'admin'
+                }
+            ]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberPaidSubscriptionEvent',
+            memberId: newMember.id,
+            asserts: [{
+                mrr_delta: 0
+            }]
+        });
+    });
+
+    it('Can create a member with an existing paid subscription', async function () {
+        const fakePrice = {
+            id: 'price_1',
+            product: 'product_1234',
+            active: true,
+            nickname: 'Paid',
+            unit_amount: 1200,
+            currency: 'usd',
+            type: 'recurring',
+            recurring: {
+                interval: 'year'
+            }
+        };
+
+        const fakeSubscription = {
+            id: 'sub_987623',
+            customer: 'cus_12345',
+            status: 'active',
+            cancel_at_period_end: false,
+            metadata: {},
+            current_period_end: Date.now() / 1000 + 1000,
+            start_date: Date.now() / 1000,
+            plan: fakePrice,
+            items: {
+                data: [{
+                    id: 'item_123',
+                    price: fakePrice
+                }]
+            }
+        };
+
+        const fakeCustomer = {
+            id: 'cus_12345',
+            name: 'Test Member',
+            email: 'create-member-paid-test@email.com',
+            subscriptions: {
+                type: 'list',
+                data: [fakeSubscription]
+            }
+        };
+        nock('https://api.stripe.com')
+            .persist()
+            .get(/v1\/.*/)
+            .reply((uri, body) => {
+                const [match, resource, id] = uri.match(/\/?v1\/(\w+)\/?(\w+)/) || [null];
+
+                if (!match) {
+                    return [500];
+                }
+
+                if (resource === 'customers') {
+                    return [200, fakeCustomer];
+                }
+
+                if (resource === 'subscriptions') {
+                    return [200, fakeSubscription];
+                }
+            });
+
+        const initialMember = {
+            name: fakeCustomer.name,
+            email: fakeCustomer.email,
+            subscribed: true,
+            stripe_customer_id: fakeCustomer.id
+        };
+
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [initialMember]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: new Array(1).fill({
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    labels: anyArray,
+                    subscriptions: anyArray,
+                    products: anyArray
+                })
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+
+        const newMember = body.members[0];
+        assert.equal(newMember.status, 'paid', 'The created member should have the paid status');
+        assert.equal(newMember.subscriptions.length, 1, 'The member should have a single subscription');
+        assert.equal(newMember.subscriptions[0].id, fakeSubscription.id, 'The returned subscription should have an ID assigned');
+
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    from_status: null,
+                    to_status: 'free'
+                }, {
+                    from_status: 'free',
+                    to_status: 'paid'
+                }
+            ]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [{
+                subscribed: true,
+                source: 'admin'
+            }]
+        });
+
+        await assertMemberEvents({
+            eventType: 'MemberPaidSubscriptionEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    mrr_delta: 100
+                }
+            ]
+        });
+
+        await assertSubscription(fakeSubscription.id, {
+            subscription_id: fakeSubscription.id,
+            status: 'active',
+            cancel_at_period_end: false,
+            plan_amount: 1200,
+            plan_interval: 'year',
+            plan_currency: 'usd',
+            mrr: 100
+        });
     });
 
     it('Can edit by id', async function () {
@@ -199,47 +997,168 @@ describe('Members API', function () {
             subscribed: false
         };
 
-        const res = await request
-            .post(localUtils.API.getApiQuery(`members/`))
-            .send({members: [memberToChange]})
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201);
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [memberToChange]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+        const newMember = body.members[0];
 
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-        jsonResponse.members.should.have.length(1);
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [{
+                subscribed: true,
+                source: 'admin'
+            }]
+        });
+        await assertMemberEvents({
+            eventType: 'MemberStatusEvent',
+            memberId: newMember.id,
+            asserts: [{
+                from_status: null,
+                to_status: 'free'
+            }]
+        });
 
-        should.exist(res.headers.location);
-        res.headers.location.should.equal(`http://127.0.0.1:2369${localUtils.API.getApiQuery('members/')}${res.body.members[0].id}/`);
+        await agent
+            .put(`/members/${newMember.id}/`)
+            .body({members: [memberChanged]})
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
 
-        const newMember = jsonResponse.members[0];
-
-        const res2 = await request
-            .put(localUtils.API.getApiQuery(`members/${newMember.id}/`))
-            .send({members: [memberChanged]})
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res2.headers['x-cache-invalidate']);
-
-        const jsonResponse2 = res2.body;
-
-        should.exist(jsonResponse2);
-        should.exist(jsonResponse2.members);
-        jsonResponse2.members.should.have.length(1);
-        localUtils.API.checkResponse(jsonResponse2.members[0], 'member', ['subscriptions', 'products']);
-        jsonResponse2.members[0].name.should.equal(memberChanged.name);
-        jsonResponse2.members[0].email.should.equal(memberChanged.email);
-        jsonResponse2.members[0].email.should.not.equal(memberToChange.email);
-        jsonResponse2.members[0].note.should.equal(memberChanged.note);
-        jsonResponse2.members[0].subscribed.should.equal(memberChanged.subscribed);
+        await assertMemberEvents({
+            eventType: 'MemberEmailChangeEvent',
+            memberId: newMember.id,
+            asserts: [{
+                from_email: memberToChange.email,
+                to_email: memberChanged.email
+            }]
+        });
+        await assertMemberEvents({
+            eventType: 'MemberSubscribeEvent',
+            memberId: newMember.id,
+            asserts: [
+                {
+                    subscribed: true,
+                    source: 'admin'
+                }, {
+                    subscribed: false,
+                    source: 'admin'
+                }
+            ]
+        });
     });
+
+    it('Can add a subscription', async function () {
+        const memberId = testUtils.DataGenerator.Content.members[0].id;
+        const price = testUtils.DataGenerator.Content.stripe_prices[0];
+
+        function nockCallback(method, uri, body) {
+            const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/(\w+))?/) || [null];
+
+            if (!match) {
+                return [500];
+            }
+
+            if (resource === 'customers') {
+                return [200, {id: 'cus_123', email: 'member1@test.com'}];
+            }
+
+            if (resource === 'subscriptions') {
+                const now = Math.floor(Date.now() / 1000);
+                return [200, {id: 'sub_123', customer: 'cus_123', cancel_at_period_end: false, items: {
+                    data: [{price: {
+                        id: price.stripe_price_id,
+                        recurring: {
+                            interval: price.interval
+                        },
+                        unit_amount: price.amount,
+                        currency: price.currency.toLowerCase()
+                    }}]
+                }, status: 'active', current_period_end: now + 24 * 3600, start_date: now}];
+            }
+        }
+
+        nock('https://api.stripe.com:443')
+            .persist()
+            .post(/v1\/.*/)
+            .reply((uri, body) => nockCallback('POST', uri, body));
+
+        nock('https://api.stripe.com:443')
+            .persist()
+            .get(/v1\/.*/)
+            .reply((uri, body) => nockCallback('GET', uri, body));
+
+        await agent
+            .post(`/members/${memberId}/subscriptions/`)
+            .body({
+                stripe_price_id: price.id
+            })
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill({
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    labels: anyArray,
+                    subscriptions: [{
+                        start_date: anyString,
+                        current_period_end: anyString,
+                        price: {
+                            price_id: anyObjectId,
+                            product: {
+                                product_id: anyObjectId
+                            }
+                        }
+                    }]
+                })
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+
+        // Check member read with a subscription
+        await agent
+            .get(`/members/${memberId}/`)
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill({
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    labels: anyArray,
+                    subscriptions: [{
+                        start_date: anyString,
+                        current_period_end: anyString,
+                        price: {
+                            price_id: anyObjectId,
+                            product: {
+                                product_id: anyObjectId
+                            }
+                        }
+                    }]
+                })
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
+
+    // Delete a member
 
     it('Can destroy', async function () {
         const member = {
@@ -247,66 +1166,108 @@ describe('Members API', function () {
             email: 'memberTestDestroy@test.com'
         };
 
-        const res = await request
-            .post(localUtils.API.getApiQuery(`members/`))
-            .send({members: [member]})
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201);
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [member]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludes)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
 
-        should.not.exist(res.headers['x-cache-invalidate']);
+        const newMember = body.members[0];
 
-        const jsonResponse = res.body;
+        await agent
+            .delete(`/members/${newMember.id}`)
+            .expectStatus(204)
+            .expectEmptyBody()
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
 
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.members);
-
-        const newMember = jsonResponse.members[0];
-
-        await request
-            .delete(localUtils.API.getApiQuery(`members/${newMember.id}`))
-            .set('Origin', config.get('url'))
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(204);
-
-        await request
-            .get(localUtils.API.getApiQuery(`members/${newMember.id}/`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(404);
+        await agent
+            .get(`/members/${newMember.id}/`)
+            .expectStatus(404)
+            .matchBodySnapshot({
+                errors: [{
+                    id: anyUuid
+                }]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
     });
 
-    it('Can export CSV', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery(`members/upload/`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /text\/csv/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
+    it('Can delete a member without cancelling Stripe Subscription', async function () {
+        let subscriptionCanceled = false;
+        nock('https://api.stripe.com')
+            .persist()
+            .delete(/v1\/.*/)
+            .reply((uri) => {
+                const [match, resource, id] = uri.match(/\/?v1\/(\w+)(?:\/(\w+))/) || [null];
 
-        should.not.exist(res.headers['x-cache-invalidate']);
-        res.headers['content-disposition'].should.match(/Attachment;\sfilename="members/);
+                if (match && resource === 'subscriptions') {
+                    subscriptionCanceled = true;
+                    return [200, {
+                        id,
+                        status: 'canceled'
+                    }];
+                }
+
+                return [500];
+            });
+
+        // @TODO This is wrong because it changes the state for the rest of the tests
+        // We need to add a member via a fixture and then remove them OR work out how
+        // to reapply fixtures before each test
+        const memberToDelete = fixtureManager.get('members', 2);
+
+        await agent
+            .delete(`members/${memberToDelete.id}/`)
+            .expectStatus(204)
+            .expectEmptyBody()
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+
+        assert.equal(subscriptionCanceled, false, 'expected subscription not to be canceled');
+    });
+
+    // Export members to CSV
+
+    it('Can export CSV', async function () {
+        const res = await agent
+            .get(`/members/upload/`)
+            .expectStatus(200)
+            .expectEmptyBody() // express-test body parsing doesn't support CSV
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                'content-length': anyString, //For some reason the content-length changes between 1220 and 1317
+                'content-disposition': anyString
+            });
+
         res.text.should.match(/id,email,name,note,subscribed_to_emails,complimentary_plan,stripe_customer_id,created_at,deleted_at/);
 
         const csv = Papa.parse(res.text, {header: true});
         should.exist(csv.data.find(row => row.name === 'Mr Egg'));
-        should.exist(csv.data.find(row => row.name === 'Egon Spengler'));
+        should.exist(csv.data.find(row => row.name === 'Winston Zeddemore'));
         should.exist(csv.data.find(row => row.name === 'Ray Stantz'));
         should.exist(csv.data.find(row => row.email === 'member2@test.com'));
     });
 
     it('Can export a filtered CSV', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery(`members/upload/?search=Egg`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /text\/csv/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
+        const res = await agent
+            .get(`/members/upload/?search=Egg`)
+            .expectStatus(200)
+            .expectEmptyBody() // express-test body parsing doesn't support CSV
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                'content-disposition': anyString
+            });
 
-        should.not.exist(res.headers['x-cache-invalidate']);
-        res.headers['content-disposition'].should.match(/Attachment;\sfilename="members/);
         res.text.should.match(/id,email,name,note,subscribed_to_emails,complimentary_plan,stripe_customer_id,created_at,deleted_at/);
 
         const csv = Papa.parse(res.text, {header: true});
@@ -316,299 +1277,191 @@ describe('Members API', function () {
         should.not.exist(csv.data.find(row => row.email === 'member2@test.com'));
     });
 
-    it('Can import CSV', async function () {
-        const res = await request
-            .post(localUtils.API.getApiQuery(`members/upload/`))
-            .attach('membersfile', path.join(__dirname, '/../../utils/fixtures/csv/valid-members-import.csv'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(201);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.meta);
-        should.exist(jsonResponse.meta.stats);
-
-        jsonResponse.meta.stats.imported.should.equal(2);
-        jsonResponse.meta.stats.invalid.length.should.equal(0);
-        jsonResponse.meta.import_label.name.should.match(/^Import \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
-
-        const importLabel = jsonResponse.meta.import_label;
-
-        // check that members had the auto-generated label attached
-        const res2 = await request.get(localUtils.API.getApiQuery(`members/?filter=label:${importLabel.slug}`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        const jsonResponse2 = res2.body;
-        should.exist(jsonResponse2);
-        should.exist(jsonResponse2.members);
-        jsonResponse2.members.should.have.length(2);
-
-        const importedMember1 = jsonResponse2.members.find(m => m.email === 'jbloggs@example.com');
-        should.exist(importedMember1);
-        importedMember1.name.should.equal('joe');
-        should(importedMember1.note).equal(null);
-        importedMember1.subscribed.should.equal(true);
-        importedMember1.labels.length.should.equal(1);
-        testUtils.API.isISO8601(importedMember1.created_at).should.be.true();
-        importedMember1.comped.should.equal(false);
-        importedMember1.subscriptions.should.not.be.undefined();
-        importedMember1.subscriptions.length.should.equal(0);
-
-        const importedMember2 = jsonResponse2.members.find(m => m.email === 'test@example.com');
-        should.exist(importedMember2);
-        importedMember2.name.should.equal('test');
-        should(importedMember2.note).equal('test note');
-        importedMember2.subscribed.should.equal(false);
-        importedMember2.labels.length.should.equal(2);
-        testUtils.API.isISO8601(importedMember2.created_at).should.be.true();
-        importedMember2.created_at.should.equal('1991-10-02T20:30:31.000Z');
-        importedMember2.comped.should.equal(false);
-        importedMember2.subscriptions.should.not.be.undefined();
-        importedMember2.subscriptions.length.should.equal(0);
-    });
+    // Get stats
 
     it('Can fetch member counts stats', async function () {
-        const res = await request
-            .get(localUtils.API.getApiQuery('members/stats/count/'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.not.exist(res.headers['x-cache-invalidate']);
-        const jsonResponse = res.body;
-        should.exist(jsonResponse);
-        should.exist(jsonResponse.total);
-        should.exist(jsonResponse.resource);
-        should.exist(jsonResponse.data);
-        const data = jsonResponse.data;
-        // 2 from above posts, 2 from above import
-        data[data.length - 1].free.should.equal(4);
-        data[data.length - 1].paid.should.equal(0);
-        data[data.length - 1].comped.should.equal(0);
-    });
-
-    it('Can import CSV and bulk destroy via auto-added label', function () {
-        // HACK: mock dates otherwise we'll often get unexpected members appearing
-        // from previous tests with the same import label due to auto-generated
-        // import labels only including minutes
-        sinon.stub(Date, 'now').returns(new Date('2021-03-30T17:21:00.000Z'));
-
-        // import our dummy data for deletion
-        return request
-            .post(localUtils.API.getApiQuery(`members/upload/`))
-            .attach('membersfile', path.join(__dirname, '/../../utils/fixtures/csv/valid-members-for-bulk-delete.csv'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .then((res) => {
-                should.not.exist(res.headers['x-cache-invalidate']);
-
-                const jsonResponse = res.body;
-
-                should.exist(jsonResponse);
-                should.exist(jsonResponse.meta);
-                should.exist(jsonResponse.meta.stats);
-                should.exist(jsonResponse.meta.import_label);
-
-                jsonResponse.meta.stats.imported.should.equal(8);
-
-                return jsonResponse.meta.import_label;
+        await agent
+            .get(`/members/stats/count/`)
+            .expectStatus(200)
+            .matchBodySnapshot({
+                data: [{
+                    date: anyISODate
+                }]
             })
-            .then((importLabel) => {
-                // check that the import worked by checking browse response with filter
-                return request.get(localUtils.API.getApiQuery(`members/?filter=label:${importLabel.slug}`))
-                    .set('Origin', config.get('url'))
-                    .expect('Content-Type', /json/)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(200)
-                    .then((res) => {
-                        should.not.exist(res.headers['x-cache-invalidate']);
-                        const jsonResponse = res.body;
-                        should.exist(jsonResponse);
-                        should.exist(jsonResponse.members);
-                        jsonResponse.members.should.have.length(8);
-                    })
-                    .then(() => importLabel);
-            })
-            .then((importLabel) => {
-                // perform the bulk delete
-                return request
-                    .del(localUtils.API.getApiQuery(`members/?filter=label:'${importLabel.slug}'`))
-                    .set('Origin', config.get('url'))
-                    .expect('Content-Type', /json/)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(200)
-                    .then((res) => {
-                        should.not.exist(res.headers['x-cache-invalidate']);
-                        const jsonResponse = res.body;
-                        should.exist(jsonResponse);
-                        should.exist(jsonResponse.meta);
-                        should.exist(jsonResponse.meta.stats);
-                        should.exist(jsonResponse.meta.stats.successful);
-                        should.equal(jsonResponse.meta.stats.successful, 8);
-                    })
-                    .then(() => importLabel);
-            })
-            .then((importLabel) => {
-                // check that the bulk delete worked by checking browse response with filter
-                return request.get(localUtils.API.getApiQuery(`members/?filter=label:${importLabel.slug}`))
-                    .set('Origin', config.get('url'))
-                    .expect('Content-Type', /json/)
-                    .expect('Cache-Control', testUtils.cacheRules.private)
-                    .expect(200)
-                    .then((res) => {
-                        const jsonResponse = res.body;
-                        should.exist(jsonResponse);
-                        should.exist(jsonResponse.members);
-                        jsonResponse.members.should.have.length(0);
-                    });
+            .matchHeaderSnapshot({
+                etag: anyEtag
             });
     });
 
-    it('Can bulk unsubscribe members with filter', async function () {
-        // import our dummy data for deletion
-        await request
-            .post(localUtils.API.getApiQuery(`members/upload/`))
-            .attach('membersfile', path.join(__dirname, '/../../utils/fixtures/csv/members-for-bulk-unsubscribe.csv'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private);
-
-        const browseResponse = await request
-            .get(localUtils.API.getApiQuery('members/?filter=label:bulk-unsubscribe-test'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        browseResponse.body.members.should.have.length(8);
-        const allMembersSubscribed = browseResponse.body.members.every((member) => {
-            return member.subscribed;
-        });
-
-        should.ok(allMembersSubscribed);
-
-        const bulkUnsubscribeResponse = await request
-            .put(localUtils.API.getApiQuery('members/bulk/?filter=label:bulk-unsubscribe-test'))
-            .set('Origin', config.get('url'))
-            .send({
-                bulk: {
-                    action: 'unsubscribe'
-                }
+    it('Errors when fetching stats with unknown days param value', async function () {
+        await agent
+            .get('members/stats/?days=nope')
+            .expectStatus(422)
+            .matchHeaderSnapshot({
+                etag: anyEtag
             })
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        should.exist(bulkUnsubscribeResponse.body.bulk);
-        should.exist(bulkUnsubscribeResponse.body.bulk.meta);
-        should.exist(bulkUnsubscribeResponse.body.bulk.meta.stats);
-        should.exist(bulkUnsubscribeResponse.body.bulk.meta.stats.successful);
-        should.equal(bulkUnsubscribeResponse.body.bulk.meta.stats.successful, 8);
-
-        const postUnsubscribeBrowseResponse = await request
-            .get(localUtils.API.getApiQuery('members/?filter=label:bulk-unsubscribe-test'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        postUnsubscribeBrowseResponse.body.members.should.have.length(8);
-        const allMembersUnsubscribed = postUnsubscribeBrowseResponse.body.members.every((member) => {
-            return !member.subscribed;
-        });
-
-        should.ok(allMembersUnsubscribed);
-    });
-
-    it('Can bulk add and remove labels to members with filter', async function () {
-        // import our dummy data for deletion
-        await request
-            .post(localUtils.API.getApiQuery('members/upload/'))
-            .attach('membersfile', path.join(__dirname, '/../../utils/fixtures/csv/members-for-bulk-add-labels.csv'))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private);
-
-        const newLabelResponse = await request
-            .post(localUtils.API.getApiQuery('labels'))
-            .set('Origin', config.get('url'))
-            .send({
-                labels: [{
-                    name: 'Awesome Label For Testing Bulk Add'
+            .matchBodySnapshot({
+                errors: [{
+                    id: anyErrorId
                 }]
             });
+    });
+});
 
-        const labelToAdd = newLabelResponse.body.labels[0];
+describe('Members API: with multiple newsletters', function () {
+    before(async function () {
+        agent = await agentProvider.getAdminAPIAgent();
+        await fixtureManager.init('members', 'newsletters');
+        await agent.loginAsOwner();
+    });
 
-        const bulkAddLabelResponse = await request
-            .put(localUtils.API.getApiQuery('members/bulk/?filter=label:bulk-add-labels-test'))
-            .set('Origin', config.get('url'))
-            .send({
-                bulk: {
-                    action: 'addLabel',
-                    meta: {
-                        label: labelToAdd
-                    }
-                }
+    beforeEach(function () {
+        mockManager.mockLabsEnabled('multipleNewsletters');
+        mockManager.mockStripe();
+        mockManager.mockMail();
+    });
+
+    afterEach(function () {
+        mockManager.restore();
+    });
+
+    // List Members
+
+    it('Can browse', async function () {
+        await agent
+            .get('/members/')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(8).fill(memberMatcherShallowIncludesForNewsletters)
             })
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
 
-        should.exist(bulkAddLabelResponse.body.bulk);
-        should.exist(bulkAddLabelResponse.body.bulk.meta);
-        should.exist(bulkAddLabelResponse.body.bulk.meta.stats);
-        should.exist(bulkAddLabelResponse.body.bulk.meta.stats.successful);
-        should.equal(bulkAddLabelResponse.body.bulk.meta.stats.successful, 8);
+    // Read a member
 
-        const postLabelAddBrowseResponse = await request
-            .get(localUtils.API.getApiQuery(`members/?filter=label:${labelToAdd.slug}`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
-
-        postLabelAddBrowseResponse.body.members.should.have.length(8);
-
-        const labelToRemove = newLabelResponse.body.labels[0];
-
-        const bulkRemoveLabelResponse = await request
-            .put(localUtils.API.getApiQuery('members/bulk/?filter=label:bulk-add-labels-test'))
-            .set('Origin', config.get('url'))
-            .send({
-                bulk: {
-                    action: 'removeLabel',
-                    meta: {
-                        label: labelToRemove
-                    }
-                }
+    it('Can read', async function () {
+        await agent
+            .get(`/members/${testUtils.DataGenerator.Content.members[0].id}/`)
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludesForNewsletters)
             })
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
 
-        should.exist(bulkRemoveLabelResponse.body.bulk);
-        should.exist(bulkRemoveLabelResponse.body.bulk.meta);
-        should.exist(bulkRemoveLabelResponse.body.bulk.meta.stats);
-        should.exist(bulkRemoveLabelResponse.body.bulk.meta.stats.successful);
-        should.equal(bulkRemoveLabelResponse.body.bulk.meta.stats.successful, 8);
+    // Create a member
+    it('Can add with default newsletters', async function () {
+        const member = {
+            name: 'test',
+            email: 'memberTestNewsletterAdd@test.com',
+            note: 'test note',
+            subscribed: false,
+            labels: ['test-label']
+        };
 
-        const postLabelRemoveBrowseResponse = await request
-            .get(localUtils.API.getApiQuery(`members/?filter=label:${labelToRemove.slug}`))
-            .set('Origin', config.get('url'))
-            .expect('Content-Type', /json/)
-            .expect('Cache-Control', testUtils.cacheRules.private)
-            .expect(200);
+        await agent
+            .post(`/members/`)
+            .body({members: [member]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: [{
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    subscriptions: anyArray,
+                    labels: anyArray,
+                    newsletters: Array(3).fill({
+                        id: matchers.anyObjectId
+                    })
+                }]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+    });
 
-        postLabelRemoveBrowseResponse.body.members.should.have.length(0);
+    it('Can filter on newsletter slug', async function () {
+        await agent
+            .get('/members/?filter=newsletters:daily-newsletter')
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: new Array(1).fill(memberMatcherShallowIncludesForNewsletters)
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+    });
+
+    // Edit a member
+    it('Can add and edit with custom newsletters', async function () {
+        // Add custom newsletter list to new member
+        const member = {
+            name: 'test newsletter',
+            email: 'memberTestAddNewsletter2@test.com',
+            note: 'test note',
+            subscribed: false,
+            labels: ['test-label'],
+            newsletters: [{id: testUtils.DataGenerator.Content.newsletters[1].id}]
+        };
+
+        const {body} = await agent
+            .post(`/members/`)
+            .body({members: [member]})
+            .expectStatus(201)
+            .matchBodySnapshot({
+                members: [{
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    subscriptions: anyArray,
+                    labels: anyArray,
+                    newsletters: Array(1).fill({
+                        id: matchers.anyObjectId
+                    })
+                }]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag,
+                location: anyLocationFor('members')
+            });
+
+        const memberId = body.members[0].id;
+        const editedMember = {
+            newsletters: [{id: testUtils.DataGenerator.Content.newsletters[0].id}]
+        };
+
+        // Edit newsletter list for member
+        await agent
+            .put(`/members/${memberId}`)
+            .body({members: [editedMember]})
+            .expectStatus(200)
+            .matchBodySnapshot({
+                members: [{
+                    id: anyObjectId,
+                    uuid: anyUuid,
+                    created_at: anyISODateTime,
+                    updated_at: anyISODateTime,
+                    subscriptions: anyArray,
+                    labels: anyArray,
+                    newsletters: Array(1).fill({
+                        id: matchers.anyObjectId
+                    })
+                }]
+            })
+            .matchHeaderSnapshot({
+                etag: anyEtag
+            });
+
+        await agent
+            .post(`/members/`)
+            .body({members: [member]})
+            .expectStatus(422);
     });
 });

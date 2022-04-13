@@ -5,7 +5,27 @@
             "entries": [
                 {
                     "name":             "Default Product",
-                    "slug":             "default-product"
+                    "slug":             "default-product",
+                    "type":             "paid",
+                    "active":           true,
+                    "visibility":       "public"
+                },
+                {
+                    "name":             "Free",
+                    "slug":             "free",
+                    "type":             "free",
+                    "active":           true,
+                    "visibility":       "public"
+                }
+            ]
+        },
+        {
+            "name": "Newsletter",
+            "entries": [
+                {
+                    "name":             "Default Newsletter",
+                    "slug":             "default-newsletter",
+                    "sender_name":      "Ghost"
                 }
             ]
         },
@@ -522,6 +542,21 @@
                     "name": "Edit custom theme settings",
                     "action_type": "edit",
                     "object_type": "custom_theme_setting"
+                },
+                {
+                    "name": "Browse newsletters",
+                    "action_type": "browse",
+                    "object_type": "newsletter"
+                },
+                {
+                    "name": "Add newsletters",
+                    "action_type": "add",
+                    "object_type": "newsletter"
+                },
+                {
+                    "name": "Edit newsletters",
+                    "action_type": "edit",
+                    "object_type": "newsletter"
                 }
             ]
         },
@@ -782,7 +817,8 @@
                     "custom_theme_setting": "all",
                     "offer": "all",
                     "authentication": "resetAllPasswords",
-                    "members_stripe_connect": "auth"
+                    "members_stripe_connect": "auth",
+                    "newsletter": "all"
                 },
                 "DB Backup Integration": {
                     "db": "all"

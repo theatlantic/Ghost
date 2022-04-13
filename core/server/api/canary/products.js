@@ -78,7 +78,7 @@ module.exports = {
                 name: {required: true}
             }
         },
-        permissions: false,
+        permissions: true,
         async query(frame) {
             const model = await membersService.api.productRepository.create(
                 frame.data,
@@ -93,7 +93,9 @@ module.exports = {
         options: [
             'id'
         ],
-        headers: {},
+        headers: {
+            cacheInvalidate: true
+        },
         validation: {
             options: {
                 id: {
@@ -101,18 +103,13 @@ module.exports = {
                 }
             }
         },
-        permissions: false,
+        permissions: true,
         async query(frame) {
             const model = await membersService.api.productRepository.update(
                 frame.data,
                 frame.options
             );
 
-            if (model.wasChanged()) {
-                this.headers.cacheInvalidate = true;
-            } else {
-                this.headers.cacheInvalidate = false;
-            }
             return model;
         }
     }

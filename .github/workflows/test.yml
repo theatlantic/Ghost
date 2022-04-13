@@ -4,12 +4,16 @@ on:
   push:
     branches:
       - main
+      - '5.0'
       - 'v4.*'
       - 3.x
       - 2.x
       - 'renovate/*'
 env:
   FORCE_COLOR: 1
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 jobs:
   lint:
     runs-on: ubuntu-18.04
@@ -37,15 +41,21 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'renovate/'))
     strategy:
       matrix:
-        DB: ['sqlite3', 'mysql']
+        env:
+          - DB: sqlite3
+            DB_CLIENT: sqlite3
+          - DB: mysql5
+            DB_CLIENT: mysql
+          - DB: mysql8
+            DB_CLIENT: mysql
     env:
-      database__client: ${{ matrix.DB }}
+      database__client: ${{ matrix.env.DB_CLIENT }}
       database__connection__filename: /dev/shm/ghost-test.db
       database__connection__host: 127.0.0.1
       database__connection__user: root
       database__connection__password: root
       database__connection__database: ghost_testing
-    name: Migrations - ${{ matrix.DB }}
+    name: Migrations (${{ matrix.env.DB }})
     steps:
       - uses: actions/checkout@v2
         with:
@@ -60,12 +70,20 @@ jobs:
 
       - name: Shutdown MySQL
         run: sudo service mysql stop
-        if: matrix.DB == 'mysql'
+        if: matrix.env.DB == 'mysql5' || matrix.env.DB == 'mysql8'
 
-      - uses: mirromutth/mysql-action@v1.1
-        if: matrix.DB == 'mysql'
+      - uses: daniellockyer/mysql-action@main
+        if: matrix.env.DB == 'mysql5'
         with:
           mysql version: '5.7'
+          mysql database: 'ghost_testing'
+          mysql root password: 'root'
+
+      - uses: daniellockyer/mysql-action@main
+        if: matrix.env.DB == 'mysql8'
+        with:
+          authentication plugin: 'caching_sha2_password'
+          mysql version: '8.0'
           mysql database: 'ghost_testing'
           mysql root password: 'root'
 
@@ -77,7 +95,40 @@ jobs:
       - run: yarn knex-migrator rollback --v 4.0 --force
       - run: yarn knex-migrator migrate --force
 
-  test:
+  unit-tests:
+    runs-on: ubuntu-18.04
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'renovate/'))
+    strategy:
+      matrix:
+        node: [ '12.22.1', '14.17.0', '16.13.0' ]
+    name: Unit Tests (Node ${{ matrix.node }})
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        env:
+          FORCE_COLOR: 0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - run: yarn
+
+      - run: yarn test:unit
+        if: matrix.node == '16.13.0'
+
+      - run: yarn test:unit:base
+        if: matrix.node != '16.13.0'
+
+      - uses: codecov/codecov-action@v2
+
+      - uses: daniellockyer/action-slack-build@master
+        if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  database-tests:
     runs-on: ubuntu-18.04
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'renovate/'))
     strategy:
@@ -86,13 +137,15 @@ jobs:
         env:
           - DB: sqlite3
             NODE_ENV: testing
-          - DB: mysql
+          - DB: mysql5
+            NODE_ENV: testing-mysql
+          - DB: mysql8
             NODE_ENV: testing-mysql
     env:
       DB: ${{ matrix.env.DB }}
       NODE_ENV: ${{ matrix.env.NODE_ENV }}
       database__connection__password: root
-    name: Node ${{ matrix.node }} - ${{ matrix.env.DB }}
+    name: Database Tests (Node ${{ matrix.node }}, ${{ matrix.env.DB }})
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -104,12 +157,20 @@ jobs:
 
       - name: Shutdown MySQL
         run: sudo service mysql stop
-        if: matrix.env.DB == 'mysql'
+        if: matrix.env.DB == 'mysql5' || matrix.env.DB == 'mysql8'
 
-      - uses: mirromutth/mysql-action@v1.1
-        if: matrix.env.DB == 'mysql'
+      - uses: daniellockyer/mysql-action@main
+        if: matrix.env.DB == 'mysql5'
         with:
           mysql version: '5.7'
+          mysql database: 'ghost_testing'
+          mysql root password: 'root'
+
+      - uses: daniellockyer/mysql-action@main
+        if: matrix.env.DB == 'mysql8'
+        with:
+          authentication plugin: 'caching_sha2_password'
+          mysql version: '8.0'
           mysql database: 'ghost_testing'
           mysql root password: 'root'
 
@@ -117,14 +178,8 @@ jobs:
 
       - run: date +%s > ${{ runner.temp }}/startTime # Get start time for test suite
 
-      - run: yarn test:e2e
-        env:
-          database__connection__filename: /dev/shm/ghost-test.db
-      - run: yarn test:integration
-        env:
-          database__connection__filename: /dev/shm/ghost-test.db
-      - run: yarn test:unit
-      - run: yarn test:regression
+      - name: Run tests
+        run: yarn test:ci
         env:
           database__connection__filename: /dev/shm/ghost-test.db
 
@@ -167,10 +222,6 @@ jobs:
                 "password": "${{ secrets.ELASTICSEARCH_PASSWORD }}"
               }
             }
-
-      - name: Unit test coverage
-        run: yarn cov:unit
-      - uses: codecov/codecov-action@v2
 
       - uses: daniellockyer/action-slack-build@master
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -230,7 +281,8 @@ jobs:
 
       - name: Print debug logs
         if: failure()
-        run: cat ~/.ghost/logs/*.log
+        run: |
+          [ -f ~/.ghost/logs/*.log ] && cat ~/.ghost/logs/*.log
 
       - uses: daniellockyer/action-slack-build@master
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -241,7 +293,7 @@ jobs:
 
   canary:
     runs-on: ubuntu-18.04
-    needs: [lint, migrations, test, ghost-cli]
+    needs: [lint, migrations, unit-tests, database-tests, ghost-cli]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: Canary
     steps:

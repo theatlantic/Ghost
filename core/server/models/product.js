@@ -4,6 +4,11 @@ const _ = require('lodash');
 const Product = ghostBookshelf.Model.extend({
     tableName: 'products',
 
+    defaults: {
+        active: true,
+        visibility: 'none'
+    },
+
     relationships: ['benefits'],
 
     relationshipBelongsTo: {

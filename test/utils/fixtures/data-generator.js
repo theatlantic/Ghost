@@ -365,11 +365,55 @@ DataGenerator.Content = {
         }
     ],
 
-    products: [
+    newsletters: [
         {
             id: ObjectId().toHexString(),
-            name: 'Ghost Product',
-            slug: 'ghost-product'
+            name: 'Daily newsletter',
+            slug: 'daily-newsletter',
+            description: '',
+            sender_name: 'Jamie',
+            sender_email: 'jamie@example.com',
+            sender_reply_to: 'newsletter',
+            status: 'active',
+            subscribe_on_signup: true,
+            title_font_category: 'serif',
+            body_font_category: 'serif',
+            show_header_icon: true,
+            show_header_title: true,
+            show_badge: true,
+            sort_order: 1
+        },
+        {
+            id: ObjectId().toHexString(),
+            name: 'Weekly newsletter',
+            slug: 'weekly-newsletter',
+            description: '',
+            sender_name: 'Jamie',
+            sender_email: 'jamie@example.com',
+            sender_reply_to: 'newsletter',
+            status: 'active',
+            subscribe_on_signup: true,
+            title_font_category: 'serif',
+            body_font_category: 'serif',
+            show_header_icon: true,
+            show_header_title: true,
+            show_badge: true,
+            sort_order: 2
+        }
+    ],
+
+    products: [
+        {
+            // No ID because these are in the core fixtures.json
+            slug: 'free',
+            // slug is to match the product, the below are updated for the product
+            welcome_page_url: '/welcome-free'
+        },
+        {
+            // No ID because these are in the core fixtures.json
+            slug: 'default-product',
+            // slug is to match the product, the below are updated for the product
+            welcome_page_url: '/welcome-paid'
         }
     ],
 
@@ -444,7 +488,8 @@ DataGenerator.Content = {
             plan_nickname: 'Monthly',
             plan_interval: 'month',
             plan_amount: '1000',
-            plan_currency: 'usd'
+            plan_currency: 'usd',
+            mrr: 1000
         },
         {
             id: ObjectId().toHexString(),
@@ -460,7 +505,8 @@ DataGenerator.Content = {
             plan_nickname: 'Monthly',
             plan_interval: 'month',
             plan_amount: '1000',
-            plan_currency: 'usd'
+            plan_currency: 'usd',
+            mrr: 1000
         },
         {
             id: ObjectId().toHexString(),
@@ -476,7 +522,8 @@ DataGenerator.Content = {
             plan_nickname: 'Complimentary',
             plan_interval: 'year',
             plan_amount: '0',
-            plan_currency: 'usd'
+            plan_currency: 'usd',
+            mrr: 0
         }
     ],
     stripe_prices: [
@@ -881,12 +928,45 @@ DataGenerator.forKnex = (function () {
         };
     }
 
+    function createNewsletter(overrides) {
+        const newObj = _.cloneDeep(overrides);
+        return _.defaults(newObj, {
+            id: ObjectId().toHexString(),
+            slug: 'daily-newsletter',
+            name: 'Daily Newsletter',
+            sender_name: 'Jamie Larsen',
+            sender_email: 'jamie@example.com',
+            sender_reply_to: 'newsletter',
+            status: 'active',
+            visibility: 'members',
+            subscribe_on_signup: true,
+            title_font_category: 'serif',
+            body_font_category: 'serif',
+            show_header_icon: true,
+            show_header_title: true,
+            show_badge: true,
+            sort_order: 0
+        });
+    }
+
     function createMember(overrides) {
         const newObj = _.cloneDeep(overrides);
 
         return _.defaults(newObj, {
             id: ObjectId().toHexString(),
             email: 'member@ghost.org'
+        });
+    }
+
+    function createMemberWithNewsletter(overrides) {
+        const newObj = _.cloneDeep(overrides);
+
+        return _.defaults(newObj, {
+            id: ObjectId().toHexString(),
+            email: 'member@ghost.org',
+            newsletters: [{
+                id: 'newsletter-1'
+            }]
         });
     }
 
@@ -897,6 +977,24 @@ DataGenerator.forKnex = (function () {
             id: ObjectId().toHexString(),
             name: 'label',
             slug: 'slug',
+            created_by: DataGenerator.Content.users[0].id,
+            created_at: new Date(),
+            updated_by: DataGenerator.Content.users[0].id,
+            updated_at: new Date()
+        });
+    }
+
+    function createProduct(overrides) {
+        const newObj = _.cloneDeep(overrides);
+
+        return _.defaults(newObj, {
+            id: ObjectId().toHexString(),
+            name: 'product',
+            slug: 'gold',
+            active: true,
+            type: 'paid',
+            visibility: 'public',
+            benefits: [],
             created_by: DataGenerator.Content.users[0].id,
             created_at: new Date(),
             updated_by: DataGenerator.Content.users[0].id,
@@ -1132,6 +1230,14 @@ DataGenerator.forKnex = (function () {
         }
     ];
 
+    const members_newsletters = [
+        {
+            id: ObjectId().toHexString(),
+            member_id: DataGenerator.Content.posts[0].id,
+            newsletter_id: DataGenerator.Content.tags[0].id
+        }
+    ];
+
     const posts_authors = [
         {
             id: ObjectId().toHexString(),
@@ -1243,6 +1349,11 @@ DataGenerator.forKnex = (function () {
         createMember(DataGenerator.Content.members[7])
     ];
 
+    const newsletters = [
+        createNewsletter(DataGenerator.Content.newsletters[0]),
+        createNewsletter(DataGenerator.Content.newsletters[1])
+    ];
+
     const labels = [
         createLabel(DataGenerator.Content.labels[0]),
         createLabel(DataGenerator.Content.labels[2])
@@ -1264,7 +1375,8 @@ DataGenerator.forKnex = (function () {
     ];
 
     const products = [
-        createBasic(DataGenerator.Content.products[0])
+        DataGenerator.Content.products[0],
+        DataGenerator.Content.products[1]
     ];
 
     const members_stripe_customers = [
@@ -1320,6 +1432,7 @@ DataGenerator.forKnex = (function () {
         createSetting,
         createToken,
         createMember,
+        createMemberWithNewsletter,
         createLabel,
         createMembersLabels,
         createMembersStripeCustomer: createBasic,
@@ -1329,6 +1442,8 @@ DataGenerator.forKnex = (function () {
         createIntegration,
         createEmail,
         createCustomThemeSetting: createBasic,
+        createProduct,
+        createNewsletter,
 
         invites,
         posts,
@@ -1336,6 +1451,7 @@ DataGenerator.forKnex = (function () {
         posts_meta,
         posts_tags,
         posts_authors,
+        members_newsletters,
         roles,
         users,
         roles_users,
@@ -1348,6 +1464,7 @@ DataGenerator.forKnex = (function () {
         labels,
         members,
         products,
+        newsletters,
         members_labels,
         members_stripe_customers,
         stripe_customer_subscriptions,

@@ -4,10 +4,10 @@ const tpl = require('@tryghost/tpl');
 const sentry = require('../../../shared/sentry');
 
 const config = require('../../../shared/config');
-const helpers = require('../../services/routing/helpers');
+const renderer = require('../../services/rendering');
 
 // @TODO: make this properly shared code
-const {prepareError} = require('@tryghost/mw-error-handler');
+const {prepareError, prepareStack} = require('@tryghost/mw-error-handler');
 
 const messages = {
     oopsErrorTemplateHasError: 'Oops, seems there is an error in the error template.',
@@ -55,7 +55,7 @@ const themeErrorRenderer = (err, req, res, next) => {
 
     // Template
     // @TODO: very dirty !!!!!!
-    helpers.templates.setTemplate(req, res);
+    renderer.templates.setTemplate(req, res);
 
     // It can be that something went wrong with the theme or otherwise loading handlebars
     // This ensures that no matter what res.render will work here
@@ -88,6 +88,8 @@ module.exports.handleThemeResponse = [
     prepareError,
     // Handle the error in Sentry
     sentry.errorHandler,
+    // Format the stack for the user
+    prepareStack,
     // Render the error using theme template
     themeErrorRenderer
 ];

@@ -457,19 +457,38 @@ const fixtures = {
         });
     },
 
+    insertArchivedTiers: function insertArchivedTiers() {
+        let archivedProduct = DataGenerator.forKnex.createProduct({
+            active: false
+        });
+
+        return models.Product.add(archivedProduct, context.internal);
+    },
+
     insertMembersAndLabelsAndProducts: function insertMembersAndLabelsAndProducts() {
         return Promise.map(DataGenerator.forKnex.labels, function (label) {
             return models.Label.add(label, context.internal);
         }).then(function () {
-            let productsToInsert = fixtureManager.findModelFixtures('Product').entries;
-            return Promise.map(productsToInsert, async (product) => {
+            let coreProductFixtures = fixtureManager.findModelFixtures('Product').entries;
+            return Promise.map(coreProductFixtures, async (product) => {
                 const found = await models.Product.findOne(product, context.internal);
                 if (!found) {
                     await models.Product.add(product, context.internal);
                 }
             });
+        }).then(async function () {
+            let testProductFixtures = DataGenerator.forKnex.products;
+            for (const productFixture of testProductFixtures) {
+                if (productFixture.id) { // Not currently used - this is used to add new text fixtures, e.g. a Bronze/Silver/Gold Tier
+                    await models.Product.add(productFixture, context.internal);
+                } else { // Used to update the core fixtures
+                    // If it doesn't exist we have invalid fixtures, so require: true to ensure we throw
+                    const existing = await models.Product.findOne({slug: productFixture.slug}, {...context.internal, require: true});
+                    await models.Product.edit(productFixture, {...context.internal, id: existing.id});
+                }
+            }
         }).then(function () {
-            return models.Product.findOne({}, context.internal);
+            return models.Product.findOne({type: 'paid'}, context.internal);
         }).then(function (product) {
             return Promise.props({
                 stripeProducts: Promise.each(_.cloneDeep(DataGenerator.forKnex.stripe_products), function (stripeProduct) {
@@ -513,6 +532,27 @@ const fixtures = {
             return Promise.each(_.cloneDeep(DataGenerator.forKnex.stripe_customer_subscriptions), function (subscription) {
                 return models.StripeCustomerSubscription.add(subscription, context.internal);
             });
+        }).then(async function () {
+            const members = (await models.Member.findAll({
+                withRelated: [
+                    'labels',
+                    'stripeSubscriptions',
+                    'stripeSubscriptions.customer',
+                    'stripeSubscriptions.stripePrice',
+                    'stripeSubscriptions.stripePrice.stripeProduct',
+                    'products',
+                    'offerRedemptions'
+                ]
+            })).toJSON();
+
+            for (const member of members) {
+                for (const subscription of member.subscriptions) {
+                    const product = subscription.price.product.product_id;
+                    await models.Member.edit({products: member.products.concat({
+                        id: product
+                    })}, {id: member.id});
+                }
+            }
         });
     },
 
@@ -534,6 +574,12 @@ const fixtures = {
             };
 
             return emailAnalyticsService.aggregateStats(toAggregate);
+        });
+    },
+
+    insertNewsletters: async function insertNewsletters() {
+        return Promise.map(DataGenerator.forKnex.newsletters, function (newsletter) {
+            return models.Newsletter.add(newsletter, context.internal);
         });
     },
 
@@ -589,6 +635,9 @@ const toDoList = {
     },
     members: function insertMembersAndLabelsAndProducts() {
         return fixtures.insertMembersAndLabelsAndProducts();
+    },
+    newsletters: function insertNewsletters() {
+        return fixtures.insertNewsletters();
     },
     'members:emails': function insertEmailsAndRecipients() {
         return fixtures.insertEmailsAndRecipients();
@@ -661,6 +710,9 @@ const toDoList = {
     },
     custom_theme_settings: function insertCustomThemeSettings() {
         return fixtures.insertCustomThemeSettings();
+    },
+    'tiers:archived': function insertArchivedTiers() {
+        return fixtures.insertArchivedTiers();
     }
 };
 
@@ -721,7 +773,13 @@ const getFixtureOps = (toDos) => {
     return fixtureOps;
 };
 
+const getCurrentOwnerUser = async () => {
+    return await models.User.getOwnerUser(context.internal);
+};
+
 module.exports = {
     fixtures,
-    getFixtureOps
+    getFixtureOps,
+    DataGenerator,
+    getCurrentOwnerUser
 };

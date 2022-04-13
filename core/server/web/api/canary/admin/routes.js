@@ -88,10 +88,17 @@ module.exports = function apiRoutes() {
     router.del('/tags/:id', mw.authAdminApi, http(api.tags.destroy));
 
     // Products
+    // TODO Remove
     router.get('/products', mw.authAdminApi, http(api.products.browse));
     router.post('/products', mw.authAdminApi, http(api.products.add));
     router.get('/products/:id', mw.authAdminApi, http(api.products.read));
     router.put('/products/:id', mw.authAdminApi, http(api.products.edit));
+
+    // Tiers
+    router.get('/tiers', mw.authAdminApi, http(api.tiers.browse));
+    router.post('/tiers', mw.authAdminApi, http(api.tiers.add));
+    router.get('/tiers/:id', mw.authAdminApi, http(api.tiers.read));
+    router.put('/tiers/:id', mw.authAdminApi, http(api.tiers.edit));
 
     // ## Members
     router.get('/members', mw.authAdminApi, http(api.members.browse));
@@ -106,8 +113,6 @@ module.exports = function apiRoutes() {
 
     router.get('/members/stats/count', mw.authAdminApi, http(api.members.memberStats));
     router.get('/members/stats/mrr', mw.authAdminApi, http(api.members.mrrStats));
-    router.get('/members/stats/subscribers', mw.authAdminApi, http(api.members.subscriberStats));
-    router.get('/members/stats/gross_volume', mw.authAdminApi, http(api.members.grossVolumeStats));
 
     router.get('/members/events', mw.authAdminApi, http(api.members.activityFeed));
 
@@ -131,6 +136,10 @@ module.exports = function apiRoutes() {
     router.put('/members/:id/subscriptions/:subscription_id', mw.authAdminApi, http(api.members.editSubscription));
 
     router.get('/members/:id/signin_urls', mw.authAdminApi, http(api.memberSigninUrls.read));
+
+    // ## Stats
+    router.get('/stats/member_count', mw.authAdminApi, http(api.stats.memberCountHistory));
+    router.get('/stats/mrr', mw.authAdminApi, http(api.stats.mrr));
 
     // ## Labels
     router.get('/labels', mw.authAdminApi, http(api.labels.browse));
@@ -283,6 +292,7 @@ module.exports = function apiRoutes() {
     router.get('/actions', mw.authAdminApi, http(api.actions.browse));
 
     // ## Email Preview
+    // @TODO: rename to email_previews in 5.0
     router.get('/email_preview/posts/:id', mw.authAdminApi, http(api.email_preview.read));
     router.post('/email_preview/posts/:id', mw.authAdminApi, http(api.email_preview.sendTestEmail));
 
@@ -301,6 +311,10 @@ module.exports = function apiRoutes() {
     // ## Custom theme settings
     router.get('/custom_theme_settings', mw.authAdminApi, http(api.customThemeSettings.browse));
     router.put('/custom_theme_settings', mw.authAdminApi, http(api.customThemeSettings.edit));
+
+    router.get('/newsletters', mw.authAdminApi, http(api.newsletters.browse));
+    router.post('/newsletters', mw.authAdminApi, http(api.newsletters.add));
+    router.put('/newsletters/:id', mw.authAdminApi, http(api.newsletters.edit));
 
     return router;
 };

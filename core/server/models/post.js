@@ -6,7 +6,7 @@ const Promise = require('bluebird');
 const {sequence} = require('@tryghost/promise');
 const tpl = require('@tryghost/tpl');
 const errors = require('@tryghost/errors');
-const nql = require('@nexes/nql');
+const nql = require('@tryghost/nql');
 const htmlToPlaintext = require('../../shared/html-to-plaintext');
 const ghostBookshelf = require('./base');
 const config = require('../../shared/config');
@@ -15,6 +15,7 @@ const limitService = require('../services/limits');
 const mobiledocLib = require('../lib/mobiledoc');
 const relations = require('./relations');
 const urlUtils = require('../../shared/url-utils');
+const {Tag} = require('./tag');
 
 const messages = {
     isAlreadyPublished: 'Your post is already published, please reload your page.',
@@ -54,9 +55,20 @@ Post = ghostBookshelf.Model.extend({
      */
     defaults: function defaults() {
         let visibility = 'public';
-
-        if (settingsCache.get('default_content_visibility')) {
-            visibility = settingsCache.get('default_content_visibility');
+        let tiers = [];
+        const defaultContentVisibility = settingsCache.get('default_content_visibility');
+        if (defaultContentVisibility) {
+            if (defaultContentVisibility === 'tiers') {
+                const tiersData = settingsCache.get('default_content_visibility_tiers') || [];
+                visibility = 'tiers',
+                tiers = tiersData.map((tierId) => {
+                    return {
+                        id: tierId
+                    };
+                });
+            } else if (defaultContentVisibility !== 'tiers') {
+                visibility = settingsCache.get('default_content_visibility');
+            }
         }
 
         return {
@@ -64,16 +76,18 @@ Post = ghostBookshelf.Model.extend({
             status: 'draft',
             featured: false,
             type: 'post',
+            tiers,
             visibility: visibility,
             email_recipient_filter: 'none'
         };
     },
 
-    relationships: ['tags', 'authors', 'mobiledoc_revisions', 'posts_meta'],
+    relationships: ['tags', 'authors', 'mobiledoc_revisions', 'posts_meta', 'tiers'],
 
     // NOTE: look up object, not super nice, but was easy to implement
     relationshipBelongsTo: {
         tags: 'tags',
+        tiers: 'products',
         authors: 'users',
         posts_meta: 'posts_meta'
     },
@@ -87,6 +101,17 @@ Post = ghostBookshelf.Model.extend({
             targetTableName: 'emails',
             foreignKey: 'post_id'
         }
+    },
+
+    tiers() {
+        return this.belongsToMany('Product', 'posts_products', 'post_id', 'product_id')
+            .withPivot('sort_order')
+            .query('orderBy', 'sort_order', 'ASC')
+            .query((qb) => {
+                // avoids bookshelf adding a `DISTINCT` to the query
+                // we know the result set will already be unique and DISTINCT hurts query performance
+                qb.columns('products.*');
+            });
     },
 
     parse() {
@@ -171,7 +196,7 @@ Post = ghostBookshelf.Model.extend({
 
         // transform visibility NQL queries to special-case values where necessary
         // ensures checks against special-case values such as `{{#has visibility="paid"}}` continue working
-        if (attrs.visibility && !['public', 'members', 'paid'].includes(attrs.visibility)) {
+        if (attrs.visibility && !['public', 'members', 'paid', 'tiers'].includes(attrs.visibility)) {
             if (attrs.visibility === 'status:-free') {
                 attrs.visibility = 'paid';
             } else {
@@ -528,15 +553,24 @@ Post = ghostBookshelf.Model.extend({
             tagsToSave = [];
 
             //  and deduplicate upper/lowercase tags
-            _.each(this.get('tags'), function each(item) {
+            loopTags: for (const tag of this.get('tags')) {
+                if (!tag.id && !tag.tag_id && tag.slug) {
+                    // Clean up the provided slugs before we do any matching with existing tags
+                    tag.slug = await ghostBookshelf.Model.generateSlug(
+                        Tag,
+                        tag.slug,
+                        {skipDuplicateChecks: true}
+                    );
+                }
+
                 for (i = 0; i < tagsToSave.length; i = i + 1) {
-                    if (tagsToSave[i].name && item.name && tagsToSave[i].name.toLocaleLowerCase() === item.name.toLocaleLowerCase()) {
-                        return;
+                    if (tagsToSave[i].name && tag.name && tagsToSave[i].name.toLocaleLowerCase() === tag.name.toLocaleLowerCase()) {
+                        continue loopTags;
                     }
                 }
 
-                tagsToSave.push(item);
-            });
+                tagsToSave.push(tag);
+            }
 
             this.set('tags', tagsToSave);
         }
@@ -843,6 +877,9 @@ Post = ghostBookshelf.Model.extend({
 
         // CASE: never expose the revisions
         delete attrs.mobiledoc_revisions;
+
+        // CASE: hide the newsletter_id for now
+        delete attrs.newsletter_id;
 
         // If the current column settings allow it...
         if (!options.columns || (options.columns && options.columns.indexOf('primary_tag') > -1)) {

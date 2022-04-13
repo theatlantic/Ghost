@@ -1,4 +1,4 @@
-const {SafeString} = require('../services/rendering');
+const {SafeString} = require('../services/handlebars');
 
 const logging = require('@tryghost/logging');
 const tpl = require('@tryghost/tpl');
@@ -44,6 +44,18 @@ const handleMatch = (data, operator, value) => {
     switch (operator) {
     case '!=':
         result = data !== value;
+        break;
+    case '<':
+        result = data < value;
+        break;
+    case '>':
+        result = data > value;
+        break;
+    case '>=':
+        result = data >= value;
+        break;
+    case '<=':
+        result = data <= value;
         break;
     default:
         result = data === value;

@@ -7,7 +7,7 @@ const path = require('path');
 const {config} = require('../../../../utils/configUtils');
 const schema = require('../../../../../core/server/data/schema/schema');
 const fixtures = require('../../../../../core/server/data/schema/fixtures/fixtures.json');
-const defaultSettings = require('../../../../../core/server/data/schema/default-settings.json');
+const defaultSettings = require('../../../../../core/server/data/schema/default-settings/default-settings.json');
 
 // Routes are yaml so we can require the file directly
 const routeSettings = require('../../../../../core/server/services/route-settings');
@@ -35,15 +35,15 @@ const validateRouteSettings = require('../../../../../core/server/services/route
  */
 describe('DB version integrity', function () {
     // Only these variables should need updating
-    const currentSchemaHash = 'e649797a5de92d417744f6f2623c79cf';
-    const currentFixturesHash = '07d4b0c4cf159b34344a6b5e88c74e9f';
-    const currentSettingsHash = 'b06316ebbf62381158e1c46c97c0b77a';
+    const currentSchemaHash = 'ff2c43dc264d712397a912e9709a0410';
+    const currentFixturesHash = 'dcc81e94da6fb9d96becf208cfa5bc73';
+    const currentSettingsHash = '71fa38d0c805c18ceebe0fda80886230';
     const currentRoutesHash = '3d180d52c663d173a6be791ef411ed01';
 
     // If this test is failing, then it is likely a change has been made that requires a DB version bump,
     // and the values above will need updating as confirmation
     it('should not change without fixing this test', function () {
-        const routesPath = path.join(config.get('paths').defaultSettings, 'default-routes.yaml');
+        const routesPath = path.join(config.get('paths').defaultRouteSettings, 'default-routes.yaml');
         const defaultRoutes = validateRouteSettings(yaml.load(fs.readFileSync(routesPath, 'utf-8')));
 
         const tablesNoValidation = _.cloneDeep(schema);

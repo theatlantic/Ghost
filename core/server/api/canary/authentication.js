@@ -41,6 +41,9 @@ module.exports = {
                         email: frame.data.setup[0].email,
                         password: frame.data.setup[0].password,
                         blogTitle: frame.data.setup[0].blogTitle,
+                        theme: frame.data.setup[0].theme,
+                        accentColor: frame.data.setup[0].accentColor,
+                        description: frame.data.setup[0].description,
                         status: 'active'
                     };
 
@@ -48,10 +51,20 @@ module.exports = {
                 })
                 .then((data) => {
                     try {
-                        return auth.setup.doProduct(data, api.products);
+                        return auth.setup.doFixtures(data);
                     } catch (e) {
                         return data;
                     }
+                })
+                .then((data) => {
+                    try {
+                        return auth.setup.doProductAndNewsletter(data, api);
+                    } catch (e) {
+                        return data;
+                    }
+                })
+                .then((data) => {
+                    return auth.setup.installTheme(data, api);
                 })
                 .then((data) => {
                     return auth.setup.doSettings(data, api.settings);

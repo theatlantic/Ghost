@@ -1,4 +1,4 @@
-const nql = require('@nexes/nql');
+const nql = require('@tryghost/nql');
 
 // @ts-check
 /** @typedef { boolean } AccessFlag */
@@ -40,7 +40,15 @@ function checkPostAccess(post, member) {
         return PERMIT_ACCESS;
     }
 
-    const visibility = post.visibility === 'paid' ? 'status:-free' : post.visibility;
+    let visibility = post.visibility === 'paid' ? 'status:-free' : post.visibility;
+    if (visibility === 'tiers') {
+        if (!post.tiers) {
+            return BLOCK_ACCESS;
+        }
+        visibility = post.tiers.map((product) => {
+            return `product:${product.slug}`;
+        }).join(',');
+    }
 
     if (visibility && member.status && nql(visibility, {expansions: MEMBER_NQL_EXPANSIONS}).queryJSON(member)) {
         return PERMIT_ACCESS;

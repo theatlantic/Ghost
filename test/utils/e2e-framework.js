@@ -14,22 +14,35 @@
 // The output state checker is responsible for checking the response from the app after performing a request.
 const _ = require('lodash');
 const {sequence} = require('@tryghost/promise');
+const {any, stringMatching} = require('@tryghost/express-test').snapshot;
 const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
 const uuid = require('uuid');
 
-const fixtures = require('./fixture-utils');
+const fixtureUtils = require('./fixture-utils');
 const redirectsUtils = require('./redirects');
 const configUtils = require('./configUtils');
-const mockUtils = require('./e2e-framework-mock-utils');
+const urlServiceUtils = require('./url-service-utils');
+const mockManager = require('./e2e-framework-mock-manager');
 
 const boot = require('../../core/boot');
-const TestAgent = require('./test-agent');
+const AdminAPITestAgent = require('./admin-api-test-agent');
+const MembersAPITestAgent = require('./members-api-test-agent');
+const ContentAPITestAgent = require('./content-api-test-agent');
 const db = require('./db-utils');
-const DataGenerator = require('./fixtures/data-generator');
 
-const startGhost = async () => {
+// Services that need resetting
+const settingsService = require('../../core/server/services/settings');
+
+/**
+ * @param {Object} [options={}]
+ * @param {Boolean} [options.backend] Boot the backend
+ * @param {Boolean} [options.frontend] Boot the frontend
+ * @param {Boolean} [options.server] Start a server
+ * @returns {Promise<Express.Application>} ghost
+ */
+const startGhost = async (options = {}) => {
     /**
      * We never use the root content folder for testing!
      * We use a tmp folder.
@@ -46,7 +59,18 @@ const startGhost = async () => {
         server: false
     };
 
-    return boot(defaults);
+    // Ensure the state of all data, including DB and caches
+    await resetData();
+
+    const bootOptions = Object.assign({}, defaults, options);
+
+    const ghostServer = await boot(bootOptions);
+
+    if (bootOptions.frontend) {
+        await urlServiceUtils.isFinished();
+    }
+
+    return ghostServer;
 };
 
 /**
@@ -96,46 +120,175 @@ const initFixtures = async (...options) => {
         }
     }));
 
-    const fixtureOps = fixtures.getFixtureOps(options);
+    const fixtureOps = fixtureUtils.getFixtureOps(options);
 
     return sequence(fixtureOps);
 };
 
 const getFixture = (type, index = 0) => {
-    return fixtures.DataGenerator.forKnex[type][index];
-};
-
-const resetDb = async () => {
-    await db.teardown();
+    return fixtureUtils.DataGenerator.forKnex[type][index];
 };
 
 /**
- * Creates a TestAgent which is a drop-in substitution for supertest hooked into Ghost.
- * @param {String} apiURL
- * @returns {TestAgent}
+ * This function ensures that Ghost's data is reset back to "factory settings"
+ *
  */
-const getAgent = async (apiURL) => {
-    const app = await startGhost();
-    const originURL = configUtils.config.get('url');
-    const ownerUser = {
-        email: DataGenerator.Content.users[0].email,
-        password: DataGenerator.Content.users[0].password
-    };
+const resetData = async () => {
+    // Calling reset on the database also causes the fixtures to be re-run
+    // We need to unhook the settings events and restore the cache before we do this
+    // Otherwise, the fixtures being restored will refer to the old settings cache data
+    settingsService.reset();
 
-    return new TestAgent({
-        apiURL,
-        app,
-        originURL,
-        ownerUser
-    });
+    // Clear out the database
+    await db.reset({truncate: true});
 };
 
-// request agent
-module.exports.getAgent = getAgent;
+/**
+ * Creates a ContentAPITestAgent which is a drop-in substitution for supertest.
+ * It is automatically hooked up to the Content API so you can make requests to e.g.
+ * agent.get('/posts/') without having to worry about URL paths
+ * @returns {Promise<ContentAPITestAgent>} agent
+ */
+const getContentAPIAgent = async () => {
+    try {
+        const app = await startGhost();
+        const originURL = configUtils.config.get('url');
 
-// state manipulation
-module.exports.initFixtures = initFixtures;
-module.exports.getFixture = getFixture;
-module.exports.resetDb = resetDb;
-module.exports.stubMail = mockUtils.stubMail;
-module.exports.restoreMocks = mockUtils.restoreMocks;
+        return new ContentAPITestAgent(app, {
+            apiURL: '/ghost/api/content/',
+            originURL
+        });
+    } catch (error) {
+        error.message = `Unable to create test agent. ${error.message}`;
+        throw error;
+    }
+};
+
+/**
+ * Creates a AdminAPITestAgent which is a drop-in substitution for supertest.
+ * It is automatically hooked up to the Admin API so you can make requests to e.g.
+ * agent.get('/posts/') without having to worry about URL paths
+ *
+ * @param {Object} [options={}]
+ * @param {Boolean} [options.members] Include members in the boot process
+ * @returns {Promise<AdminAPITestAgent>} agent
+ */
+const getAdminAPIAgent = async (options = {}) => {
+    const bootOptions = {};
+
+    if (options.members) {
+        bootOptions.frontend = true;
+    }
+
+    try {
+        const app = await startGhost(bootOptions);
+        const originURL = configUtils.config.get('url');
+
+        return new AdminAPITestAgent(app, {
+            apiURL: '/ghost/api/admin/',
+            originURL
+        });
+    } catch (error) {
+        error.message = `Unable to create test agent. ${error.message}`;
+        throw error;
+    }
+};
+
+/**
+ * Creates a MembersAPITestAgent which is a drop-in substitution for supertest
+ * It is automatically hooked up to the Members API so you can make requests to e.g.
+ * agent.get('/webhooks/stripe/') without having to worry about URL paths
+ *
+ * @returns {Promise<MembersAPITestAgent>} agent
+ */
+const getMembersAPIAgent = async () => {
+    const bootOptions = {
+        frontend: true
+    };
+    try {
+        const app = await startGhost(bootOptions);
+        const originURL = configUtils.config.get('url');
+
+        return new MembersAPITestAgent(app, {
+            apiURL: '/members/',
+            originURL
+        });
+    } catch (error) {
+        error.message = `Unable to create test agent. ${error.message}`;
+        throw error;
+    }
+};
+
+/**
+ *
+ * @returns {Promise<{adminAgent: AdminAPITestAgent, membersAgent: MembersAPITestAgent}>} agents
+ */
+const getAgentsForMembers = async () => {
+    let membersAgent;
+    let adminAgent;
+
+    const bootOptions = {
+        frontend: true
+    };
+
+    try {
+        const app = await startGhost(bootOptions);
+        const originURL = configUtils.config.get('url');
+
+        membersAgent = new MembersAPITestAgent(app, {
+            apiURL: '/members/',
+            originURL
+        });
+        adminAgent = new AdminAPITestAgent(app, {
+            apiURL: '/ghost/api/admin/',
+            originURL
+        });
+    } catch (error) {
+        error.message = `Unable to create test agent. ${error.message}`;
+        throw error;
+    }
+
+    return {
+        adminAgent,
+        membersAgent
+    };
+};
+
+module.exports = {
+    // request agent
+    agentProvider: {
+        getAdminAPIAgent,
+        getMembersAPIAgent,
+        getContentAPIAgent,
+        getAgentsForMembers
+    },
+
+    // Mocks and Stubs
+    mockManager,
+
+    // DB State Manipulation
+    fixtureManager: {
+        get: getFixture,
+        getCurrentOwnerUser: fixtureUtils.getCurrentOwnerUser,
+        init: initFixtures,
+        restore: resetData,
+        getPathForFixture: (fixturePath) => {
+            return path.join(__dirname, 'fixtures', fixturePath);
+        }
+    },
+    matchers: {
+        anyString: any(String),
+        anyArray: any(Array),
+        anyISODateTime: stringMatching(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z/),
+        anyISODate: stringMatching(/\d{4}-\d{2}-\d{2}/),
+        anyISODateTimeWithTZ: stringMatching(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000\+\d{2}:\d{2}/),
+        anyEtag: stringMatching(/(?:W\/)?"(?:[ !#-\x7E\x80-\xFF]*|\r\n[\t ]|\\.)*"/),
+        anyObjectId: stringMatching(/[a-f0-9]{24}/),
+        anyErrorId: stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/),
+        anyUuid: stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/),
+        anyLocationFor: (resource) => {
+            return stringMatching(new RegExp(`https?://.*?/${resource}/[a-f0-9]{24}/`));
+        },
+        stringMatching
+    }
+};

@@ -78,7 +78,7 @@ module.exports = {
     },
 
     get membersStripeConnect() {
-        return shared.pipeline(require('./membersStripeConnect'), localUtils);
+        return shared.pipeline(require('./members-stripe-connect'), localUtils);
     },
 
     get members() {
@@ -93,8 +93,12 @@ module.exports = {
         return shared.pipeline(require('./products'), localUtils);
     },
 
+    get tiers() {
+        return shared.pipeline(require('./tiers'), localUtils);
+    },
+
     get memberSigninUrls() {
-        return shared.pipeline(require('./memberSigninUrls.js'), localUtils);
+        return shared.pipeline(require('./member-signin-urls.js'), localUtils);
     },
 
     get labels() {
@@ -154,7 +158,7 @@ module.exports = {
     },
 
     get emails() {
-        return shared.pipeline(require('./email'), localUtils);
+        return shared.pipeline(require('./emails'), localUtils);
     },
 
     get site() {
@@ -165,12 +169,20 @@ module.exports = {
         return shared.pipeline(require('./snippets'), localUtils);
     },
 
+    get stats() {
+        return shared.pipeline(require('./stats'), localUtils);
+    },
+
     get customThemeSettings() {
         return shared.pipeline(require('./custom-theme-settings'), localUtils);
     },
 
     get serializers() {
         return require('./utils/serializers');
+    },
+
+    get newsletters() {
+        return shared.pipeline(require('./newsletters'), localUtils);
     },
 
     /**
@@ -203,5 +215,9 @@ module.exports = {
 
     get productsPublic() {
         return shared.pipeline(require('./products-public'), localUtils, 'content');
+    },
+
+    get tiersPublic() {
+        return shared.pipeline(require('./tiers-public'), localUtils, 'content');
     }
 };
