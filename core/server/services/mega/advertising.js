@@ -4,7 +4,7 @@ const got = require('got');
 
 // Let's try to stick to existing strings in the template
 const markers = {
-  presentedBy: "<!-- ATLANTIC_TOP_AD -->",
+  presentedBy: "<!-- ATLANTIC_PRESENTED_BY -->",
   other: "<!-- ATLANTIC_BOTTOM_AD -->",
 }
 
