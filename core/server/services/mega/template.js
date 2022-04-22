@@ -324,15 +324,27 @@ figure blockquote p {
     padding: 16px 16px 12px;
 }
 
+.header-subscribe {
+    color: #000000;
+    font-family: 'Logic Monospace', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 16px 16px 12px;
+    border-bottom: 0.5px solid #000000;
+}
+
 .header-info {
     font-family: Courier,sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
-    line-height: 150%;
+    line-height: 18px;
     text-align: center;
     letter-spacing: 0.04em;
-    text-transform: uppercase;
     color: #000000;
     padding-right: 20px;
     padding-left: 20px;
@@ -706,6 +718,40 @@ figure blockquote p {
     padding-right: 8px;
 }
 
+.bottom-subscribe-area {
+    font-family: 'Adobe Garamond Pro', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 28px;
+    color: #000000;
+}
+
+.bottom-subscribe-area-header {
+    font-family: 'Adobe Garamond Pro', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 40px;
+    color: #21272C;
+    padding-bottom: 24px;
+}
+
+.bottom-subscribe-btn {
+    padding: 15px 24px;
+    background: #21272C;
+    border-radius: 4px;
+    font-family: 'Arial', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 48px;
+    text-align: center;
+    color: #FFFFFF;
+    height: 48px;
+    text-decoration: none;
+}
+
 /* -------------------------------------
     BUTTONS
 ------------------------------------- */
@@ -968,6 +1014,14 @@ figure blockquote p {
             src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
+        @font-face {
+            font-display: swap;
+            font-family: "Logic Monospace";
+            font-stretch: normal;
+            font-style: normal;
+            font-weight: 400;
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/logic/LogicMonospace-Regular.woff2") format("woff");
+        }
 </style>
 </head>
 
@@ -1006,6 +1060,21 @@ figure blockquote p {
                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 0.5px solid #000000;">
 
                                     <tr class="email-content">
+                                        <td class="header-subscribe" width="100%" align="center">
+                                            <div>
+                                                <svg style="vertical-align:middle; display: inline-block" width="30" height="12" viewBox="0 0 30 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M17.375 6C17.375 6 13.5974 12 8.9375 12C4.2776 12 0.5 6 0.5 6C0.5 6 4.2776 0 8.9375 0C13.5974 0 17.375 6 17.375 6Z" fill="white"></path>
+                                                <path d="M10.8125 6C10.8125 7.10457 9.97303 8 8.9375 8C7.90197 8 7.0625 7.10457 7.0625 6C7.0625 4.89543 7.90197 4 8.9375 4C9.97303 4 10.8125 4.89543 10.8125 6Z" fill="black"></path>
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M8.9375 12C4.2776 12 0.5 6 0.5 6C0.5 6 4.2776 0 8.9375 0C12.3898 0 15.3578 3.29316 16.6643 5H24.8656V4.99998H26.7406V5H28.625H30.5V7V11H28.625V7H26.7418L26.7429 9.00002H24.8679L24.8668 7H16.6643C15.3578 8.70684 12.3898 12 8.9375 12ZM4.24151 7.52886C3.69684 6.99379 3.23175 6.45472 2.86986 6C3.23175 5.54528 3.69684 5.00621 4.24151 4.47114C5.66765 3.07011 7.32983 2 8.9375 2C10.5452 2 12.2074 3.07011 13.6335 4.47114C14.1782 5.00621 14.6433 5.54528 15.0051 6C14.6433 6.45472 14.1782 6.99379 13.6335 7.52886C12.2074 8.92989 10.5452 10 8.9375 10C7.32983 10 5.66765 8.92989 4.24151 7.52886Z" fill="black"></path>
+                                                </svg>
+                                                <div style="margin-left: 3px;display: inline-block;">
+                                                  subscriber newsletter
+                                                </div>
+                                              </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="email-content">
                                         <td class="header-date" width="100%" align="center">
                                             ${postPubDate} <!-- ATLANTIC_PRESENTED_BY -->
                                         </td>
@@ -1020,14 +1089,20 @@ figure blockquote p {
                                         </td>
                                     </tr>
                                     ` : ''}
-                                    <!--
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
-                                            This is a free edition of ${site.title}. To receive all emails, including ones
-                                            exclusively available to Atlantic subscribers, <a href="${ctaUrl}">start your subscription today</a>.
+                                            %recipient.paid_block_start%
+                                            As a subscriber to <i>The Atlantic</i>, you have access to all editions of
+                                            this newsletter, including subscriber-only exclusives.
+                                            Thank you for supporting my work.
+                                            %recipient.paid_block_end%
+
+                                            %recipient.free_block_start%
+                                            For access to all editions of this newsletter, including subscriber-only exclusives,
+                                            <a href="${ctaUrl}">subscribe to <i>The Atlantic</i></a>.
+                                            %recipient.free_block_end%
                                         </td>
                                     </tr>
-                                    -->
                                     ${ templateSettings.showFeatureImage && post.feature_image ? `
                                     <tr class="email-content">
                                         <td class="feature-image ${hasFeatureImageCaption ? 'feature-image-with-caption' : ''}"><img src="${post.feature_image}"${post.feature_image_width ? ` width="${post.feature_image_width}"` : ''}${post.feature_image_alt ? ` alt="${post.feature_image_alt}"` : ''}></td>
@@ -1054,7 +1129,53 @@ figure blockquote p {
 
                                     <tr>
                                         <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 20px; padding-bottom: 40px; border-top: 1px solid #D3DCE6;">
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                                            style="padding-top: 32px; padding-bottom: 32px; border-top: 1px solid #D3DCE6;">
+                                                <tr>
+                                                    <td class="bottom-subscribe-area">
+                                                        %recipient.paid_block_start%
+                                                        Did someone forward you this newsletter? <a href="https://newsletters.theatlantic.com/">Sign up here</a>, and
+                                                        <a href="${ctaUrl}">subscribe to <i>The Atlantic</i></a> for access to more exclusives like this.
+                                                        %recipient.paid_block_end%
+
+                                                        %recipient.free_block_start%
+                                                        Did someone forward you this newsletter?
+                                                        <a href="https://newsletters.theatlantic.com/">Sign up here</a>.
+                                                        %recipient.free_block_end%
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    %recipient.free_block_start%
+                                    <tr>
+                                        <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                                            style="padding-top: 16px; border-top: 1px solid #000000;">
+                                                <tr>
+                                                    <td class="bottom-subscribe-area-header">Subscribe to <i>The Atlantic</i></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="bottom-subscribe-area">
+                                                    Thanks for reading! For access to all editions of this newsletter, including
+                                                    subscriber-only exclusives, subscribe to <i>The Atlantic</i> today.
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding-top: 40px;padding-bottom: 40px;text-align: center">
+                                                        <a class="bottom-subscribe-btn" href="${ctaUrl}">Subscribe to <i>The Atlantic</i></a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    %recipient.free_block_end%
+
+                                    <tr>
+                                        <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                                            style="padding-top: 20px; padding-bottom: 40px; border-top: 1px solid #D3DCE6;">
                                                 <tr>
                                                     <td class="footer-top">Share This Newsletter:</td>
                                                 </tr>
