@@ -233,7 +233,7 @@ module.exports = {
             });
 
             // @Hack: Replace needed tag according to member access level
-            if (recipient.member_status === 'paid') {
+            if (recipient.member_status === 'paid' || recipient.member_status === 'comped') {
                 data.free_block_start = '<!--';
                 data.free_block_end = '-->';
                 data.paid_block_start = '';
