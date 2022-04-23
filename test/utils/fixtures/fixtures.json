@@ -24,8 +24,7 @@
             "entries": [
                 {
                     "name":             "Default Newsletter",
-                    "slug":             "default-newsletter",
-                    "sender_name":      "Ghost"
+                    "slug":             "default-newsletter"
                 }
             ]
         },
@@ -107,6 +106,11 @@
                     "name": "Browse notifications",
                     "action_type": "browse",
                     "object_type": "notification"
+                },
+                {
+                    "name": "Read newsletters",
+                    "action_type": "read",
+                    "object_type": "newsletter"
                 },
                 {
                     "name": "Add notifications",

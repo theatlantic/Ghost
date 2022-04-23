@@ -13,7 +13,7 @@ module.exports = {
         name: {type: 'string', maxlength: 191, nullable: false, unique: true},
         description: {type: 'string', maxlength: 2000, nullable: true},
         slug: {type: 'string', maxlength: 191, nullable: false, unique: true},
-        sender_name: {type: 'string', maxlength: 191, nullable: false},
+        sender_name: {type: 'string', maxlength: 191, nullable: true},
         sender_email: {type: 'string', maxlength: 191, nullable: true},
         sender_reply_to: {type: 'string', maxlength: 191, nullable: false, defaultTo: 'newsletter', validations: {isIn: [['newsletter', 'support']]}},
         status: {type: 'string', maxlength: 50, nullable: false, defaultTo: 'active'},
@@ -576,6 +576,7 @@ module.exports = {
         updated_at: {type: 'dateTime', nullable: true},
         updated_by: {type: 'string', maxlength: 24, nullable: true},
         mrr: {type: 'integer', unsigned: true, nullable: false, defaultTo: 0},
+        offer_id: {type: 'string', maxlength: 24, nullable: true, unique: false, references: 'offers.id'},
         /* Below fields are now redundant as we link prie_id to stripe_prices table */
         plan_id: {type: 'string', maxlength: 255, nullable: false, unique: false},
         plan_nickname: {type: 'string', maxlength: 50, nullable: false},
