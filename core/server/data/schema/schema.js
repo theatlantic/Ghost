@@ -695,6 +695,7 @@ module.exports = {
         member_uuid: {type: 'string', maxlength: 36, nullable: false},
         member_email: {type: 'string', maxlength: 191, nullable: false},
         member_name: {type: 'string', maxlength: 191, nullable: true},
+        member_status: {type: 'string', maxlength: 10, nullable: true},
         '@@INDEXES@@': [
             ['email_id', 'member_email']
         ]

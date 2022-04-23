@@ -232,6 +232,19 @@ module.exports = {
                 data[id] = recipient[recipientProperty] || fallback || '';
             });
 
+            // @Hack: Replace needed tag according to member access level
+            if (recipient.member_status === 'paid' || recipient.member_status === 'comped') {
+                data.free_block_start = '<!--';
+                data.free_block_end = '-->';
+                data.paid_block_start = '';
+                data.paid_block_end = '';
+            } else {
+                data.free_block_start = '';
+                data.free_block_end = '';
+                data.paid_block_start = '<!--';
+                data.paid_block_end = '-->';
+            }
+
             recipientData[recipient.member_email] = data;
         });
 

@@ -300,6 +300,10 @@ const serialize = async (postModel, options = {isBrowserPreview: false, apiVersi
     if (options.isBrowserPreview) {
         const previewUnsubscribeUrl = createUnsubscribeUrl(null);
         htmlTemplate = htmlTemplate.replace('%recipient.unsubscribe_url%', previewUnsubscribeUrl);
+        htmlTemplate = htmlTemplate.replace(/%recipient.free_block_start%/g, '');
+        htmlTemplate = htmlTemplate.replace(/%recipient.free_block_end%/g, '');
+        htmlTemplate = htmlTemplate.replace(/%recipient.paid_block_start%/g, '<!--');
+        htmlTemplate = htmlTemplate.replace(/%recipient.paid_block_end%/g, '-->');
     }
 
     // @HACK: The Atlantic inserts ads
