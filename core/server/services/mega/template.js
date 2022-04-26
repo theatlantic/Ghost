@@ -343,13 +343,10 @@ figure blockquote p {
     font-weight: normal;
     font-size: 12px;
     line-height: 18px;
-    text-align: center;
-    letter-spacing: 0.04em;
+    text-align: left;
+    letter-spacing: 0.48px;
     color: #000000;
-    padding-right: 20px;
-    padding-left: 20px;
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding: 24px 20px;
     background-color: #ffffff;
 }
 
@@ -719,16 +716,16 @@ figure blockquote p {
 }
 
 .bottom-subscribe-area {
-    font-family: 'Adobe Garamond Pro', sans-serif;
+    font-family: 'Adobe Garamond Pro', Times New Roman, serif;
     font-style: normal;
     font-weight: 400;
     font-size: 19px;
-    line-height: 28px;
+    line-height: 28.5px;
     color: #000000;
 }
 
 .bottom-subscribe-area-header {
-    font-family: 'Adobe Garamond Pro', sans-serif;
+    font-family: 'Adobe Garamond Pro', Times New Roman, serif;
     font-style: normal;
     font-weight: 400;
     font-size: 32px;
@@ -1026,7 +1023,7 @@ figure blockquote p {
 </head>
 
 <body class="">
-    <span class="preheader">${ post.excerpt ? post.excerpt : `${post.title} – ` }</span>
+    <span class="preheader">${post.excerpt ? post.excerpt : `${post.title} – `}</span>
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" width="100%">
 
         <!-- Outlook doesn't respect max-width so we need an extra centered table -->
@@ -1044,7 +1041,7 @@ figure blockquote p {
 
                     <!-- START CENTERED WHITE CONTAINER -->
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
-                        ${ post.email_only === false ? `
+                        ${post.email_only === false ? `
                         <tr>
                             <td style="padding: 12px; background-color: white; text-align: center; line-height: 18px;">
                                 <a style="font-family: Arial, sans-serif; font-style: normal; font-weight: normal; font-size: 12px;" href="${post.url}">
@@ -1062,11 +1059,7 @@ figure blockquote p {
                                     <tr class="email-content">
                                         <td class="header-subscribe" width="100%" align="center">
                                             <div>
-                                                <svg style="vertical-align:middle; display: inline-block" width="30" height="12" viewBox="0 0 30 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M17.375 6C17.375 6 13.5974 12 8.9375 12C4.2776 12 0.5 6 0.5 6C0.5 6 4.2776 0 8.9375 0C13.5974 0 17.375 6 17.375 6Z" fill="white"></path>
-                                                <path d="M10.8125 6C10.8125 7.10457 9.97303 8 8.9375 8C7.90197 8 7.0625 7.10457 7.0625 6C7.0625 4.89543 7.90197 4 8.9375 4C9.97303 4 10.8125 4.89543 10.8125 6Z" fill="black"></path>
-                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M8.9375 12C4.2776 12 0.5 6 0.5 6C0.5 6 4.2776 0 8.9375 0C12.3898 0 15.3578 3.29316 16.6643 5H24.8656V4.99998H26.7406V5H28.625H30.5V7V11H28.625V7H26.7418L26.7429 9.00002H24.8679L24.8668 7H16.6643C15.3578 8.70684 12.3898 12 8.9375 12ZM4.24151 7.52886C3.69684 6.99379 3.23175 6.45472 2.86986 6C3.23175 5.54528 3.69684 5.00621 4.24151 4.47114C5.66765 3.07011 7.32983 2 8.9375 2C10.5452 2 12.2074 3.07011 13.6335 4.47114C14.1782 5.00621 14.6433 5.54528 15.0051 6C14.6433 6.45472 14.1782 6.99379 13.6335 7.52886C12.2074 8.92989 10.5452 10 8.9375 10C7.32983 10 5.66765 8.92989 4.24151 7.52886Z" fill="black"></path>
-                                                </svg>
+                                                <img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-key.png" width="30" height="12" style="vertical-align:middle; display: inline-block" alt="Key Icon">
                                                 <div style="margin-left: 3px;display: inline-block;">
                                                   subscriber newsletter
                                                 </div>
@@ -1080,7 +1073,7 @@ figure blockquote p {
                                         </td>
                                     </tr>
 
-                                    ${ templateSettings.headerImage ? `
+                                    ${templateSettings.headerImage ? `
                                     <tr class="email-content">
                                         <td class="header-image" width="100%" align="center">
                                             <a href="${site.url}">
@@ -1103,12 +1096,12 @@ figure blockquote p {
                                             %recipient.free_block_end%
                                         </td>
                                     </tr>
-                                    ${ templateSettings.showFeatureImage && post.feature_image ? `
+                                    ${templateSettings.showFeatureImage && post.feature_image ? `
                                     <tr class="email-content">
                                         <td class="feature-image ${hasFeatureImageCaption ? 'feature-image-with-caption' : ''}"><img src="${post.feature_image}"${post.feature_image_width ? ` width="${post.feature_image_width}"` : ''}${post.feature_image_alt ? ` alt="${post.feature_image_alt}"` : ''}></td>
                                     </tr>
                                     ` : ``}
-                                    ${ hasFeatureImageCaption ? `
+                                    ${hasFeatureImageCaption ? `
                                     <tr class="email-content">
                                         <td class="feature-image-caption" align="left">${post.feature_image_caption}</td>
                                     </tr>
@@ -1164,7 +1157,7 @@ figure blockquote p {
                                                 </tr>
                                                 <tr>
                                                     <td style="padding-top: 40px;padding-bottom: 40px;text-align: center">
-                                                        <a class="bottom-subscribe-btn" href="${ctaUrl}">Subscribe to <i>The Atlantic</i></a>
+                                                        <a class="bottom-subscribe-btn" href="${site.url}">Subscribe</a>
                                                     </td>
                                                 </tr>
                                             </table>
