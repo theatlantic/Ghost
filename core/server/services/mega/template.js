@@ -1127,13 +1127,13 @@ figure blockquote p {
                                                 <tr>
                                                     <td class="bottom-subscribe-area">
                                                         %recipient.paid_block_start%
-                                                        Did someone forward you this newsletter? <a href="https://newsletters.theatlantic.com/">Sign up here</a>, and
+                                                        Did someone forward you this newsletter? <a href="${site.url}">Sign up here</a>, and
                                                         <a href="${ctaUrl}">subscribe to <i>The Atlantic</i></a> for access to more exclusives like this.
                                                         %recipient.paid_block_end%
 
                                                         %recipient.free_block_start%
                                                         Did someone forward you this newsletter?
-                                                        <a href="https://newsletters.theatlantic.com/">Sign up here</a>.
+                                                        <a href="${site.url}">Sign up here</a>.
                                                         %recipient.free_block_end%
                                                     </td>
                                                 </tr>
@@ -1157,7 +1157,7 @@ figure blockquote p {
                                                 </tr>
                                                 <tr>
                                                     <td style="padding-top: 40px;padding-bottom: 40px;text-align: center">
-                                                        <a class="bottom-subscribe-btn" href="${site.url}">Subscribe</a>
+                                                        <a class="bottom-subscribe-btn" href="${ctaUrl}">Subscribe</a>
                                                     </td>
                                                 </tr>
                                             </table>
