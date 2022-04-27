@@ -326,7 +326,7 @@ figure blockquote p {
 
 .header-subscribe {
     color: #000000;
-    font-family: 'Logic Monospace', sans-serif;
+    font-family: Courier, sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 12px;
@@ -338,7 +338,7 @@ figure blockquote p {
 }
 
 .header-info {
-    font-family: Courier,sans-serif;
+    font-family: Courier, sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
@@ -1010,14 +1010,6 @@ figure blockquote p {
             font-weight: 700;
             src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
             mso-font-alt: "Georgia";
-        }
-        @font-face {
-            font-display: swap;
-            font-family: "Logic Monospace";
-            font-stretch: normal;
-            font-style: normal;
-            font-weight: 400;
-            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/logic/LogicMonospace-Regular.woff2") format("woff");
         }
 </style>
 </head>
