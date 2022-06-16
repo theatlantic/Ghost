@@ -45,7 +45,6 @@ function createApiInstance(config) {
                 }
             },
             getSubject(type) {
-                const siteTitle = settingsCache.get('title');
                 switch (type) {
                 case 'subscribe':
                     return `Please confirm your email address`;

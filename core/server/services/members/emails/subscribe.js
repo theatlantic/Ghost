@@ -1,5 +1,4 @@
-module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, siteUrl}) => {
-
+module.exports = ({url, siteUrl}) => {
     // find site slug for build subscription url
     const parsedUrl = new URL(siteUrl);
     const siteSlug = parsedUrl.pathname.split('/')[1];
@@ -97,7 +96,6 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
             src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
             mso-font-alt: "Georgia";
         }
-        ​
         @font-face {
             font-display: swap;
             font-family: "Adobe Garamond Pro";
@@ -106,7 +104,6 @@ module.exports = ({siteTitle, email, url, accentColor = '#15212A', siteDomain, s
             src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
             mso-font-alt: "Georgia";
         }
-        ​
         @font-face {
             font-display: swap;
             font-family: "Adobe Garamond Pro";

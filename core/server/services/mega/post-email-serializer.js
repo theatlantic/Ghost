@@ -11,7 +11,7 @@ const htmlToPlaintext = require('../../../shared/html-to-plaintext');
 const {isUnsplashImage, isLocalContentImage} = require('@tryghost/kg-default-cards/lib/utils');
 const {textColorForBackgroundColor, darkenToContrastThreshold} = require('@tryghost/color-utils');
 const logging = require('@tryghost/logging');
-const {fillAdvertisements} = require("./advertising")
+const {fillAdvertisements} = require('./advertising');
 
 const ALLOWED_REPLACEMENTS = ['first_name'];
 
@@ -300,7 +300,7 @@ const serialize = async (postModel, newsletter, options = {isBrowserPreview: fal
     // @HACK: The Atlantic inserts ads
     htmlTemplate = await fillAdvertisements({
         site: getSite(),
-        html: htmlTemplate,
+        html: htmlTemplate
     });
 
     // Clean up any unknown replacements strings to get our final content

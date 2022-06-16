@@ -4,9 +4,6 @@ const membersService = require('./service');
 const models = require('../../models');
 const urlUtils = require('../../../shared/url-utils');
 const {formattedMemberResponse} = require('./utils');
-const labsService = require('../../../shared/labs');
-const config = require('../../../shared/config');
-const getNewslettersServiceInstance = require('../newsletters');
 const createCookies = require('cookies');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
@@ -50,7 +47,7 @@ const getAtlanticMemberCookie = async function (req, res) {
                     const publicKeyPath = path.resolve(__dirname, '../../../../content/keys/jwt_cookie_cert.pem');
                     const publicKey = fs.readFileSync(publicKeyPath);
                     jwt.verify(atlanticCookie, publicKey, {ignoreExpiration: true, maxAge: cookieMaxAge});
-                    console.log('cookie valid');
+                    //console.log('cookie valid');
 
                     res.setHeader(atlanticPaywallHeaderName, 0);
 
@@ -63,8 +60,8 @@ const getAtlanticMemberCookie = async function (req, res) {
                         status: 'paid'
                     };
                 } catch (err) {
-                    console.log('cookie NOT verified');
-                    console.log(err);
+                    //console.log('cookie NOT verified');
+                    //console.log(err);
                 }
             }
         }
