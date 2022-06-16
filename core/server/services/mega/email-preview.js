@@ -1,24 +1,26 @@
 const postEmailSerializer = require('./post-email-serializer');
+const models = require('../../models');
 
 class EmailPreview {
     /**
-     * @constructor
-     * @param {Object} options
-     * @param {String} options.apiVersion
-     */
-    constructor({apiVersion}) {
-        this.apiVersion = apiVersion;
-    }
-
-    /**
      * @param {Object} post - Post model object instance
-     * @param {String} memberSegment - member segment filter
+     * @param {Object} options
+     * @param {String} options.newsletter - newsletter slug
+     * @param {String} options.memberSegment - member segment filter
      * @returns {Promise<Object>}
      */
-    async generateEmailContent(post, memberSegment) {
-        let emailContent = await postEmailSerializer.serialize(post, {
-            isBrowserPreview: true,
-            apiVersion: this.apiVersion
+    async generateEmailContent(post, {newsletter, memberSegment} = {}) {
+        let newsletterModel = await post.getLazyRelation('newsletter');
+        if (!newsletterModel) {
+            if (newsletter) {
+                newsletterModel = await models.Newsletter.findOne({slug: newsletter});
+            } else {
+                newsletterModel = await models.Newsletter.getDefaultNewsletter();
+            }
+        }
+
+        let emailContent = await postEmailSerializer.serialize(post, newsletterModel, {
+            isBrowserPreview: true
         });
 
         if (memberSegment) {

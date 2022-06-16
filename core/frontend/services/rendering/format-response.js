@@ -6,7 +6,7 @@ const {prepareContextResource} = require('../proxy');
  *
  * @return {Object} containing page variables
  */
-function formatPageResponse(result) {
+function formatPageResponse(result, pageAsPost = false) {
     const response = {};
 
     if (result.posts) {
@@ -32,6 +32,10 @@ function formatPageResponse(result) {
         }
     });
 
+    if (pageAsPost && response.page) {
+        response.post = response.page;
+    }
+
     return response;
 }
 
@@ -46,12 +50,19 @@ function formatPageResponse(result) {
  *
  * @return {Object} containing page variables
  */
-function formatResponse(post) {
+function formatResponse(post, context) {
     prepareContextResource(post);
 
-    return {
+    let entry = {
         post: post
     };
+
+    // NOTE: preview context is a special case where the internal preview api returns the post model's type field
+    if (context?.includes('page') || (context?.includes('preview') && post.type === 'page')) {
+        entry.page = post;
+    }
+
+    return entry;
 }
 
 module.exports = {

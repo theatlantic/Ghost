@@ -33,25 +33,32 @@ function serializeSettings(models, apiConfig, frame) {
     // If this is public, we already have the right data, we just need to add an Array wrapper
     if (utils.isContentAPI(frame)) {
         filteredSettings = models;
+        
+        // Change the returned icon location to use a resized version, to prevent serving giant icon files
+        const icon = filteredSettings.icon;
+        if (icon) {
+            filteredSettings.icon = filteredSettings.icon.replace(/\/content\/images\//, '/content/images/size/w256h256/');
+        }
     } else {
         filteredSettings = _.values(settingsFilter(models, frame.options.group));
+
+        // Change the returned icon location to use a resized version, to prevent serving giant icon files
+        // in admin
+        const icon = filteredSettings.find(setting => setting.key === 'icon');
+        if (icon && icon.value) {
+            icon.value = icon.value.replace(/\/content\/images\//, '/content/images/size/w256h256/');
+        }
     }
 
     frame.response = {
-        settings: mappers.settings(filteredSettings, frame),
+        settings: mappers.settings(filteredSettings),
         meta: {}
     };
 
-    if (frame.options.type || frame.options.group) {
-        frame.response.meta.filters = {};
-
-        if (frame.options.type) {
-            frame.response.meta.filters.type = frame.options.type;
-        }
-
-        if (frame.options.group) {
-            frame.response.meta.filters.group = frame.options.group;
-        }
+    if (frame.options.group) {
+        frame.response.meta.filters = {
+            group: frame.options.group
+        };
     }
 }
 
@@ -86,7 +93,5 @@ module.exports = {
     download: serializeData,
     upload: serializeData,
 
-    updateMembersEmail: passthrough,
-    validateMembersEmailUpdate: passthrough,
-    disconnectStripeConnectIntegration: passthrough
+    validateMembersEmailUpdate: passthrough
 };

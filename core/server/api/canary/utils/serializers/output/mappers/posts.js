@@ -13,10 +13,9 @@ const url = require('../utils/url');
 const utils = require('../../../index');
 
 const postsMetaSchema = require('../../../../../../data/schema').tables.posts_meta;
-const labsService = require('../../../../../../../shared/labs');
 
 const getPostServiceInstance = require('../../../../../../services/posts/posts-service');
-const postsService = getPostServiceInstance('canary');
+const postsService = getPostServiceInstance();
 
 module.exports = async (model, frame, options = {}) => {
     const {tiers: tiersData} = options || {};
@@ -26,14 +25,16 @@ module.exports = async (model, frame, options = {}) => {
 
     const jsonModel = model.toJSON(extendedOptions);
 
+    // Map email_recipient_filter to email_segment
+    jsonModel.email_segment = jsonModel.email_recipient_filter;
+    delete jsonModel.email_recipient_filter;
+
     url.forPost(model.id, jsonModel, frame);
 
     extraAttrs.forPost(frame, model, jsonModel);
 
     // Attach tiers to custom nql visibility filter
-    if (labsService.isSet('multipleProducts')
-        && jsonModel.visibility
-    ) {
+    if (jsonModel.visibility) {
         if (['members', 'public'].includes(jsonModel.visibility) && jsonModel.tiers) {
             jsonModel.tiers = tiersData || [];
         }
@@ -51,10 +52,6 @@ module.exports = async (model, frame, options = {}) => {
     }
 
     if (utils.isContentAPI(frame)) {
-        // Content api v2 still expects page prop
-        if (jsonModel.type === 'page') {
-            jsonModel.page = true;
-        }
         date.forPost(jsonModel);
         gating.forPost(jsonModel, frame);
     }
@@ -93,6 +90,10 @@ module.exports = async (model, frame, options = {}) => {
 
             if (relation === 'email' && _.isEmpty(jsonModel.email)) {
                 jsonModel.email = null;
+            }
+
+            if (relation === 'newsletter' && _.isEmpty(jsonModel.newsletter)) {
+                jsonModel.newsletter = null;
             }
         });
     }

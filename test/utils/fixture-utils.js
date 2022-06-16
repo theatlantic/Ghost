@@ -6,6 +6,7 @@ const fs = require('fs-extra');
 const uuid = require('uuid');
 const ObjectId = require('bson-objectid');
 const KnexMigrator = require('knex-migrator');
+const {sequence} = require('@tryghost/promise');
 const knexMigrator = new KnexMigrator();
 
 // Ghost Internals
@@ -13,7 +14,7 @@ const models = require('../../core/server/models');
 const {fixtureManager} = require('../../core/server/data/schema/fixtures');
 const emailAnalyticsService = require('../../core/server/services/email-analytics');
 const permissions = require('../../core/server/services/permissions');
-const settingsService = require('../../core/server/services/settings');
+const settingsService = require('../../core/server/services/settings/settings-service');
 const labsService = require('../../core/shared/labs');
 
 // Other Test Utilities
@@ -26,9 +27,11 @@ let postsInserted = 0;
 /** TEST FIXTURES **/
 const fixtures = {
     insertPosts: function insertPosts(posts) {
-        return Promise.map(posts, function (post) {
+        const tasks = posts.map(post => () => {
             return models.Post.add(post, context.internal);
         });
+
+        return sequence(tasks);
     },
 
     insertPostsAndTags: function insertPostsAndTags() {
@@ -92,12 +95,12 @@ const fixtures = {
             // Let's insert posts with random authors
             for (i = 0; i < count; i += 1) {
                 const author = users[i % users.length];
-                posts.push(DataGenerator.forKnex.createGenericPost(k, null, null, author));
+                posts.push(DataGenerator.forKnex.createGenericPost(k, null, null, [{id: author}]));
                 k = k + 1;
             }
 
             return Promise.map(posts, function (post, index) {
-                posts[index].authors = [{id: posts[index].author_id}];
+                posts[index].authors = [{id: posts[index].authors[0].id}];
                 posts[index].tags = [tags[Math.floor(Math.random() * (tags.length - 1))]];
                 return models.Post.add(posts[index], context.internal);
             });
@@ -433,6 +436,16 @@ const fixtures = {
         });
     },
 
+    insertWebhook: function (attributes) {
+        const webhook = DataGenerator.forKnex.createWebhook(
+            Object.assign(attributes, {
+                integration_id: DataGenerator.forKnex.integrations[0].id
+            })
+        );
+
+        return models.Webhook.add(webhook, context.internal);
+    },
+
     insertWebhooks: function insertWebhooks() {
         return Promise.map(DataGenerator.forKnex.webhooks, function (webhook) {
             return models.Webhook.add(webhook, context.internal);
@@ -465,7 +478,7 @@ const fixtures = {
         return models.Product.add(archivedProduct, context.internal);
     },
 
-    insertMembersAndLabelsAndProducts: function insertMembersAndLabelsAndProducts() {
+    insertMembersAndLabelsAndProducts: function insertMembersAndLabelsAndProducts(newsletters = false) {
         return Promise.map(DataGenerator.forKnex.labels, function (label) {
             return models.Label.add(label, context.internal);
         }).then(function () {
@@ -503,6 +516,15 @@ const fixtures = {
                     });
 
                     member.labels = memberLabelRelations;
+
+                    if (newsletters) {
+                        let memberNewsletterRelations = _.filter(DataGenerator.forKnex.members_newsletters, {member_id: member.id});
+                        memberNewsletterRelations = _.map(memberNewsletterRelations, function (memberNewsletterRelation) {
+                            return _.find(DataGenerator.forKnex.newsletters, {id: memberNewsletterRelation.newsletter_id});
+                        });
+
+                        member.newsletters = memberNewsletterRelations;
+                    }
 
                     // TODO: replace with full member/product associations
                     if (member.email === 'with-product@test.com') {
@@ -552,6 +574,10 @@ const fixtures = {
                         id: product
                     })}, {id: member.id});
                 }
+            }
+        }).then(async function () {
+            for (const event of DataGenerator.forKnex.members_paid_subscription_events) {
+                await models.MemberPaidSubscriptionEvent.add(event);
             }
         });
     },
@@ -634,10 +660,13 @@ const toDoList = {
         return fixtures.insertOne('Member', 'members', 'createMember');
     },
     members: function insertMembersAndLabelsAndProducts() {
-        return fixtures.insertMembersAndLabelsAndProducts();
+        return fixtures.insertMembersAndLabelsAndProducts(false);
     },
     newsletters: function insertNewsletters() {
         return fixtures.insertNewsletters();
+    },
+    'members:newsletters': function insertMembersAndLabelsAndProductsAndNewsletters() {
+        return fixtures.insertMembersAndLabelsAndProducts(true);
     },
     'members:emails': function insertEmailsAndRecipients() {
         return fixtures.insertEmailsAndRecipients();

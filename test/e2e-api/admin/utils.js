@@ -16,7 +16,6 @@ const expectedProperties = {
     tags: ['tags', 'meta'],
     users: ['users', 'meta'],
     settings: ['settings', 'meta'],
-    subscribers: ['subscribers', 'meta'],
     roles: ['roles'],
     pagination: ['page', 'limit', 'pages', 'total', 'next', 'prev'],
     slugs: ['slugs'],
@@ -44,7 +43,7 @@ const expectedProperties = {
         'featured',
         'status',
         'visibility',
-        'email_recipient_filter',
+        'email_segment',
         'created_at',
         'updated_at',
         'published_at',
@@ -71,7 +70,8 @@ const expectedProperties = {
         'email_subject',
         'frontmatter',
         'email_only',
-        'tiers'
+        'tiers',
+        'newsletter'
     ],
 
     page: [
@@ -128,9 +128,6 @@ const expectedProperties = {
     setting: _(schema.settings)
         .keys()
     ,
-    subscriber: _(schema.subscribers)
-        .keys()
-    ,
     member: [
         'id',
         'uuid',
@@ -168,7 +165,7 @@ const expectedProperties = {
     ,
     email: _(schema.emails)
         .keys(),
-    email_preview: ['html', 'subject', 'plaintext'],
+    email_previews: ['html', 'subject', 'plaintext'],
     email_recipient: _(schema.email_recipients)
         .keys()
         .filter(key => key.indexOf('@@') === -1),

@@ -1,9 +1,10 @@
-const should = require('should');
-const UrlUtils = require('@tryghost/url-utils');
+const assert = require('assert');
+const sinon = require('sinon');
+
 const MembersConfigProvider = require('../../../../../core/server/services/members/config');
 
+const urlUtils = require('../../../../utils/urlUtils');
 const configUtils = require('../../../../utils/configUtils');
-const sinon = require('sinon');
 
 /**
  * @param {object} options
@@ -13,11 +14,9 @@ const sinon = require('sinon');
 function createSettingsMock({setDirect, setConnect}) {
     const getStub = sinon.stub();
 
-    getStub.withArgs('members_from_address').returns('noreply');
     getStub.withArgs('members_signup_access').returns('all');
     getStub.withArgs('stripe_secret_key').returns(setDirect ? 'direct_secret' : null);
     getStub.withArgs('stripe_publishable_key').returns(setDirect ? 'direct_publishable' : null);
-    getStub.withArgs('stripe_product_name').returns('Test');
     getStub.withArgs('stripe_plans').returns([{
         name: 'Monthly',
         currency: 'usd',
@@ -36,60 +35,46 @@ function createSettingsMock({setDirect, setConnect}) {
     getStub.withArgs('stripe_connect_display_name').returns('Test');
     getStub.withArgs('stripe_connect_account_id').returns('ac_XXXXXXXXXXXXX');
 
+    getStub.withArgs('members_private_key').returns('PRIVATE');
+    getStub.withArgs('members_public_key').returns('PUBLIC');
+
     return {
         get: getStub
     };
 }
 
-function createUrlUtilsMock() {
-    return new UrlUtils({
-        getSubdir: configUtils.config.getSubdir,
-        getSiteUrl: configUtils.config.getSiteUrl,
-        getAdminUrl: configUtils.config.getAdminUrl,
-        apiVersions: {
-            all: ['canary'],
-            canary: {
-                admin: 'admin',
-                content: 'content'
-            }
-        },
-        defaultApiVersion: 'canary',
-        slugs: ['ghost', 'rss', 'amp'],
-        redirectCacheMaxAge: 31536000,
-        baseApiPath: '/ghost/api'
-    });
-}
-
 describe('Members - config', function () {
+    let membersConfig;
+
     beforeEach(function () {
         configUtils.set({
             url: 'http://domain.tld/subdir',
             admin: {url: 'http://sub.domain.tld'}
         });
+
+        membersConfig = new MembersConfigProvider({
+            config: configUtils.config,
+            settingsCache: createSettingsMock({setDirect: true, setConnect: false}),
+            urlUtils: urlUtils.stubUrlUtilsFromConfig()
+        });
     });
 
     afterEach(function () {
         configUtils.restore();
+        urlUtils.restore();
+        sinon.restore();
     });
 
-    it('Does not export webhookHandlerUrl', function () {
-        configUtils.set({
-            stripeDirect: false,
-            url: 'http://site.com/subdir'
-        });
-        const settingsCache = createSettingsMock({setDirect: true, setConnect: false});
-        const urlUtils = createUrlUtilsMock();
+    it('can get correct tokenConfig', function () {
+        const {issuer, publicKey, privateKey} = membersConfig.getTokenConfig();
 
-        const membersConfig = new MembersConfigProvider({
-            config: configUtils.config,
-            settingsCache,
-            urlUtils,
-            ghostVersion: {original: 'v7357'},
-            logging: console
-        });
+        assert.equal(issuer, 'http://domain.tld/subdir/members/api');
+        assert.equal(publicKey, 'PUBLIC');
+        assert.equal(privateKey, 'PRIVATE');
+    });
 
-        const paymentConfig = membersConfig.getStripePaymentConfig();
-
-        should.not.exist(paymentConfig.webhookHandlerUrl);
+    it('can get correct signinUrl', function () {
+        const signinUrl = membersConfig.getSigninURL('a', 'b');
+        assert.equal(signinUrl, 'http://domain.tld/subdir/members/?token=a&action=b');
     });
 });

@@ -8,13 +8,21 @@ const config = require('../../../../core/shared/config');
 const models = require('../../../../core/server/models');
 const localUtils = require('./utils');
 
+const defaultNewsletterSlug = testUtils.DataGenerator.Content.newsletters[0].slug;
+const secondNewsletterSlug = testUtils.DataGenerator.Content.newsletters[1].slug;
+
 describe('Posts API (canary)', function () {
     let request;
 
     before(async function () {
         await localUtils.startGhost();
         request = supertest.agent(config.get('url'));
-        await localUtils.doAuth(request, 'users:extra', 'posts', 'emails', 'members');
+
+        // Archive the default newsletter fixture
+        const defaultNewsletter = await models.Newsletter.findOne({status: 'active'});
+        await models.Newsletter.edit({status: 'archived'}, {id: defaultNewsletter.id});
+
+        await localUtils.doAuth(request, 'users:extra', 'posts', 'emails', 'newsletters', 'members:newsletters');
     });
 
     describe('Browse', function () {
@@ -267,7 +275,8 @@ describe('Posts API (canary)', function () {
                         'property',
                         'help',
                         'code',
-                        'id'
+                        'id',
+                        'ghostErrorCode'
                     ]);
                     done();
                 });
@@ -410,7 +419,7 @@ describe('Posts API (canary)', function () {
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
                 .expect(201);
-            
+
             should.exist(res.body.posts);
             should.exist(res.body.posts[0].title);
             res.body.posts[0].title.should.equal('Tags test 5');
@@ -420,7 +429,7 @@ describe('Posts API (canary)', function () {
             // Expected behaviour when creating a slug with spaces:
             res.body.posts[0].tags[0].name.should.equal('five-spaces');
 
-            // If we create another post again now that the five-spaces tag exists, 
+            // If we create another post again now that the five-spaces tag exists,
             // we need to make sure it matches correctly and doesn't create a new tag again
 
             const res2 = await request
@@ -435,7 +444,7 @@ describe('Posts API (canary)', function () {
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
                 .expect(201);
-            
+
             should.exist(res2.body.posts);
             should.exist(res2.body.posts[0].title);
             res2.body.posts[0].title.should.equal('Tags test 6');
@@ -458,7 +467,7 @@ describe('Posts API (canary)', function () {
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
                 .expect(201);
-            
+
             should.exist(res.body.posts);
             should.exist(res.body.posts[0].title);
             res.body.posts[0].title.should.equal('Tags test 7');
@@ -466,7 +475,7 @@ describe('Posts API (canary)', function () {
             res.body.posts[0].tags[0].slug.should.equal('six-spaces');
             res.body.posts[0].tags[0].name.should.equal('Not automated name for six spaces');
 
-            // If we create another post again now that the five-spaces tag exists, 
+            // If we create another post again now that the five-spaces tag exists,
             // we need to make sure it matches correctly and doesn't create a new tag again
 
             const res2 = await request
@@ -481,7 +490,7 @@ describe('Posts API (canary)', function () {
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
                 .expect(201);
-            
+
             should.exist(res2.body.posts);
             should.exist(res2.body.posts[0].title);
             res2.body.posts[0].title.should.equal('Tags test 8');
@@ -504,14 +513,14 @@ describe('Posts API (canary)', function () {
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
                 .expect(201);
-            
+
             should.exist(res.body.posts);
             should.exist(res.body.posts[0].title);
             res.body.posts[0].title.should.equal('Tags test 9');
             res.body.posts[0].tags.length.should.equal(1);
             res.body.posts[0].tags[0].slug.should.equal(tooLongSlug.substring(0, 185));
 
-            // If we create another post again now that the very long tag exists, 
+            // If we create another post again now that the very long tag exists,
             // we need to make sure it matches correctly and doesn't create a new tag again
 
             const res2 = await request
@@ -526,7 +535,7 @@ describe('Posts API (canary)', function () {
                 .expect('Content-Type', /json/)
                 .expect('Cache-Control', testUtils.cacheRules.private)
                 .expect(201);
-            
+
             should.exist(res2.body.posts);
             should.exist(res2.body.posts[0].title);
             res2.body.posts[0].title.should.equal('Tags test 10');
@@ -563,7 +572,7 @@ describe('Posts API (canary)', function () {
                 });
         });
 
-        it('publishes a post with email_only and sends email', async function () {
+        it('publishes a post with email_only and sends email to all', async function () {
             const res = await request
                 .post(localUtils.API.getApiQuery('posts/'))
                 .set('Origin', config.get('url'))
@@ -587,7 +596,7 @@ describe('Posts API (canary)', function () {
             res.headers.location.should.equal(`http://127.0.0.1:2369${localUtils.API.getApiQuery('posts/')}${res.body.posts[0].id}/`);
 
             const publishedRes = await request
-                .put(localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/?email_recipient_filter=all`))
+                .put(localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/?newsletter=${defaultNewsletterSlug}`))
                 .set('Origin', config.get('url'))
                 .send({
                     posts: [{
@@ -604,10 +613,10 @@ describe('Posts API (canary)', function () {
             publishedRes.body.posts[0].status.should.equal('sent');
 
             should.exist(publishedRes.body.posts[0].email);
-            publishedRes.body.posts[0].email.email_count.should.equal(8);
+            publishedRes.body.posts[0].email.email_count.should.equal(4);
         });
 
-        it('publishes a post while setting email_only flag sends an email', async function () {
+        it('publishes a post while setting email_only flag sends an email to paid', async function () {
             const res = await request
                 .post(localUtils.API.getApiQuery('posts/'))
                 .set('Origin', config.get('url'))
@@ -630,7 +639,7 @@ describe('Posts API (canary)', function () {
             res.headers.location.should.equal(`http://127.0.0.1:2369${localUtils.API.getApiQuery('posts/')}${res.body.posts[0].id}/`);
 
             const publishedRes = await request
-                .put(localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/?email_recipient_filter=paid`))
+                .put(localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/?email_segment=status:-free&newsletter=${defaultNewsletterSlug}`))
                 .set('Origin', config.get('url'))
                 .send({
                     posts: [{
@@ -647,7 +656,50 @@ describe('Posts API (canary)', function () {
             publishedRes.body.posts[0].status.should.equal('sent');
 
             should.exist(publishedRes.body.posts[0].email);
-            publishedRes.body.posts[0].email.email_count.should.equal(5);
+            publishedRes.body.posts[0].email.email_count.should.equal(2);
+        });
+
+        it('only send an email to paid subscribed members of the selected newsletter', async function () {
+            const res = await request
+                .post(localUtils.API.getApiQuery('posts/'))
+                .set('Origin', config.get('url'))
+                .send({
+                    posts: [{
+                        title: 'Email me'
+                    }]
+                })
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(201);
+
+            should.exist(res.body.posts);
+            should.exist(res.body.posts[0].title);
+            res.body.posts[0].title.should.equal('Email me');
+            res.body.posts[0].email_only.should.be.false();
+            res.body.posts[0].status.should.equal('draft');
+
+            should.exist(res.headers.location);
+            res.headers.location.should.equal(`http://127.0.0.1:2369${localUtils.API.getApiQuery('posts/')}${res.body.posts[0].id}/`);
+
+            const publishedRes = await request
+                .put(localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/?email_segment=status:-free&newsletter=${secondNewsletterSlug}`))
+                .set('Origin', config.get('url'))
+                .send({
+                    posts: [{
+                        status: 'published',
+                        email_only: true,
+                        updated_at: res.body.posts[0].updated_at
+                    }]
+                })
+                .expect('Content-Type', /json/)
+                .expect('Cache-Control', testUtils.cacheRules.private)
+                .expect(200);
+
+            should.exist(publishedRes.body.posts);
+            publishedRes.body.posts[0].status.should.equal('sent');
+
+            should.exist(publishedRes.body.posts[0].email);
+            publishedRes.body.posts[0].email.email_count.should.equal(2);
         });
 
         it('read-only value do not cause errors when edited', function () {
@@ -979,7 +1031,7 @@ describe('Posts API (canary)', function () {
                 });
         });
 
-        it('errors with invalid email recipient filter', function () {
+        it('errors with invalid email segment', function () {
             return request
                 .post(localUtils.API.getApiQuery('posts/'))
                 .set('Origin', config.get('url'))
@@ -994,7 +1046,7 @@ describe('Posts API (canary)', function () {
                 .expect(201)
                 .then((res) => {
                     return request
-                        .put(`${localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/`)}?email_recipient_filter=not a filter`)
+                        .put(`${localUtils.API.getApiQuery(`posts/${res.body.posts[0].id}/`)}?newsletter=${secondNewsletterSlug}&email_segment=not-a-filter`)
                         .set('Origin', config.get('url'))
                         .send({
                             posts: [{
@@ -1009,7 +1061,7 @@ describe('Posts API (canary)', function () {
                         .expect(400);
                 })
                 .then((res) => {
-                    res.text.should.match(/invalid filter/i);
+                    res.text.should.match(/valid filter/i);
                 });
         });
     });
@@ -1035,7 +1087,8 @@ describe('Posts API (canary)', function () {
                         'property',
                         'help',
                         'code',
-                        'id'
+                        'id',
+                        'ghostErrorCode'
                     ]);
                 });
         });

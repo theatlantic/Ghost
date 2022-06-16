@@ -5,10 +5,9 @@ const bodyParser = require('body-parser');
 const shared = require('../../../shared');
 const apiMw = require('../../middleware');
 const errorHandler = require('@tryghost/mw-error-handler');
-const versionMissmatchHandler = require('@tryghost/mw-api-version-mismatch');
 const sentry = require('../../../../../shared/sentry');
 const routes = require('./routes');
-const {APIVersionCompatibilityServiceInstance} = require('../../../../services/api-version-compatibility');
+const APIVersionCompatibilityService = require('../../../../services/api-version-compatibility');
 
 module.exports = function setupApiApp() {
     debug('Admin API canary setup start');
@@ -17,8 +16,8 @@ module.exports = function setupApiApp() {
     // API middleware
 
     // Body parsing
-    apiApp.use(bodyParser.json({limit: '1mb'}));
-    apiApp.use(bodyParser.urlencoded({extended: true, limit: '1mb'}));
+    apiApp.use(bodyParser.json({limit: '50mb'}));
+    apiApp.use(bodyParser.urlencoded({extended: true, limit: '50mb'}));
 
     // Query parsing
     apiApp.use(boolParser());
@@ -35,8 +34,8 @@ module.exports = function setupApiApp() {
 
     // API error handling
     apiApp.use(errorHandler.resourceNotFound);
-    apiApp.use(versionMissmatchHandler(APIVersionCompatibilityServiceInstance));
-    apiApp.use(errorHandler.handleJSONResponseV2(sentry));
+    apiApp.use(APIVersionCompatibilityService.errorHandler);
+    apiApp.use(errorHandler.handleJSONResponse(sentry));
 
     debug('Admin API canary setup end');
 

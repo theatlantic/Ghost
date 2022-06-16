@@ -1,6 +1,10 @@
 const should = require('should');
+const sinon = require('sinon');
+const settingsCache = require('../../../../../core/shared/settings-cache');
+const models = require('../../../../../core/server/models');
+const urlUtils = require('../../../../../core/shared/url-utils');
 
-const {parseReplacements, renderEmailForSegment} = require('../../../../../core/server/services/mega/post-email-serializer');
+const {parseReplacements, renderEmailForSegment, _getTemplateSettings, createUnsubscribeUrl} = require('../../../../../core/server/services/mega/post-email-serializer');
 
 describe('Post Email Serializer', function () {
     it('creates replacement pattern for valid format and value', function () {
@@ -79,6 +83,85 @@ describe('Post Email Serializer', function () {
             let output = renderEmailForSegment(email, null);
             output.html.should.equal('hello');
             output.plaintext.should.equal('hello');
+        });
+    });
+
+    describe('createUnsubscribeUrl', function () {
+        before(function () {
+            models.init();
+        });
+
+        afterEach(function () {
+            sinon.restore();
+        });
+
+        it('generates unsubscribe url for preview', function () {
+            sinon.stub(urlUtils, 'getSiteUrl').returns('https://site.com/blah');
+            const unsubscribeUrl = createUnsubscribeUrl(null);
+            unsubscribeUrl.should.eql('https://site.com/blah/unsubscribe/?preview=1');
+        });
+
+        it('generates unsubscribe url with only post uuid', function () {
+            sinon.stub(urlUtils, 'getSiteUrl').returns('https://site.com/blah');
+            const unsubscribeUrl = createUnsubscribeUrl('post-abcd');
+            unsubscribeUrl.should.eql('https://site.com/blah/unsubscribe/?uuid=post-abcd');
+        });
+
+        it('generates unsubscribe url with both post and newsletter uuid', function () {
+            sinon.stub(urlUtils, 'getSiteUrl').returns('https://site.com/blah');
+            const unsubscribeUrl = createUnsubscribeUrl('post-abcd', 'newsletter-abcd');
+            unsubscribeUrl.should.eql('https://site.com/blah/unsubscribe/?uuid=post-abcd&newsletter=newsletter-abcd');
+        });
+    });
+
+    describe('getTemplateSettings', function () {
+        before(function () {
+            models.init();
+        });
+
+        afterEach(function () {
+            sinon.restore();
+        });
+
+        it('uses the newsletter settings', async function () {
+            sinon.stub(settingsCache, 'get').callsFake(function (key) {
+                return {
+                    icon: 'icon2',
+                    accent_color: '#000099'
+                }[key];
+            });
+            const newsletterMock = {
+                get: function (key) {
+                    return {
+                        header_image: 'image',
+                        show_header_icon: true,
+                        show_header_title: true,
+                        show_feature_image: true,
+                        title_font_category: 'sans-serif',
+                        title_alignment: 'center',
+                        body_font_category: 'serif',
+                        show_badge: true,
+                        footer_content: 'footer',
+                        show_header_name: true
+                    }[key];
+                }
+            };
+            const res = await _getTemplateSettings(newsletterMock);
+            should(res).eql({
+                headerImage: 'image',
+                showHeaderIcon: 'icon2',
+                showHeaderTitle: true,
+                showFeatureImage: true,
+                titleFontCategory: 'sans-serif',
+                titleAlignment: 'center',
+                bodyFontCategory: 'serif',
+                showBadge: true,
+                footerContent: 'footer',
+                accentColor: '#000099',
+                adjustedAccentColor: '#000099',
+                adjustedAccentContrastColor: '#FFFFFF',
+                showHeaderName: true
+            });
         });
     });
 });

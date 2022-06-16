@@ -6,11 +6,11 @@ describe('Tiers Content API', function () {
     before(async function () {
         agent = await agentProvider.getContentAPIAgent();
         await fixtureManager.init('members', 'api_keys', 'tiers:archived');
-        agent.authenticate();
+        await agent.authenticate();
     });
 
     it('Can request only active tiers', async function () {
-        await agent.get('/tiers/')
+        await agent.get('/tiers/?include=monthly_price')
             .expectStatus(200)
             .matchHeaderSnapshot({
                 etag: matchers.anyEtag

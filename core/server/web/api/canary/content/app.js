@@ -6,8 +6,7 @@ const sentry = require('../../../../../shared/sentry');
 const shared = require('../../../shared');
 const routes = require('./routes');
 const errorHandler = require('@tryghost/mw-error-handler');
-const versionMissmatchHandler = require('@tryghost/mw-api-version-mismatch');
-const {APIVersionCompatibilityServiceInstance} = require('../../../../services/api-version-compatibility');
+const apiVersionCompatibility = require('../../../../services/api-version-compatibility');
 
 module.exports = function setupApiApp() {
     debug('Content API canary setup start');
@@ -16,7 +15,7 @@ module.exports = function setupApiApp() {
     // API middleware
 
     // @NOTE: req.body is undefined if we don't use this parser, this can trouble if components rely on req.body being present
-    apiApp.use(bodyParser.json({limit: '1mb'}));
+    apiApp.use(bodyParser.json({limit: '50mb'}));
 
     // Query parsing
     apiApp.use(boolParser());
@@ -29,7 +28,7 @@ module.exports = function setupApiApp() {
 
     // API error handling
     apiApp.use(errorHandler.resourceNotFound);
-    apiApp.use(versionMissmatchHandler(APIVersionCompatibilityServiceInstance));
+    apiApp.use(apiVersionCompatibility.errorHandler);
     apiApp.use(errorHandler.handleJSONResponse(sentry));
 
     debug('Content API canary setup end');

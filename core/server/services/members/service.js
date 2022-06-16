@@ -18,7 +18,6 @@ const jobsService = require('../jobs');
 const VerificationTrigger = require('@tryghost/verification-trigger');
 const DomainEvents = require('@tryghost/domain-events');
 const {LastSeenAtUpdater} = require('@tryghost/members-events-service');
-const events = require('../../lib/common/events');
 const DatabaseInfo = require('@tryghost/database-info');
 
 const messages = {
@@ -53,7 +52,10 @@ const membersImporter = new MembersCSVImporter({
     isSet: labsService.isSet.bind(labsService),
     addJob: jobsService.addJob.bind(jobsService),
     knex: db.knex,
-    urlFor: urlUtils.urlFor.bind(urlUtils)
+    urlFor: urlUtils.urlFor.bind(urlUtils),
+    context: {
+        importer: true
+    }
 });
 
 const processImport = async (options) => {
@@ -70,32 +72,6 @@ module.exports = {
         const stripeService = require('../stripe');
         const createMembersApiInstance = require('./api');
         const env = config.get('env');
-
-        events.on('settings.edited', async function (settingModel) {
-            if (labsService.isSet('multipleProducts')) {
-                return;
-            }
-
-            const key = settingModel.get('key');
-            const value = settingModel.get('value');
-
-            if (key === 'members_free_signup_redirect') {
-                try {
-                    await models.Product.forge().query().update('welcome_page_url', value).where('type', 'free');
-                } catch (err) {
-                    logging.error(err);
-                }
-                return;
-            }
-            if (key === 'members_paid_signup_redirect') {
-                try {
-                    await models.Product.forge().query().update('welcome_page_url', value).where('type', 'paid');
-                } catch (err) {
-                    logging.error(err);
-                }
-                return;
-            }
-        });
 
         // @TODO Move to stripe service
         if (env !== 'production') {
@@ -154,12 +130,12 @@ module.exports = {
         });
 
         new LastSeenAtUpdater({
-            models: {
-                Member: models.Member
-            },
             services: {
                 domainEvents: DomainEvents,
                 settingsCache
+            },
+            async getMembersApi() {
+                return membersApi;
             }
         });
 
@@ -199,7 +175,7 @@ module.exports = {
 
     processImport: processImport,
 
-    stats: membersStats
-
+    stats: membersStats,
+    export: require('./exporter/query')
 };
 module.exports.middleware = require('./middleware');

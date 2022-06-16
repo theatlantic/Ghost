@@ -18,7 +18,7 @@ describe('Unit: canary/utils/serializers/output/members', function () {
         sinon.restore();
     });
 
-    it('browse: includes newsletter data when flag is enabled', function () {
+    it('browse: includes newsletter data', function () {
         const apiConfig = {docName: 'members'};
         const frame = {
             options: {
@@ -34,8 +34,7 @@ describe('Unit: canary/utils/serializers/output/members', function () {
         should.exist(frame.response.members[0].newsletters);
     });
 
-    it('browse: removes newsletter data when flag is disabled', function () {
-        labsStub.returns(false);
+    it('browse: includes tiers data', function () {
         const apiConfig = {docName: 'members'};
         const frame = {
             options: {
@@ -43,15 +42,16 @@ describe('Unit: canary/utils/serializers/output/members', function () {
             }
         };
 
-        const ctrlResponse = memberModel(testUtils.DataGenerator.forKnex.createMemberWithNewsletter());
+        const ctrlResponse = memberModel(testUtils.DataGenerator.forKnex.createMemberWithProducts());
         memberSerializer.browse({
             data: [ctrlResponse],
             meta: null
         }, apiConfig, frame);
-        should.not.exist(frame.response.members[0].newsletters);
+
+        should.exist(frame.response.members[0].tiers);
     });
 
-    it('read: includes newsletter data when flag is enabled', function () {
+    it('read: includes newsletter data', function () {
         const apiConfig = {docName: 'members'};
         const frame = {
             options: {
@@ -64,8 +64,7 @@ describe('Unit: canary/utils/serializers/output/members', function () {
         should.exist(frame.response.members[0].newsletters);
     });
 
-    it('read: removes newsletter data when flag is disabled', function () {
-        labsStub.returns(false);
+    it('read: includes tiers data', function () {
         const apiConfig = {docName: 'members'};
         const frame = {
             options: {
@@ -73,8 +72,9 @@ describe('Unit: canary/utils/serializers/output/members', function () {
             }
         };
 
-        const ctrlResponse = memberModel(testUtils.DataGenerator.forKnex.createMemberWithNewsletter());
+        const ctrlResponse = memberModel(testUtils.DataGenerator.forKnex.createMemberWithProducts());
         memberSerializer.read(ctrlResponse, apiConfig, frame);
-        should.not.exist(frame.response.members[0].newsletters);
+
+        should.exist(frame.response.members[0].tiers);
     });
 });

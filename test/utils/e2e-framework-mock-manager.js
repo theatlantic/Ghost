@@ -5,6 +5,8 @@ const nock = require('nock');
 
 // Helper services
 const configUtils = require('./configUtils');
+const WebhookMockReceiver = require('@tryghost/webhook-mock-receiver');
+const {snapshotManager} = require('@tryghost/express-test').snapshot;
 
 let mocks = {};
 let emailCount = 0;
@@ -13,6 +15,9 @@ let emailCount = 0;
 const mailService = require('../../core/server/services/mail/index');
 const labs = require('../../core/shared/labs');
 const events = require('../../core/server/lib/common/events');
+
+let fakedLabsFlags = {};
+const originalLabsIsSet = labs.isSet;
 
 /**
  * Stripe Mocks
@@ -43,6 +48,12 @@ const mockMail = (response = 'Mail is disabled') => {
         .resolves(response);
 
     return mocks.mail;
+};
+
+const mockWebhookRequests = () => {
+    mocks.webhookMockReceiver = new WebhookMockReceiver({snapshotManager});
+
+    return mocks.webhookMockReceiver;
 };
 
 const sentEmailCount = (count) => {
@@ -93,6 +104,15 @@ const emittedEvent = (name) => {
 /**
  * Labs Mocks
  */
+
+const fakeLabsIsSet = (flag) => {
+    if (fakedLabsFlags.hasOwnProperty(flag)) {
+        return fakedLabsFlags[flag];
+    }
+
+    return originalLabsIsSet(flag);
+};
+
 const mockLabsEnabled = (flag, alpha = true) => {
     // We assume we should enable alpha experiments unless explicitly told not to!
     if (!alpha) {
@@ -100,10 +120,10 @@ const mockLabsEnabled = (flag, alpha = true) => {
     }
 
     if (!mocks.labs) {
-        mocks.labs = sinon.stub(labs, 'isSet');
+        mocks.labs = sinon.stub(labs, 'isSet').callsFake(fakeLabsIsSet);
     }
 
-    mocks.labs.withArgs(flag).returns(true);
+    fakedLabsFlags[flag] = true;
 };
 
 const mockLabsDisabled = (flag, alpha = true) => {
@@ -113,19 +133,24 @@ const mockLabsDisabled = (flag, alpha = true) => {
     }
 
     if (!mocks.labs) {
-        mocks.labs = sinon.stub(labs, 'isSet');
+        mocks.labs = sinon.stub(labs, 'isSet').callsFake(fakeLabsIsSet);
     }
 
-    mocks.labs.withArgs(flag).returns(false);
+    fakedLabsFlags[flag] = false;
 };
 
 const restore = () => {
     configUtils.restore();
     sinon.restore();
     mocks = {};
+    fakedLabsFlags = {};
     emailCount = 0;
     nock.cleanAll();
     nock.enableNetConnect();
+
+    if (mocks.webhookMockReceiver) {
+        mocks.webhookMockReceiver.reset();
+    }
 };
 
 module.exports = {
@@ -135,6 +160,7 @@ module.exports = {
     mockStripe,
     mockLabsEnabled,
     mockLabsDisabled,
+    mockWebhookRequests,
     restore,
     assert: {
         sentEmailCount,

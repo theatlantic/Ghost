@@ -13,13 +13,16 @@ const routing = require('../../../../core/frontend/services/routing');
 const urlService = require('../../../../core/server/services/url');
 
 const ghost_head = require('../../../../core/frontend/helpers/ghost_head');
-const {settingsCache} = require('../../../../core/frontend/services/proxy');
+const proxy = require('../../../../core/frontend/services/proxy');
+const {settingsCache} = proxy;
 
 describe('{{ghost_head}} helper', function () {
     let posts = [];
     let tags = [];
     let authors = [];
     let users = [];
+
+    let keyStub;
 
     const makeFixtures = () => {
         const {createPost, createUser, createTag} = testUtils.DataGenerator.forKnex;
@@ -193,6 +196,7 @@ describe('{{ghost_head}} helper', function () {
         posts.push(createPost({// Post 4
             title: 'Welcome to Ghost',
             mobiledoc: testUtils.DataGenerator.markdownToMobiledoc('This is a short post'),
+            excerpt: 'This is a short post',
             authors: [
                 authors[3]
             ],
@@ -263,6 +267,7 @@ describe('{{ghost_head}} helper', function () {
         posts.push(createPost({// Post 9
             title: 'Welcome to Ghost',
             mobiledoc: testUtils.DataGenerator.markdownToMobiledoc('This is a short post'),
+            excerpt: 'This is a short post',
             tags: [
                 createTag({name: 'tag1'}),
                 createTag({name: 'tag2'}),
@@ -278,6 +283,12 @@ describe('{{ghost_head}} helper', function () {
     before(function () {
         // @TODO: remove when visibility is refactored out of models
         models.init();
+
+        keyStub = sinon.stub().resolves('xyz');
+        const dataService = {
+            getFrontendKey: keyStub
+        };
+        proxy.init({dataService});
     });
 
     beforeEach(function () {
@@ -286,11 +297,8 @@ describe('{{ghost_head}} helper', function () {
         // @TODO: this is a LOT of mocking :/
         sinon.stub(routing.registry, 'getRssUrl').returns('http://localhost:65530/rss/');
         sinon.stub(imageLib.imageSize, 'getImageSizeFromUrl').resolves();
-        sinon.stub(themeEngine, 'getActive').returns({
-            engine: () => 'canary'
-        });
-
         sinon.stub(settingsCache, 'get');
+
         settingsCache.get.withArgs('title').returns('Ghost');
         settingsCache.get.withArgs('description').returns('site description');
         settingsCache.get.withArgs('cover_image').returns('/content/images/site-cover.png');
@@ -1296,7 +1304,7 @@ describe('{{ghost_head}} helper', function () {
                 }
             })).then(function (rendered) {
                 should.exist(rendered);
-                rendered.string.should.match(/<link rel="icon" href="\/site\/favicon.png" type="image\/png" \/>/);
+                rendered.string.should.match(/<link rel="icon" href="\/site\/content\/images\/size\/w256h256\/favicon.png" type="image\/png" \/>/);
                 rendered.string.should.match(/<link rel="canonical" href="http:\/\/localhost:65530\/site\/" \/>/);
                 rendered.string.should.match(/<meta name="generator" content="Ghost 0.3" \/>/);
                 rendered.string.should.match(/<link rel="alternate" type="application\/rss\+xml" title="Ghost" href="http:\/\/localhost:65530\/site\/rss\/" \/>/);
@@ -1325,7 +1333,7 @@ describe('{{ghost_head}} helper', function () {
                 }
             })).then(function (rendered) {
                 should.exist(rendered);
-                rendered.string.should.match(/<link rel="icon" href="\/site\/favicon.png" type="image\/png" \/>/);
+                rendered.string.should.match(/<link rel="icon" href="\/site\/content\/images\/size\/w256h256\/favicon.png" type="image\/png" \/>/);
                 rendered.string.should.match(/<meta name="referrer" content="origin" \/>/);
                 rendered.string.should.not.match(/<meta name="description" /);
 
@@ -1360,7 +1368,7 @@ describe('{{ghost_head}} helper', function () {
                 }
             })).then(function (rendered) {
                 should.exist(rendered);
-                rendered.string.should.match(/<link rel="icon" href="\/favicon.png" type="image\/png" \/>/);
+                rendered.string.should.match(/<link rel="icon" href="\/content\/images\/size\/w256h256\/favicon.png" type="image\/png" \/>/);
                 rendered.string.should.match(/<link rel="canonical" href="http:\/\/localhost:65530\/post\/" \/>/);
                 rendered.string.should.match(/<link rel="amphtml" href="http:\/\/localhost:65530\/post\/amp\/" \/>/);
                 rendered.string.should.match(/<meta name="description" content="site description" \/>/);
@@ -1393,7 +1401,7 @@ describe('{{ghost_head}} helper', function () {
                 }
             })).then(function (rendered) {
                 should.exist(rendered);
-                rendered.string.should.match(/<link rel="icon" href="\/favicon.png" type="image\/png" \/>/);
+                rendered.string.should.match(/<link rel="icon" href="\/content\/images\/size\/w256h256\/favicon.png" type="image\/png" \/>/);
                 rendered.string.should.match(/<link rel="canonical" href="http:\/\/localhost:65530\/" \/>/);
                 rendered.string.should.match(/<meta name="generator" content="Ghost 0.3" \/>/);
                 rendered.string.should.match(/<link rel="alternate" type="application\/rss\+xml" title="Ghost" href="http:\/\/localhost:65530\/rss\/" \/>/);
@@ -1479,7 +1487,7 @@ describe('{{ghost_head}} helper', function () {
                 }
             })).then(function (rendered) {
                 should.exist(rendered);
-                rendered.string.should.match(/<link rel="icon" href="\/favicon.png" type="image\/png" \/>/);
+                rendered.string.should.match(/<link rel="icon" href="\/content\/images\/size\/w256h256\/favicon.png" type="image\/png" \/>/);
                 rendered.string.should.match(/<link rel="canonical" href="http:\/\/localhost:65530\/" \/>/);
                 rendered.string.should.match(/<meta name="generator" content="Ghost 0.3" \/>/);
                 rendered.string.should.match(/<link rel="alternate" type="application\/rss\+xml" title="Ghost" href="http:\/\/localhost:65530\/rss\/" \/>/);
@@ -1569,6 +1577,8 @@ describe('{{ghost_head}} helper', function () {
         });
 
         it('attaches style tag to existing script/style tag', function (done) {
+            settingsCache.get.withArgs('members_enabled').returns(true);
+            
             const renderObject = {
                 post: posts[1]
             };
@@ -1648,8 +1658,8 @@ describe('{{ghost_head}} helper', function () {
     });
 
     describe('members scripts', function () {
-        it('includes portal when signup is "all"', function (done) {
-            settingsCache.get.withArgs('members_signup_access').returns('all');
+        it('includes portal when members enabled', function (done) {
+            settingsCache.get.withArgs('members_enabled').returns(true);
 
             ghost_head(testUtils.createHbsResponse({
                 locals: {
@@ -1660,13 +1670,15 @@ describe('{{ghost_head}} helper', function () {
             })).then(function (rendered) {
                 should.exist(rendered);
                 rendered.string.should.containEql('<script defer src="https://unpkg.com/@tryghost/portal');
+                rendered.string.should.containEql('data-ghost="http://127.0.0.1:2369/" data-key="xyz" data-api="http://127.0.0.1:2369/ghost/api/content/"');
                 rendered.string.should.containEql('<style id="gh-members-styles">');
                 done();
             }).catch(done);
         });
 
-        it('includes portal when signup is "invite"', function (done) {
-            settingsCache.get.withArgs('members_signup_access').returns('invite');
+        it('includes stripe when connected', function (done) {
+            settingsCache.get.withArgs('members_enabled').returns(true);
+            settingsCache.get.withArgs('paid_members_enabled').returns(true);
 
             ghost_head(testUtils.createHbsResponse({
                 locals: {
@@ -1677,56 +1689,16 @@ describe('{{ghost_head}} helper', function () {
             })).then(function (rendered) {
                 should.exist(rendered);
                 rendered.string.should.containEql('<script defer src="https://unpkg.com/@tryghost/portal');
-                rendered.string.should.containEql('<style id="gh-members-styles">');
-                done();
-            }).catch(done);
-        });
-
-        it('includes stripe when set up as direct', function (done) {
-            settingsCache.get.withArgs('members_signup_access').returns('all');
-            settingsCache.get.withArgs('stripe_secret_key').returns('secret');
-            settingsCache.get.withArgs('stripe_publishable_key').returns('publishable');
-            settingsCache.get.withArgs('stripe_connect_account_id').returns(null);
-
-            ghost_head(testUtils.createHbsResponse({
-                locals: {
-                    relativeUrl: '/',
-                    context: ['home', 'index'],
-                    safeVersion: '4.3'
-                }
-            })).then(function (rendered) {
-                should.exist(rendered);
-                rendered.string.should.containEql('<script defer src="https://unpkg.com/@tryghost/portal');
+                rendered.string.should.containEql('data-ghost="http://127.0.0.1:2369/" data-key="xyz" data-api="http://127.0.0.1:2369/ghost/api/content/"');
                 rendered.string.should.containEql('<style id="gh-members-styles">');
                 rendered.string.should.containEql('<script async src="https://js.stripe.com');
                 done();
             }).catch(done);
         });
 
-        it('includes stripe when set up as connect', function (done) {
-            settingsCache.get.withArgs('members_signup_access').returns('all');
-            settingsCache.get.withArgs('stripe_secret_key').returns(null);
-            settingsCache.get.withArgs('stripe_publishable_key').returns(null);
-            settingsCache.get.withArgs('stripe_connect_account_id').returns('connect_account');
-
-            ghost_head(testUtils.createHbsResponse({
-                locals: {
-                    relativeUrl: '/',
-                    context: ['home', 'index'],
-                    safeVersion: '4.3'
-                }
-            })).then(function (rendered) {
-                should.exist(rendered);
-                rendered.string.should.containEql('<script defer src="https://unpkg.com/@tryghost/portal');
-                rendered.string.should.containEql('<style id="gh-members-styles">');
-                rendered.string.should.containEql('<script async src="https://js.stripe.com');
-                done();
-            }).catch(done);
-        });
-
-        it('skips portal and stripe when signup is "none"', function (done) {
-            settingsCache.get.withArgs('members_signup_access').returns('none');
-            settingsCache.get.withArgs('stripe_connect_account_id').returns('connect_account');
+        it('skips portal and stripe when members are disabled', function (done) {
+            settingsCache.get.withArgs('members_enabled').returns(false);
+            settingsCache.get.withArgs('paid_members_enabled').returns(true);
 
             ghost_head(testUtils.createHbsResponse({
                 locals: {
@@ -1737,6 +1709,7 @@ describe('{{ghost_head}} helper', function () {
             })).then(function (rendered) {
                 should.exist(rendered);
                 rendered.string.should.not.containEql('<script defer src="https://unpkg.com/@tryghost/portal');
+                rendered.string.should.not.containEql('data-ghost="http://127.0.0.1:2369/" data-key="xyz" data-api="http://127.0.0.1:2369/ghost/api/content/"');
                 rendered.string.should.not.containEql('<style id="gh-members-styles">');
                 rendered.string.should.not.containEql('<script async src="https://js.stripe.com');
                 done();
@@ -1744,10 +1717,8 @@ describe('{{ghost_head}} helper', function () {
         });
 
         it('skips stripe if not set up', function (done) {
-            settingsCache.get.withArgs('members_signup_access').returns('all');
-            settingsCache.get.withArgs('stripe_secret_key', null);
-            settingsCache.get.withArgs('stripe_publishable_key', null);
-            settingsCache.get.withArgs('stripe_connect_account_id', null);
+            settingsCache.get.withArgs('members_enabled').returns(true);
+            settingsCache.get.withArgs('paid_members_enabled').returns(false);
 
             ghost_head(testUtils.createHbsResponse({
                 locals: {
@@ -1758,6 +1729,7 @@ describe('{{ghost_head}} helper', function () {
             })).then(function (rendered) {
                 should.exist(rendered);
                 rendered.string.should.containEql('<script defer src="https://unpkg.com/@tryghost/portal');
+                rendered.string.should.containEql('data-ghost="http://127.0.0.1:2369/" data-key="xyz" data-api="http://127.0.0.1:2369/ghost/api/content/"');
                 rendered.string.should.containEql('<style id="gh-members-styles">');
                 rendered.string.should.not.containEql('<script async src="https://js.stripe.com');
                 done();

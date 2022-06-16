@@ -14,15 +14,7 @@ const messages = {
 };
 
 // flags in this list always return `true`, allows quick global enable prior to full flag removal
-const GA_FEATURES = [
-    'multipleProducts',
-    'tierWelcomePages',
-    'tierName',
-    'selectablePortalLinks',
-    'membersTableStatus',
-    'improvedOnboarding',
-    'membersActivityFeed'
-];
+const GA_FEATURES = [];
 
 // NOTE: this allowlist is meant to be used to filter out any unexpected
 //       input for the "labs" setting value
@@ -31,15 +23,8 @@ const BETA_FEATURES = [
 ];
 
 const ALPHA_FEATURES = [
-    'oauthLogin',
-    'membersActivity',
     'urlCache',
-    'beforeAfterCard',
-    'tweetGridCard',
-    'multipleNewsletters',
-    'multipleNewslettersUI',
-    'dashboardV5',
-    'publishingFlow'
+    'beforeAfterCard'
 ];
 
 module.exports.GA_KEYS = [...GA_FEATURES];

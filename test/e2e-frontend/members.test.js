@@ -9,6 +9,8 @@ const settingsCache = require('../../core/shared/settings-cache');
 const DomainEvents = require('@tryghost/domain-events');
 const {MemberPageViewEvent} = require('@tryghost/member-events');
 const models = require('../../core/server/models');
+const {mockManager} = require('../utils/e2e-framework');
+const DataGenerator = require('../utils/fixtures/data-generator');
 
 function assertContentIsPresent(res) {
     res.text.should.containEql('<h2 id="markdown">markdown</h2>');
@@ -56,7 +58,8 @@ describe('Front-end members behaviour', function () {
             return originalSettingsCacheGetFn(key, options);
         });
         await testUtils.startGhost();
-        await testUtils.initFixtures('members');
+        await testUtils.initFixtures('newsletters', 'members:newsletters');
+
         request = supertest.agent(configUtils.config.get('url'));
     });
 
@@ -91,11 +94,6 @@ describe('Front-end members behaviour', function () {
                 .expect(204);
         });
 
-        it('should serve member site endpoint', async function () {
-            await request.get('/members/api/site')
-                .expect(200);
-        });
-
         it('should error for invalid data on member magic link endpoint', async function () {
             await request.post('/members/api/send-magic-link')
                 .expect(400);
@@ -106,6 +104,23 @@ describe('Front-end members behaviour', function () {
                 .expect(400);
         });
 
+        //TODO: Remove 500 expect once tests are wired up with Stripe
+        it('should not throw 400 for using offer id on members create checkout session endpoint', async function () {
+            await request.post('/members/api/create-stripe-checkout-session')
+                .send({
+                    offerId: '62826b1b6dccb3e3e997ebd4',
+                    identity: null,
+                    metadata: {
+                        name: 'Jamie Larsen'
+                    },
+                    cancelUrl: 'https://example.com/blog/?stripe=cancel',
+                    customerEmail: 'jamie@example.com',
+                    tierId: null,
+                    cadence: null
+                })
+                .expect(500);
+        });
+
         it('should error for invalid data on members create update session endpoint', async function () {
             await request.post('/members/api/create-stripe-update-session')
                 .expect(400);
@@ -114,6 +129,53 @@ describe('Front-end members behaviour', function () {
         it('should error for invalid data on members subscription endpoint', async function () {
             await request.put('/members/api/subscriptions/123')
                 .expect(400);
+        });
+
+        it('should error for fetching member newsletters with missing uuid', async function () {
+            await request.get('/members/api/member/newsletters')
+                .expect(400);
+        });
+
+        it('should error for fetching member newsletters with invalid uuid', async function () {
+            await request.get('/members/api/member/newsletters?uuid=abc')
+                .expect(404);
+        });
+
+        it('should error for updating member newsletters with missing uuid', async function () {
+            await request.put('/members/api/member/newsletters')
+                .expect(400);
+        });
+
+        it('should error for updating member newsletters with invalid uuid', async function () {
+            await request.put('/members/api/member/newsletters?uuid=abc')
+                .expect(404);
+        });
+
+        it('should fetch and update member newsletters with valid uuid', async function () {
+            const memberUUID = DataGenerator.Content.members[0].uuid;
+
+            // Can fetch newsletter subscriptions
+            const getRes = await request.get(`/members/api/member/newsletters?uuid=${memberUUID}`)
+                .expect(200);
+            const getJsonResponse = getRes.body;
+
+            should.exist(getJsonResponse);
+            getJsonResponse.should.have.properties(['email', 'uuid', 'status', 'name', 'newsletters']);
+            getJsonResponse.should.not.have.property('id');
+            getJsonResponse.newsletters.should.have.length(1);
+
+            // Can update newsletter subscription
+            const res = await request.put(`/members/api/member/newsletters?uuid=${memberUUID}`)
+                .send({
+                    newsletters: []
+                })
+                .expect(200);
+            const jsonResponse = res.body;
+
+            should.exist(jsonResponse);
+            jsonResponse.should.have.properties(['email', 'uuid', 'status', 'name', 'newsletters']);
+            jsonResponse.should.not.have.property('id');
+            jsonResponse.newsletters.should.have.length(0);
         });
 
         it('should serve theme 404 on members endpoint', async function () {
@@ -129,19 +191,26 @@ describe('Front-end members behaviour', function () {
         });
     });
 
-    describe('Price data', function () {
-        it('Can be used as a number, and with the price helper', async function () {
-            // Check out test/utils/fixtures/themes/price-data-test-theme/index.hbs
-            // To see where this is coming from.
-            //
-            const legacyUse = /You can use the price data as a number and currency: £12/;
-            const withPriceHelper = /You can pass price data to the price helper: £12/;
+    describe('Unsubscribe', function () {
+        afterEach(function () {
+            mockManager.restore();
+        });
 
-            await request.get('/')
-                .expect((res) => {
-                    should.exist(res.text.match(legacyUse));
-                    should.exist(res.text.match(withPriceHelper));
-                });
+        it('should redirect with uuid and action param', async function () {
+            await request.get('/unsubscribe/?uuid=XXX')
+                .expect(302)
+                .expect('Location', 'http://127.0.0.1:2369/?uuid=XXX&action=unsubscribe');
+        });
+
+        it('should pass through an optional newsletter param', async function () {
+            await request.get('/unsubscribe/?uuid=XXX&newsletter=YYY')
+                .expect(302)
+                .expect('Location', 'http://127.0.0.1:2369/?uuid=XXX&newsletter=YYY&action=unsubscribe');
+        });
+
+        it('should reject when missing a uuid', async function () {
+            await request.get('/unsubscribe/')
+                .expect(400);
         });
     });
 

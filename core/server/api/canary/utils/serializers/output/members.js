@@ -1,11 +1,8 @@
 //@ts-check
 const debug = require('@tryghost/debug')('api:canary:utils:serializers:output:members');
 const {unparse} = require('@tryghost/members-csv');
-const labsService = require('../../../../../../shared/labs');
 
 module.exports = {
-    hasActiveStripeSubscriptions: createSerializer('hasActiveStripeSubscriptions', passthrough),
-
     browse: createSerializer('browse', paginatedMembers),
     read: createSerializer('read', singleMember),
     edit: createSerializer('edit', singleMember),
@@ -79,18 +76,13 @@ function bulkAction(bulkActionResult, _apiConfig, frame) {
 /**
  * @template PageMeta
  *
- * @param {{data: import('bookshelf').Model[], meta: PageMeta}} page
- * @param {APIConfig} _apiConfig
- * @param {Frame} frame
+ * @param {{data: any[]}} data
  *
  * @returns {string} - A CSV string
  */
-function exportCSV(page, _apiConfig, frame) {
+function exportCSV(data) {
     debug('exportCSV');
-
-    const members = page.data.map(model => serializeMember(model, frame.options));
-
-    return unparse(members);
+    return unparse(data.data);
 }
 
 /**
@@ -129,14 +121,37 @@ function serializeMember(member, options) {
     };
 
     if (json.products) {
-        serialized.products = json.products;
+        serialized.tiers = json.products;
     }
 
-    if (json.newsletters && labsService.isSet('multipleNewsletters')) {
-        json.newsletters.sort((a, b) => {
-            return a.sort_order - b.sort_order;
-        });
-        serialized.newsletters = json.newsletters;
+    // Rename subscriptions.price.product to subscriptions.price.tier
+    for (const subscription of serialized.subscriptions) {
+        if (!subscription.price) {
+            continue;
+        }
+        
+        if (!subscription.price.tier && subscription.price.product) {
+            subscription.price.tier = subscription.price.product;
+            
+            if (!subscription.price.tier.tier_id) {
+                subscription.price.tier.tier_id = subscription.price.tier.product_id;
+            }
+            delete subscription.price.tier.product_id;
+        }
+        delete subscription.price.product;
+    }
+
+    if (json.newsletters) {
+        serialized.newsletters = json.newsletters
+            .filter(newsletter => newsletter.status === 'active')
+            .sort((a, b) => {
+                return a.sort_order - b.sort_order;
+            });
+    }
+    // override the `subscribed` param to mean "subscribed to any active newsletter"
+    serialized.subscribed = false;
+    if (Array.isArray(serialized.newsletters) && serialized.newsletters.length > 0) {
+        serialized.subscribed = true;
     }
 
     return serialized;

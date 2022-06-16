@@ -185,8 +185,42 @@ describe('User API', function () {
         }
     });
 
-    it('Can edit user with empty roles data', async function () {
-        await request.put(localUtils.API.getApiQuery('users/me'))
+    it('can edit a user fetched from the API', async function () {
+        const userToEditId = testUtils.getExistingData().users[1].id;
+        const res = await request
+            .get(localUtils.API.getApiQuery(`users/${userToEditId}/?include=roles`))
+            .set('Origin', config.get('url'))
+            .expect(200);
+
+        const jsonResponse = res.body;
+        jsonResponse.users[0].name.should.equal('Ghost');
+
+        should.exist(jsonResponse.users[0].roles);
+        jsonResponse.users[0].roles.should.have.length(1);
+        jsonResponse.users[0].roles[0].name.should.equal('Contributor');
+
+        jsonResponse.users[0].name = 'Changed Name';
+
+        const editResponse = await request
+            .put(localUtils.API.getApiQuery(`users/${userToEditId}/?include=roles`))
+            .set('Origin', config.get('url'))
+            .send({
+                users: jsonResponse.users
+            })
+            .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules.private)
+            .expect(200);
+
+        const editJSONResponse = editResponse.body;
+        editJSONResponse.users[0].name.should.equal('Changed Name');
+
+        should.exist(editJSONResponse.users[0].roles);
+        editJSONResponse.users[0].roles.should.have.length(1);
+        editJSONResponse.users[0].roles[0].name.should.equal('Contributor');
+    });
+
+    it('Can edit user with empty roles data and does not change the role', async function () {
+        const res = await request.put(localUtils.API.getApiQuery('users/me?include=roles'))
             .set('Origin', config.get('url'))
             .send({
                 users: [{
@@ -194,17 +228,82 @@ describe('User API', function () {
                 }]
             })
             .expect(200);
+
+        const jsonResponse = res.body;
+        should.exist(jsonResponse.users);
+        jsonResponse.users.should.have.length(1);
+
+        should.exist(jsonResponse.users[0].roles);
+        jsonResponse.users[0].roles.should.have.length(1);
+        jsonResponse.users[0].roles[0].name.should.equal('Owner');
     });
 
-    it('Can destroy an active user', async function () {
+    it('Cannot edit user with invalid roles data', async function () {
         const userId = testUtils.getExistingData().users[1].id;
+        const res = await request.put(localUtils.API.getApiQuery(`users/${userId}?include=roles`))
+            .set('Origin', config.get('url'))
+            .send({
+                users: [{
+                    roles: ['Invalid Role Name']
+                }]
+            })
+            .expect(422);
+
+        const jsonResponse = res.body;
+        should.exist(jsonResponse.errors);
+        jsonResponse.errors.should.have.length(1);
+        jsonResponse.errors[0].message.should.match(/cannot edit user/);
+    });
+
+    it('Can edit user roles by name', async function () {
+        const userId = testUtils.getExistingData().users[1].id;
+        const res = await request.put(localUtils.API.getApiQuery(`users/${userId}?include=roles`))
+            .set('Origin', config.get('url'))
+            .send({
+                users: [{
+                    roles: ['Administrator']
+                }]
+            })
+            .expect(200);
+
+        const jsonResponse = res.body;
+        should.exist(jsonResponse.users);
+        jsonResponse.users.should.have.length(1);
+
+        should.exist(jsonResponse.users[0].roles);
+        jsonResponse.users[0].roles.should.have.length(1);
+        jsonResponse.users[0].roles[0].name.should.equal('Administrator');
+    });
+
+    it('Can destroy an active user and transfer posts to the owner', async function () {
+        const userId = testUtils.getExistingData().users[1].id;
+        const userSlug = testUtils.getExistingData().users[1].slug;
+        const ownerId = testUtils.getExistingData().users[0].id;
 
         const res = await request
-            .get(localUtils.API.getApiQuery(`posts/?filter=author_id:${userId}`))
+            .get(localUtils.API.getApiQuery(`posts/?filter=authors:${userSlug}`))
             .set('Origin', config.get('url'))
             .expect(200);
 
         res.body.posts.length.should.eql(7);
+
+        const ownerPostsAuthorsModels = await db.knex('posts_authors')
+            .where({
+                author_id: ownerId
+            })
+            .select();
+
+        // includes posts & pages
+        should.equal(ownerPostsAuthorsModels.length, 8);
+
+        const userPostsAuthorsModels = await db.knex('posts_authors')
+            .where({
+                author_id: userId
+            })
+            .select();
+
+        // includes posts & pages
+        should.equal(userPostsAuthorsModels.length, 11);
 
         const res2 = await request
             .delete(localUtils.API.getApiQuery(`users/${userId}`))
@@ -224,7 +323,7 @@ describe('User API', function () {
             .expect(404);
 
         const res3 = await request
-            .get(localUtils.API.getApiQuery(`posts/?filter=author_id:${userId}`))
+            .get(localUtils.API.getApiQuery(`posts/?filter=authors:${userSlug}}`))
             .set('Origin', config.get('url'))
             .expect(200);
 
@@ -240,6 +339,22 @@ describe('User API', function () {
 
         const rolesUsers = await db.knex('roles_users').select();
         rolesUsers.length.should.greaterThan(0);
+
+        const ownerPostsAuthorsModelsAfter = await db.knex('posts_authors')
+            .where({
+                author_id: ownerId
+            })
+            .select();
+
+        should.equal(ownerPostsAuthorsModelsAfter.length, 19);
+
+        const userPostsAuthorsModelsAfter = await db.knex('posts_authors')
+            .where({
+                author_id: userId
+            })
+            .select();
+
+        should.equal(userPostsAuthorsModelsAfter.length, 0);
     });
 
     it('Can transfer ownership to admin user', async function () {

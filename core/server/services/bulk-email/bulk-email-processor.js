@@ -167,6 +167,9 @@ module.exports = {
         await emailBatchModel.save({status: 'submitting'}, knexOptions);
 
         try {
+            // Load newsletter data on email
+            await emailBatchModel.relations.email.getLazyRelation('newsletter', {require: false, ...knexOptions});
+
             // send the email
             const sendResponse = await this.send(emailBatchModel.relations.email.toJSON(), recipientRows, memberSegment);
 
@@ -194,7 +197,7 @@ module.exports = {
             // update all email recipients with a processed_at
             await models.EmailRecipient
                 .where({batch_id: emailBatchId})
-                .save({processed_at: moment()}, Object.assign({}, knexOptions, {patch: true}));
+                .save({processed_at: moment()}, Object.assign({}, knexOptions, {autoRefresh: false, patch: true}));
         }
     },
 
@@ -217,11 +220,12 @@ module.exports = {
 
         // collate static and dynamic data for each recipient ready for provider
         const recipientData = {};
+        const newsletterUuid = emailData.newsletter ? emailData.newsletter.uuid : null;
         recipients.forEach((recipient) => {
             // static data for every recipient
             const data = {
                 unique_id: recipient.member_uuid,
-                unsubscribe_url: postEmailSerializer.createUnsubscribeUrl(recipient.member_uuid)
+                unsubscribe_url: postEmailSerializer.createUnsubscribeUrl(recipient.member_uuid, newsletterUuid)
             };
 
             // computed properties on recipients - TODO: better way of handling these

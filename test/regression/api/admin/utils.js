@@ -8,7 +8,6 @@ const expectedProperties = {
     tags: ['tags', 'meta'],
     users: ['users', 'meta'],
     settings: ['settings', 'meta'],
-    subscribers: ['subscribers', 'meta'],
     roles: ['roles'],
     pagination: ['page', 'limit', 'pages', 'total', 'next', 'prev'],
     slugs: ['slugs'],
@@ -38,7 +37,7 @@ const expectedProperties = {
         'featured',
         'status',
         'visibility',
-        'email_recipient_filter',
+        'email_segment',
         'created_at',
         'updated_at',
         'published_at',
@@ -65,7 +64,8 @@ const expectedProperties = {
         'email_subject',
         'frontmatter',
         'email_only',
-        'tiers'
+        'tiers',
+        'newsletter'
     ],
     user: [
         'id',
@@ -178,14 +178,13 @@ const expectedProperties = {
         'secret',
         'api_version',
         'integration_id',
-        'status',
         'last_triggered_at',
         'last_triggered_status',
         'last_triggered_error',
         'created_at',
         'updated_at'
     ],
-    email_preview: ['html', 'subject', 'plaintext']
+    email_previews: ['html', 'subject', 'plaintext']
 };
 
 module.exports = {

@@ -3,10 +3,11 @@ const template = require('./template');
 const settingsCache = require('../../../shared/settings-cache');
 const urlUtils = require('../../../shared/url-utils');
 const moment = require('moment-timezone');
-const api = require('../../api');
+const api = require('../../api').endpoints;
+const apiShared = require('../../api').shared;
 const {URL} = require('url');
 const mobiledocLib = require('../../lib/mobiledoc');
-const htmlToText = require('html-to-text');
+const htmlToPlaintext = require('../../../shared/html-to-plaintext');
 const {isUnsplashImage, isLocalContentImage} = require('@tryghost/kg-default-cards/lib/utils');
 const {textColorForBackgroundColor, darkenToContrastThreshold} = require('@tryghost/color-utils');
 const logging = require('@tryghost/logging');
@@ -49,29 +50,16 @@ const getSite = () => {
     });
 };
 
-const htmlToPlaintext = (html) => {
-    // same options as used in Post model for generating plaintext but without `wordwrap: 80`
-    // to avoid replacement strings being split across lines and for mail clients to handle
-    // word wrapping based on user preferences
-    return htmlToText.fromString(html, {
-        wordwrap: false,
-        ignoreImage: true,
-        hideLinkHrefIfSameAsText: true,
-        preserveNewlines: true,
-        returnDomByDefault: true,
-        uppercaseHeadings: false
-    });
-};
-
 /**
  * createUnsubscribeUrl
  *
- * Takes a member uuid and returns the url that should be used to unsubscribe
+ * Takes a member and newsletter uuid. Returns the url that should be used to unsubscribe
  * In case of no member uuid, generates the preview unsubscribe url - `?preview=1`
  *
- * @param {string} uuid
+ * @param {string} uuid post uuid
+ * @param {string} newsletterUuid newsletter uuid
  */
-const createUnsubscribeUrl = (uuid) => {
+const createUnsubscribeUrl = (uuid, newsletterUuid) => {
     const siteUrl = urlUtils.getSiteUrl();
     const unsubscribeUrl = new URL(siteUrl);
     unsubscribeUrl.pathname = `${unsubscribeUrl.pathname}/unsubscribe/`.replace('//', '/');
@@ -80,21 +68,23 @@ const createUnsubscribeUrl = (uuid) => {
     } else {
         unsubscribeUrl.searchParams.set('preview', '1');
     }
+    if (newsletterUuid) {
+        unsubscribeUrl.searchParams.set('newsletter', newsletterUuid);
+    }
 
     return unsubscribeUrl.href;
 };
 
-// NOTE: serialization is needed to make sure we are using current API and do post transformations
-//       such as image URL transformation from relative to absolute
-const serializePostModel = async (model, apiVersion = 'v4') => {
+// NOTE: serialization is needed to make sure we do post transformations such as image URL transformation from relative to absolute
+const serializePostModel = async (model) => {
     // fetch mobiledoc rather than html and plaintext so we can render email-specific contents
     const frame = {options: {context: {user: true}, formats: 'mobiledoc'}};
     const docName = 'posts';
 
-    await api.shared
+    await apiShared
         .serializers
         .handle
-        .output(model, {docName: docName, method: 'read'}, api[apiVersion].serializers.output, frame);
+        .output(model, {docName: docName, method: 'read'}, api.serializers.output, frame);
 
     return frame.response[docName][0];
 };
@@ -170,21 +160,22 @@ const parseReplacements = (email) => {
     return replacements;
 };
 
-const getTemplateSettings = async () => {
+const getTemplateSettings = async (newsletter) => {
     const accentColor = settingsCache.get('accent_color');
     const adjustedAccentColor = accentColor && darkenToContrastThreshold(accentColor, '#ffffff', 2).hex();
     const adjustedAccentContrastColor = accentColor && textColorForBackgroundColor(adjustedAccentColor).hex();
 
     const templateSettings = {
-        headerImage: settingsCache.get('newsletter_header_image'),
-        showHeaderIcon: settingsCache.get('newsletter_show_header_icon') && settingsCache.get('icon'),
-        showHeaderTitle: settingsCache.get('newsletter_show_header_title'),
-        showFeatureImage: settingsCache.get('newsletter_show_feature_image'),
-        titleFontCategory: settingsCache.get('newsletter_title_font_category'),
-        titleAlignment: settingsCache.get('newsletter_title_alignment'),
-        bodyFontCategory: settingsCache.get('newsletter_body_font_category'),
-        showBadge: settingsCache.get('newsletter_show_badge'),
-        footerContent: settingsCache.get('newsletter_footer_content'),
+        headerImage: newsletter.get('header_image'),
+        showHeaderIcon: newsletter.get('show_header_icon') && settingsCache.get('icon'),
+        showHeaderTitle: newsletter.get('show_header_title'),
+        showFeatureImage: newsletter.get('show_feature_image'),
+        titleFontCategory: newsletter.get('title_font_category'),
+        titleAlignment: newsletter.get('title_alignment'),
+        bodyFontCategory: newsletter.get('body_font_category'),
+        showBadge: newsletter.get('show_badge'),
+        footerContent: newsletter.get('footer_content'),
+        showHeaderName: newsletter.get('show_header_name'),
         accentColor,
         adjustedAccentColor,
         adjustedAccentContrastColor
@@ -222,8 +213,8 @@ const getTemplateSettings = async () => {
     return templateSettings;
 };
 
-const serialize = async (postModel, options = {isBrowserPreview: false, apiVersion: 'v4'}) => {
-    const post = await serializePostModel(postModel, options.apiVersion);
+const serialize = async (postModel, newsletter, options = {isBrowserPreview: false}) => {
+    const post = await serializePostModel(postModel);
 
     const timezone = settingsCache.get('timezone');
     const momentDate = post.published_at ? moment(post.published_at) : moment();
@@ -258,7 +249,7 @@ const serialize = async (postModel, options = {isBrowserPreview: false, apiVersi
     `).remove();
     post.html = _cheerio('body').html();
 
-    post.plaintext = htmlToPlaintext(post.html);
+    post.plaintext = htmlToPlaintext.email(post.html);
 
     // Outlook will render feature images at full-size breaking the layout.
     // Content images fix this by rendering max 600px images - do the same for feature image here
@@ -291,11 +282,11 @@ const serialize = async (postModel, options = {isBrowserPreview: false, apiVersi
         }
     }
 
-    const templateSettings = await getTemplateSettings();
+    const templateSettings = await getTemplateSettings(newsletter);
 
     const render = template;
 
-    let htmlTemplate = render({post, site: getSite(), templateSettings});
+    let htmlTemplate = render({post, site: getSite(), templateSettings, newsletter: newsletter.toJSON()});
 
     if (options.isBrowserPreview) {
         const previewUnsubscribeUrl = createUnsubscribeUrl(null);
@@ -341,7 +332,7 @@ function renderEmailForSegment(email, memberSegment) {
     });
 
     result.html = formatHtmlForEmail($.html());
-    result.plaintext = htmlToPlaintext(result.html);
+    result.plaintext = htmlToPlaintext.email(result.html);
 
     return result;
 }
@@ -350,5 +341,7 @@ module.exports = {
     serialize,
     createUnsubscribeUrl,
     renderEmailForSegment,
-    parseReplacements
+    parseReplacements,
+    // Export for tests
+    _getTemplateSettings: getTemplateSettings
 };

@@ -4,7 +4,7 @@ const debug = require('@tryghost/debug')('services:routing:controllers:static');
 const renderer = require('../../rendering');
 
 function processQuery(query, locals) {
-    const api = require('../../proxy').api[locals.apiVersion];
+    const api = require('../../proxy').api;
     query = _.cloneDeep(query);
 
     // CASE: If you define a single data key for a static route (e.g. data: page.team), this static route will represent
@@ -60,12 +60,10 @@ module.exports = function staticController(req, res, next) {
                 });
             }
 
-            // @TODO: See renderer/secure for more context.
-            _.each(response.data, function (data) {
-                renderer.secure(req, data);
-            });
-
-            renderer.renderer(req, res, renderer.formatResponse.entries(response));
+            // This flag solves the confusion about whether the output contains a post or page object by duplicating the objects
+            // This is not ideal, but will solve some long standing pain points with dynamic routing until we can overhaul it
+            const duplicatePagesAsPosts = true;
+            renderer.renderer(req, res, renderer.formatResponse.entries(response, duplicatePagesAsPosts));
         })
         .catch(renderer.handleError(next));
 };
