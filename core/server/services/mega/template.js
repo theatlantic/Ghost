@@ -1075,14 +1075,13 @@ figure blockquote p {
                                     <tr>
                                         <td class="header-info" width="100%" align="center">
                                             %recipient.paid_block_start%
-                                            As a subscriber to <i>The Atlantic</i>, you have access to all editions of
-                                            this newsletter, including subscriber-only exclusives.
-                                            Thank you for supporting my work.
+                                            With your <i>Atlantic</i> subscription, you have access to all editions
+                                            of this newsletter. Thank you for supporting my work.
                                             %recipient.paid_block_end%
 
                                             %recipient.free_block_start%
-                                            For access to all editions of this newsletter, including subscriber-only exclusives,
-                                            <a href="${ctaUrl}">subscribe to <i>The Atlantic</i></a>.
+                                            Unlock every edition of this newsletter with a month of unlimited access
+                                            to The <i>Atlantic</i>. <a href="https://accounts.theatlantic.com/products/free-trial/">Start your free trial today</a>.
                                             %recipient.free_block_end%
                                         </td>
                                     </tr>
@@ -1137,17 +1136,17 @@ figure blockquote p {
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
                                             style="padding-top: 16px; border-top: 1px solid #000000;">
                                                 <tr>
-                                                    <td class="bottom-subscribe-area-header">Subscribe to <i>The Atlantic</i></td>
+                                                    <td class="bottom-subscribe-area-header">Try one month of <i>The Atlantic</i></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="bottom-subscribe-area">
-                                                    Thanks for reading! For access to all editions of this newsletter, including
-                                                    subscriber-only exclusives, subscribe to <i>The Atlantic</i> today.
+                                                    Enjoy subscriber-only editions of this newsletter—plus all <i>The Atlantic’s</i>
+                                                    journalism, past and present—with a 30-day free trial. Cancel anytime.
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td style="padding-top: 40px;padding-bottom: 40px;text-align: center">
-                                                        <a class="bottom-subscribe-btn" href="${ctaUrl}">Subscribe</a>
+                                                        <a class="bottom-subscribe-btn" href="https://accounts.theatlantic.com/products/free-trial/">Get Started</a>
                                                     </td>
                                                 </tr>
                                             </table>
