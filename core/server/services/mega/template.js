@@ -215,8 +215,8 @@ h1 a {
 
 h2 {
     border-top: 1px solid #000000;
-    font-size: 32px;
-    line-height: 40px;
+    font-size: 22px;
+    line-height: 27.5px;
     padding-bottom: 24px;
     padding-top: 16px;
     margin: 0;
