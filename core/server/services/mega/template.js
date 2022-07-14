@@ -257,11 +257,15 @@ figure {
 }
 
 figcaption {
-    text-align: center;
-    font-family: Adobe Garamond Pro, Times New Roman, serif;
-    font-size: 14px;
-    padding-top: 5px;
-    line-height: 1.5em;
+    font-family: Courier, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 18px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #5E6A74;
+    padding-top: 4px;
 }
 
 code {
@@ -489,7 +493,7 @@ figure blockquote p {
     font-weight: normal;
     font-size: 12px;
     line-height: 18px;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     color: #5E6A74;
 }
