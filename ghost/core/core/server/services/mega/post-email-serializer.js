@@ -14,6 +14,7 @@ const {isUnsplashImage, isLocalContentImage} = require('@tryghost/kg-default-car
 const {textColorForBackgroundColor, darkenToContrastThreshold} = require('@tryghost/color-utils');
 const logging = require('@tryghost/logging');
 const urlService = require('../../services/url');
+const {fillAdvertisements} = require('./advertising');
 
 const ALLOWED_REPLACEMENTS = ['first_name'];
 
@@ -314,7 +315,17 @@ const serialize = async (postModel, newsletter, options = {isBrowserPreview: fal
     if (options.isBrowserPreview) {
         const previewUnsubscribeUrl = createUnsubscribeUrl(null);
         htmlTemplate = htmlTemplate.replace('%recipient.unsubscribe_url%', previewUnsubscribeUrl);
+        htmlTemplate = htmlTemplate.replace(/%recipient.free_block_start%/g, '');
+        htmlTemplate = htmlTemplate.replace(/%recipient.free_block_end%/g, '');
+        htmlTemplate = htmlTemplate.replace(/%recipient.paid_block_start%/g, '<!--');
+        htmlTemplate = htmlTemplate.replace(/%recipient.paid_block_end%/g, '-->');
     }
+
+    // @HACK: The Atlantic inserts ads
+    htmlTemplate = await fillAdvertisements({
+        site: getSite(),
+        html: htmlTemplate
+    });
 
     // Clean up any unknown replacements strings to get our final content
     const {html, plaintext} = normalizeReplacementStrings({
@@ -351,7 +362,7 @@ function renderPaywallCTA(post) {
     <h2
         style="margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.11em; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 26px;">
         Subscribe to <span style="white-space: nowrap; font-size: 26px !important;">continue reading.</span></h2>
-    <p style="margin: 0 auto 1.5em auto; line-height: 1.6em; max-width: 440px;">Become a paid member of ${siteTitle} to get access to all 
+    <p style="margin: 0 auto 1.5em auto; line-height: 1.6em; max-width: 440px;">Become a paid member of ${siteTitle} to get access to all
     <span style="white-space: nowrap;">subscriber-only content.</span></p>
     <div class="btn btn-accent" style="box-sizing: border-box; width: 100%; display: table;">
         <table border="0" cellspacing="0" cellpadding="0" align="center"

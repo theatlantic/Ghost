@@ -88,6 +88,11 @@ const sendTestEmail = async (postModel, toEmails, memberSegment) => {
     let emailData = await getEmailData(postModel);
     emailData.subject = `[Test] ${emailData.subject}`;
 
+    let memberStatus = 'free';
+    if (memberSegment === 'status:-free') {
+        memberStatus = 'paid';
+    }
+
     // fetch any matching members so that replacements use expected values
     const recipients = await Promise.all(toEmails.map(async (email) => {
         const member = await membersService.api.members.get({email});
@@ -95,12 +100,14 @@ const sendTestEmail = async (postModel, toEmails, memberSegment) => {
             return {
                 member_uuid: member.get('uuid'),
                 member_email: member.get('email'),
-                member_name: member.get('name')
+                member_name: member.get('name'),
+                member_status: memberStatus
             };
         }
 
         return {
-            member_email: email
+            member_email: email,
+            member_status: memberStatus
         };
     }));
 
@@ -489,7 +496,8 @@ async function createEmailBatches({emailModel, memberRows, memberSegment, option
                 batch_id: batchModel.id,
                 member_uuid: memberRow.uuid,
                 member_email: memberRow.email,
-                member_name: memberRow.name
+                member_name: memberRow.name,
+                member_status: memberRow.status
             });
         });
 
