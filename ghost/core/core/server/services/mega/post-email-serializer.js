@@ -347,11 +347,9 @@ const serialize = async (postModel, newsletter, options = {isBrowserPreview: fal
  * renderPaywallCTA
  *
  * outputs html for rendering paywall CTA in newsletter
- *
- * @param {Object} post Post Object
  */
 
-function renderPaywallCTA(post) {
+function renderPaywallCTA() {
     const siteTitle = settingsCache.get('title') || 'Ghost';
     const siteUrl = urlUtils.getSiteUrl();
     const parsedUrl = new URL(siteUrl);
