@@ -1134,30 +1134,6 @@ figure blockquote p {
                                         </td>
                                     </tr>
 
-                                    %recipient.free_block_start%
-                                    <tr>
-                                        <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
-                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
-                                            style="padding-top: 16px; border-top: 1px solid #000000;">
-                                                <tr>
-                                                    <td class="bottom-subscribe-area-header">Try one month of <i>The Atlantic</i></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="bottom-subscribe-area">
-                                                    Enjoy subscriber-only editions of this newsletter—plus all <i>The Atlantic’s</i>
-                                                    journalism, past and present—with a 30-day free trial. Cancel anytime.
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding-top: 40px;padding-bottom: 40px;text-align: center">
-                                                        <a class="bottom-subscribe-btn" href="https://accounts.theatlantic.com/products/free-trial/">Get Started</a>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                    %recipient.free_block_end%
-
                                     <tr>
                                         <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
