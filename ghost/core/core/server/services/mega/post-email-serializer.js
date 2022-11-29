@@ -394,7 +394,7 @@ const PostEmailSerializer = {
 
         // @HACK: The Atlantic free/paid blocks
         if (options.isBrowserPreview) {
-            const previewUnsubscribeUrl = createUnsubscribeUrl(null);
+            const previewUnsubscribeUrl = this.createUnsubscribeUrl(null);
             result.html = result.html.replace('%recipient.unsubscribe_url%', previewUnsubscribeUrl);
             result.html = result.html.replace(/%recipient.free_block_start%/g, '');
             result.html = result.html.replace(/%recipient.free_block_end%/g, '');
@@ -403,7 +403,7 @@ const PostEmailSerializer = {
         }
         // @HACK: The Atlantic inserts ads
         result.html = await fillAdvertisements({
-            site: getSite(),
+            site: this.getSite(),
             html: result.html
         });
 
