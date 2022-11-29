@@ -19,6 +19,7 @@ const linkTracking = require('../link-tracking');
 const memberAttribution = require('../member-attribution');
 const feedbackButtons = require('./feedback-buttons');
 const labs = require('../../../shared/labs');
+const {fillAdvertisements} = require('./advertising');
 
 const ALLOWED_REPLACEMENTS = ['first_name', 'uuid'];
 
@@ -391,6 +392,21 @@ const PostEmailSerializer = {
             }
         }
 
+        // @HACK: The Atlantic free/paid blocks
+        if (options.isBrowserPreview) {
+            const previewUnsubscribeUrl = createUnsubscribeUrl(null);
+            result.html = result.html.replace('%recipient.unsubscribe_url%', previewUnsubscribeUrl);
+            result.html = result.html.replace(/%recipient.free_block_start%/g, '');
+            result.html = result.html.replace(/%recipient.free_block_end%/g, '');
+            result.html = result.html.replace(/%recipient.paid_block_start%/g, '<!--');
+            result.html = result.html.replace(/%recipient.paid_block_end%/g, '-->');
+        }
+        // @HACK: The Atlantic inserts ads
+        result.html = await fillAdvertisements({
+            site: getSite(),
+            html: result.html
+        });
+
         // Now replace the links in the HTML version
         if (!options.isBrowserPreview && !options.isTestEmail && settingsCache.get('email_track_clicks')) {
             result.html = await linkReplacer.replace(result.html, async (url) => {
@@ -442,40 +458,33 @@ const PostEmailSerializer = {
      * renderPaywallCTA
      *
      * outputs html for rendering paywall CTA in newsletter
-     *
-     * @param {Object} post Post Object
      */
-    renderPaywallCTA(post) {
-        const accentColor = settingsCache.get('accent_color');
+
+    renderPaywallCTA() {
         const siteTitle = settingsCache.get('title') || 'Ghost';
-        const signupUrl = this.createPostSignupUrl(post);
+        const siteUrl = urlUtils.getSiteUrl();
+        const parsedUrl = new URL(siteUrl);
+        const siteSlug = parsedUrl.pathname.split('/')[1];
+        const ctaUrl = `https://accounts.theatlantic.com/products/?referral=${siteSlug}&source=${siteSlug}`;
 
         return `<div class="align-center" style="text-align: center;">
         <hr
-            style="position: relative; display: block; width: 100%; margin: 3em 0; padding: 0; height: 1px; border: 0; border-top: 1px solid #e5eff5;">
+            style="position: relative; display: block; width: 100%; margin: 36px 0 0;padding: 0; height: 1px; border: 0; border-top: 1px solid #D3DCE6;">
         <h2
-            style="margin-top: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.11em; font-weight: 700; text-rendering: optimizeLegibility; margin: 1.5em 0 0.5em 0; font-size: 26px;">
-            Subscribe to <span style="white-space: nowrap; font-size: 26px !important;">continue reading.</span></h2>
-        <p style="margin: 0 auto 1.5em auto; line-height: 1.6em; max-width: 440px;">Become a paid member of ${siteTitle} to get access to all
-        <span style="white-space: nowrap;">subscriber-only content.</span></p>
-        <div class="btn btn-accent" style="box-sizing: border-box; width: 100%; display: table;">
-            <table border="0" cellspacing="0" cellpadding="0" align="center"
-                style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
-                <tbody>
-                    <tr>
-                        <td align="center"
-                            style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; vertical-align: top; text-align: center; border-radius: 5px;"
-                            valign="top" bgcolor="${accentColor}">
-                            <a href="${signupUrl}"
-                                style="overflow-wrap: anywhere; border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-decoration: none; background-color: ${accentColor}; border-color: ${accentColor}; color: #FFFFFF;"
-                                target="_blank">Subscribe
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            style="margin-top: 62px; margin-bottom: 0; font-weight: 400; font-size: 32px; line-height: 40px;text-align: center;color: #21272C;font-family: 'Adobe Garamond Pro', Times New Roman, serif;">
+            Keep reading with a free trial.
+        </h2>
+        <p style="margin: 16px 24px 0 24px;font-style: normal;font-weight: 400;font-size: 19px;line-height: 28px;font-family: 'Adobe Garamond Pro', Times New Roman, serif;">
+            This is a subscriber-only edition of ${siteTitle}. To read it in full, start your 30-day trial to The Atlantic.
+        </p>
+        <div style="margin: 36px 0 24px 0;text-align: center;">
+            <a target="_blank" href="${ctaUrl}"
+                style="padding: 15px 24px;background: #21272C;border-radius: 4px;font-family: 'Arial', sans-serif;font-style: normal;
+                    font-weight: 400;font-size: 16px;line-height: 48px;text-align: center;color: #FFFFFF;height: 48px;text-decoration: none;"
+            >
+                Get Started
+            </a>
         </div>
-        <p style="margin: 0 0 1.5em 0; line-height: 1.6em;"></p>
     </div>`;
     },
 
