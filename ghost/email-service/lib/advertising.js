@@ -19,9 +19,9 @@ const markers = {
  * @returns String
  *
  */
-async function fillAdvertisements({site, html}) {
+async function fillAdvertisements({siteUrl, html}) {
     // Use the site url as the identifier for the newsletter in Hattie.
-    const siteID = encodeURIComponent(site.url);
+    const siteID = encodeURIComponent(siteUrl);
 
     // Allow overriding for local develment
     const hattieApi = process.env.HATTIE_API || 'https://sponsor.theatlantic.com';

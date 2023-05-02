@@ -8,6 +8,8 @@ const {textColorForBackgroundColor, darkenToContrastThreshold} = require('@trygh
 const {DateTime} = require('luxon');
 const htmlToPlaintext = require('@tryghost/html-to-plaintext');
 const tpl = require('@tryghost/tpl');
+const {fillAdvertisements} = require('./advertising');
+const moment = require('moment');
 
 const messages = {
     subscriptionStatus: {
@@ -375,6 +377,12 @@ class EmailRenderer {
         html = html.replace(/“/g, '&ldquo;');
         html = html.replace(/”/g, '&rdquo;');
 
+        // @HACK: The Atlantic inserts ads
+        //html = fillAdvertisements({
+        //    siteUrl: this.#urlUtils.urlFor('home', true),
+        //    html: html
+        //});
+
         return {
             html,
             plaintext,
@@ -581,6 +589,30 @@ class EmailRenderer {
                 id: 'status_text',
                 getValue: (member) => {
                     return this.getMemberStatusText(member);
+                }
+            },
+            {
+                id: 'paid_block_start',
+                getValue: (member) => {
+                    return member.status !== 'free' ? '' : '<!--';
+                }
+            },
+            {
+                id: 'paid_block_end',
+                getValue: (member) => {
+                    return member.status !== 'free' ? '' : '-->';
+                }
+            },
+            {
+                id: 'free_block_start',
+                getValue: (member) => {
+                    return member.status === 'free' ? '' : '<!--';
+                }
+            },
+            {
+                id: 'free_block_end',
+                getValue: (member) => {
+                    return member.status === 'free' ? '' : '-->';
                 }
             }
         ];
@@ -922,6 +954,11 @@ class EmailRenderer {
             }
         }
 
+        // @HACK: Outpost code
+        const parsedUrl = new URL(this.#urlUtils.urlFor('home', true));
+        const siteSlug = parsedUrl.pathname.split('/')[1];
+        const ctaUrl = `https://accounts.theatlantic.com/products/?referral=${siteSlug}&source=${siteSlug}`;
+
         const data = {
             site: {
                 title: this.#settingsCache.get('title'),
@@ -929,7 +966,8 @@ class EmailRenderer {
                 iconUrl: this.#settingsCache.get('icon') ?
                     this.#urlUtils.urlFor('image', {
                         image: this.#settingsCache.get('icon')
-                    }, true) : null
+                    }, true) : null,
+                ctaUrl
             },
             preheader: this.#getEmailPreheader(post),
             html,
@@ -944,7 +982,10 @@ class EmailRenderer {
                 feature_image_width: postFeatureImageWidth,
                 feature_image_height: postFeatureImageHeight,
                 feature_image_alt: post.related('posts_meta')?.get('feature_image_alt'),
-                feature_image_caption: post.related('posts_meta')?.get('feature_image_caption')
+                feature_image_caption: post.related('posts_meta')?.get('feature_image_caption'),
+                encodedPageUrl: encodeURIComponent(postUrl),
+                publishedAtFormatted: moment(post.get('published_at')).format('MMMM D, YYYY'),
+                hasEmailOnlyFlag: hasEmailOnlyFlag
             },
 
             newsletter: {
@@ -995,7 +1036,8 @@ class EmailRenderer {
 
             // Paywall
             paywall: addPaywall ? {
-                signupUrl: signupUrl.href
+                signupUrl: signupUrl.href,
+                ctaUrl: ctaUrl
             } : null,
 
             year: new Date().getFullYear().toString()

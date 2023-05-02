@@ -1,240 +1,1230 @@
+
 <!doctype html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width" />
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]-->
-        <title>{{post.title}}</title>
-        {{>styles}}
-    </head>
-    <body>
-        <span class="preheader">{{preheader}}</span>
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" width="100%">
-            <!-- Outlook doesn't respect max-width so we need an extra centered table -->
-            <!--[if mso]>
-            <tr>
-                <td>
-                    <center>
-                        <table border="0" cellpadding="0" cellspacing="0" width="600">
-            <![endif]-->
-            <tr>
-                <td>&nbsp;</td>
-                <td class="container">
-                    <div class="content">
-                        <!-- START CENTERED WHITE CONTAINER -->
-                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
 
-                            <!-- START MAIN CONTENT AREA -->
-                            <tr>
-                                <td class="wrapper">
-                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                        {{#if headerImage}}
-                                            <tr class="header-image-row">
-                                                <td class="header-image" width="100%" align="center">
-                                                    <img
-                                                        src="{{headerImage}}"
-                                                        {{#if headerImageWidth}}
-                                                            width="{{headerImageWidth}}"
-                                                        {{/if}}
-                                                    >
-                                                </td>
-                                            </tr>
-                                        {{/if}}
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>{{post.title}}</title>
 
-                                        {{#if (or showHeaderIcon showHeaderTitle showHeaderName) }}
-                                            <tr>
-                                                <td class="{{#if (and newsletter.showPostTitleSection showHeaderTitle) }}site-info-bordered{{else}}site-info{{/if}}" width="100%" align="center">
-                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                                        {{#if (and showHeaderIcon site.iconUrl) }}
-                                                            <tr>
-                                                                <td class="site-icon"><a href="{{site.url}}"><img src="{{site.iconUrl}}" alt="{{site.title}}" border="0"></a></td>
-                                                            </tr>
-                                                        {{/if}}
-                                                        {{#if showHeaderTitle }}
-                                                            <tr>
-                                                                <td class="site-url {{#unless showHeaderName}}site-url-bottom-padding{{/unless}}"><div style="width: 100% !important;"><a href="{{site.url}}" class="site-title">{{site.title}}</a></div></td>
-                                                            </tr>
-                                                        {{/if}}
-                                                        {{#if (and showHeaderName showHeaderTitle) }}
-                                                            <tr>
-                                                                <td class="site-url site-url-bottom-padding"><div style="width: 100% !important;"><a href="{{site.url}}" class="site-subtitle">{{newsletter.name}}</a></div></td>
-                                                            </tr>
-                                                        {{/if}}
-                                                        {{#if (and showHeaderName (not showHeaderTitle)) }}
-                                                            <tr>
-                                                                <td class="site-url site-url-bottom-padding"><div style="width: 100% !important;"><a href="{{site.url}}" class="site-title">{{newsletter.name}}</a></div></td>
-                                                            </tr>
-                                                        {{/if}}
+    <style>
+        /* -------------------------------------
+            GLOBAL RESETS
+        ------------------------------------- */
 
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        {{/if}}
+        /*All the styling goes here*/
 
-                                        {{#if newsletter.showPostTitleSection}}
-                                            <tr>
-                                                <td class="{{classes.title}}">
-                                                    <a href="{{post.url}}" class="{{classes.titleLink}}">{{post.title}}</a>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="width: 100%">
-                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-bottom: 48px;">
-                                                        <tr>
-                                                            <td height="20" class="{{classes.meta}}" style="padding: 0;">
-                                                                By {{post.authors}} • <span class="post-meta-date">{{post.publishedAt}} </span>
-                                                                {{#if newsletter.showCommentCta}}
-                                                                    <a href="{{post.commentUrl}}" class="comment-link" valign="middle">
-                                                                        • <img src="https://static.ghost.org/v5.0.0/images/comment-icon.png" border="0" width="16" height="16" alt="Comment">
-                                                                    </a>
-                                                                {{/if}}
-                                                            </td>
-                                                            <td class="{{classes.meta}} view-online desktop">
-                                                                <a href="{{post.url}}" class="view-online-link">View in browser</a>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="{{classes.meta}} view-online-mobile">
-                                                            <td height="20" class="view-online">
-                                                                <a href="{{post.url}}" class="view-online-link">View in browser</a>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        {{/if}}
+        img {
+            border: none;
+            -ms-interpolation-mode: bicubic;
+            max-width: 100%;
+        }
 
-                                        {{#if showFeatureImage }}
-                                            <tr class="feature-image-row">
-                                                <td class="feature-image
+        body {
+            background-color: #fff;
+            font-family: Adobe Garamond Pro, Times New Roman, serif;
+            -webkit-font-smoothing: antialiased;
+            font-size: 18px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            color: #15212A;
+        }
+
+        table {
+            border-collapse: separate;
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            width: 100%;
+        }
+
+        table td {
+            font-family: Adobe Garamond Pro, Times New Roman, serif;
+            font-size: 18px;
+            vertical-align: top;
+            color: #15212A;
+        }
+
+        /* -------------------------------------
+            BODY & CONTAINER
+        ------------------------------------- */
+        .body {
+            background-color: #fff;
+            width: 100%;
+        }
+
+        /* Set a max-width, and make it display as block so it will automatically stretch to that width, but will also shrink down on a phone or something */
+        .container {
+            display: block;
+            margin: 0 auto !important;
+            /* makes it centered */
+            max-width: 600px;
+        }
+
+        /* This should also be a block element, so that it will fill 100% of the .container */
+        .content {
+            box-sizing: border-box;
+            display: block;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
+        /* -------------------------------------
+            POST CONTENT
+        ------------------------------------- */
+        hr {
+            position: relative;
+            display: block;
+            width: 100%;
+            margin: 3em 0;
+            padding: 0;
+            height: 1px;
+            border: 0;
+            border-top: 1px solid #e5eff5;
+        }
+
+        p,
+        ul,
+        ol,
+        dl,
+        blockquote {
+            margin: 0 0 16px 0;
+            line-height: 28.5px;
+        }
+
+        ol,
+        ul {
+            padding-left: 1.3em;
+            padding-right: 1.5em;
+        }
+
+        ol ol,
+        ul ul,
+        ul ol,
+        ol ul {
+            margin: 0.5em 0 1em;
+        }
+
+        ul {
+            list-style: disc;
+        }
+
+        ol {
+            list-style: decimal;
+        }
+
+        ul,
+        ol {
+            max-width: 100%;
+        }
+
+        li {
+            margin: 0.5em 0;
+            padding-left: 0.3em;
+            line-height: 28.5px;
+        }
+
+        dt {
+            float: left;
+            margin: 0 20px 0 0;
+            width: 120px;
+            color: #15212A;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        dd {
+            margin: 0 0 5px 0;
+            text-align: left;
+        }
+
+        blockquote {
+            margin: 16px 0;
+            padding: 0 16px 0 16px;
+            border-left: #5E6A74 1px solid;
+            font-size: 19px;
+            font-weight: 500;
+            line-height: 28.5px;
+            letter-spacing: -0.2px;
+        }
+
+        blockquote p {
+            margin: 16px 0;
+            font-size: 19px;
+        }
+
+        blockquote small {
+            display: inline-block;
+            margin: 0.8em 0 0.8em 1.5em;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        blockquote cite {
+            font-weight: bold;
+        }
+        blockquote cite a {
+            font-weight: normal;
+        }
+
+        a {
+            color: #000000;
+            text-decoration: underline;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin-top: 0;
+            font-family: Adobe Garamond Pro, Times New Roman, serif;
+            line-height: 1.15em;
+            font-weight: 400;
+            text-rendering: optimizeLegibility;
+        }
+
+        h1 {
+            border-top: 1px solid #000000;
+            font-size: 32px;
+            line-height: 40px;
+            padding-bottom: 24px;
+            padding-top: 16px;
+            margin: 0;
+            font-weight: 400;
+        }
+
+        h1 a {
+            text-decoration: none;
+        }
+
+        h2 {
+            border-top: 1px solid #000000;
+            font-size: 22px;
+            line-height: 27.5px;
+            padding-bottom: 24px;
+            padding-top: 16px;
+            margin: 0;
+        }
+
+        h3 {
+            margin: 1.5em 0 0.5em 0;
+            font-size: 26px;
+            line-height: 1.25em;
+        }
+
+        h4 {
+            margin: 1.8em 0 0.5em 0;
+            font-size: 21px;
+            line-height: 1.3em;
+        }
+
+        h5 {
+            margin: 2em 0 0.5em 0;
+            font-size: 19px;
+            line-height: 1.4em;
+        }
+
+        h6 {
+            margin: 2em 0 0.5em 0;
+            font-size: 19px;
+            line-height: 1.4em;
+            font-weight: 700;
+        }
+
+        strong {
+            font-weight: 700;
+        }
+
+        figure {
+            margin: 0 0 1.5em;
+            padding: 0;
+        }
+
+        figcaption {
+            font-family: Courier, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 18px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #5E6A74;
+            padding-top: 4px;
+        }
+
+        code {
+            font-size: 0.9em;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            background: #15212A;
+            padding: 15px;
+            border-radius: 3px;
+            line-height: 1.2em;
+            color: #ffffff;
+        }
+
+        p code {
+            background: #F2F7FA;
+            word-break: break-all;
+            padding: 1px 7px;
+            border-radius: 3px;
+        }
+
+        figure blockquote p {
+            font-size: 1em;
+        }
+
+        .header-image {
+            padding-top: 0;
+            padding-bottom: 40px;
+        }
+
+        .header-image td {
+            border: 0.5px solid #000000;
+            height: 184px;
+            vertical-align: middle;
+        }
+
+        .header-image .site-title {
+            font-family: Adobe Garamond Pro, Times New Roman, serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 24px;
+            line-height: 125%;
+            text-align: center;
+            color: #000000;
+        }
+
+        .header-date {
+            font-family: Courier, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 18px;
+            text-align: center;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #5E6A74;
+            padding: 16px 16px 12px;
+        }
+
+        .header-subscribe {
+            color: #000000;
+            font-family: Courier, sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 16px 16px 12px;
+            border-bottom: 0.5px solid #000000;
+        }
+
+        .header-info {
+            font-family: Courier, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 18px;
+            text-align: left;
+            letter-spacing: 0.48px;
+            color: #000000;
+            padding: 24px 20px;
+            background-color: #ffffff;
+        }
+
+        .email-content>td {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .post-content {
+            font-family: Adobe Garamond Pro, Times New Roman, serif;
+            font-style: normal;
+            font-size: 19px;
+            line-height: 150%;
+            color: #000000;
+            padding-bottom: 30px;
+            padding-top: 24px;
+        }
+
+        .email-white-delimiter {
+            background-color: #ffffff;
+            height: 40px;
+        }
+
+        .site-icon {
+            padding-bottom: 10px;
+            padding-top: 20px;
+            text-align: center;
+            border-radius: 3px;
+        }
+
+        .site-icon img {
+            width: 48px;
+            height: 48px;
+            border-radius: 3px;
+        }
+
+        .site-info {
+            padding-top: 50px;
+            border-bottom: 1px solid #e5eff5;
+        }
+
+        .site-url {
+            color: #15212A;
+            font-size: 16px;
+            letter-spacing: -0.1px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+            padding-bottom: 50px;
+        }
+
+        .site-title {
+            color: #15212A;
+        }
+
+        .site-sub-title {
+            font-family: Adobe Garamond Pro, Times New Roman, serif;
+            font-style: italic;
+            font-weight: normal;
+            font-size: 24px;
+            line-height: 125%;
+            text-align: center;
+            color: #000000;
+            flex: none;
+            order: 1;
+            align-self: stretch;
+            flex-grow: 0;
+            margin: 4px 0px;
+        }
+
+        .post-title {
+            padding-top: 40px;
+            padding-bottom: 0;
+            font-family: Adobe Garamond Pro, Times New Roman, serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 32px;
+            line-height: 40px;
+            color: #21272C;
+        }
+
+        .post-title h1 {
+            padding-bottom: 0;
+        }
+
+        .post-title div {
+            border-top: 1px solid #000000;
+        }
+
+        .post-title-serif {
+            font-family: Georgia, serif;
+        }
+        .post-title-left {
+            text-align: left;
+        }
+
+        .post-title-link {
+            color: #15212A;
+            display: block;
+            text-align: center;
+        }
+        .post-title-link-left {
+            text-align: left;
+        }
+
+        .post-meta,
+        .view-online {
+            padding-bottom: 50px;
+            white-space: nowrap;
+            color: #738a94;
+            font-size: 13px;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .post-meta-left {
+            text-align: left;
+        }
+
+        .view-online {
+            text-align: right;
+        }
+
+        .view-online-link {
+            white-space: nowrap;
+            color: #15212A;
+        }
+
+        .feature-image {
+            padding-top: 40px;
+            width: 100%;
+        }
+
+        .feature-image-with-caption {
+            padding-bottom: 3px;
+        }
+
+        .feature-image-caption {
+            font-family: Courier, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 18px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #5E6A74;
+        }
+
+        .post-content-sans-serif {
+            max-width: 600px !important;
+            font-size: 17px;
+            line-height: 1.5em;
+            color: #23323D;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5eff5;
+        }
+
+        .post-content a,
+        .post-content-sans-serif a {
+            color: #000000;
+            text-decoration: underline;
+        }
+
+        .kg-bookmark-card {
+            width: 100%;
+            background: #ffffff;
+        }
+
+        .kg-bookmark-card a {
+            text-decoration: none;
+        }
+
+        .kg-card + .kg-bookmark-card {
+            margin-top: 0;
+        }
+
+        .kg-image-card img {
+            display: block;
+            margin: 0 auto;
+            width: auto;
+            height: auto !important;
+        }
+
+        .kg-bookmark-container {
+            display: flex;
+            min-height: 148px;
+            color: #15212A;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            text-decoration: none;
+            border-radius: 3px;
+            border: 1px solid #e5eff5;
+        }
+
+        .kg-bookmark-content {
+            display: inline-block;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .kg-bookmark-title {
+            color: #15212A;
+            font-size: 15px;
+            line-height: 1.5em;
+            font-weight: 600;
+        }
+
+        .kg-bookmark-description {
+            display: -webkit-box;
+            overflow-y: hidden;
+            margin-top: 12px;
+            max-height: 40px;
+            color: #738a94;
+            font-size: 13px;
+            line-height: 1.5em;
+            font-weight: 400;
+
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .kg-bookmark-thumbnail {
+            min-width: 140px;
+            max-width: 180px;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            border-radius: 0 2px 2px 0;
+        }
+
+        .kg-bookmark-thumbnail img {
+            display: none;
+        }
+
+        .kg-bookmark-metadata {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 14px;
+            color: #15212A;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .kg-bookmark-icon {
+            margin-right: 8px;
+            width: 22px;
+            height: 22px;
+        }
+
+        .kg-bookmark-author {
+            line-height: 1.5em;
+        }
+
+        .kg-bookmark-publisher {
+            overflow: hidden;
+            max-width: 240px;
+            line-height: 1.5em;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .kg-bookmark-publisher:before {
+            content: "•";
+            margin: 0 6px;
+        }
+
+        .kg-gallery-container {
+            margin-top: -20px;
+        }
+
+        .kg-gallery-image img {
+            width: 100% !important;
+            height: auto !important;
+            padding-top: 20px;
+        }
+
+        .kg-video-preview {
+            background-color: #1d1f21;
+            background-image: radial-gradient(circle at center, #5b5f66, #1d1f21);
+            display: block;
+            text-decoration: none !important;
+        }
+        .kg-video-preview table {
+            background-size: cover;
+            min-height: 200px; /* for when images aren't loaded */
+        }
+        .kg-video-play-button {
+            height: 2em;
+            width: 3em;
+            margin: 0 auto;
+            border-radius: 10px;
+            padding: 1em 0.8em 0.6em 1em;
+            font-size: 1em; /* change this to resize */
+            background-color: rgba(0,0,0,0.85);
+        }
+        .kg-video-play-button div {
+            display: block;
+            width: 0;
+            height: 0;
+            margin: 0 auto;
+            line-height: 0px; /* fix for Yahoo Mail */
+            border-color: transparent transparent transparent white;
+            border-style: solid;
+            border-width: 0.8em 0 0.8em 1.5em;
+        }
+
+
+        /* -------------------------------------
+            HEADER, FOOTER, MAIN
+        ------------------------------------- */
+        .main {
+            background: #F8F7F3;
+            border-radius: 3px;
+            width: 100%;
+        }
+
+        .wrapper {
+            box-sizing: border-box;
+            padding: 0;
+        }
+
+        .content-block {
+            padding-bottom: 10px;
+            padding-top: 10px;
+        }
+
+        .footer-top {
+            font-family: Arial, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 150%;
+            text-align: center;
+            text-transform: uppercase;
+            color: #5E6A74;
+            padding-top: 10px;
+        }
+
+
+        .footer {
+            font-family: Arial, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 150%;
+            text-align: center;
+            color: #5E6A74;
+            padding-bottom: 12px;
+        }
+
+        .footer a {
+            color: #5E6A74;
+            text-decoration: underline;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .footer-icons {
+            padding-top: 17px;
+            padding-bottom: 24px;
+        }
+
+        .footer-icons .footer-social {
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        .bottom-subscribe-area {
+            font-family: 'Adobe Garamond Pro', Times New Roman, serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 19px;
+            line-height: 28.5px;
+            color: #000000;
+        }
+
+        .bottom-subscribe-area-header {
+            font-family: 'Adobe Garamond Pro', Times New Roman, serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 32px;
+            line-height: 40px;
+            color: #21272C;
+            padding-bottom: 24px;
+        }
+
+        .bottom-subscribe-btn {
+            padding: 15px 24px;
+            background: #21272C;
+            border-radius: 4px;
+            font-family: 'Arial', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 48px;
+            text-align: center;
+            color: #FFFFFF;
+            height: 48px;
+            text-decoration: none;
+        }
+
+        /* -------------------------------------
+            BUTTONS
+        ------------------------------------- */
+        .btn {
+            box-sizing: border-box;
+            width: 100%;
+            display: table;
+        }
+
+        .btn>tbody>tr>td {
+            padding-bottom: 15px;
+        }
+
+        .btn table {
+            width: auto;
+        }
+
+        .btn table td {
+            background-color: #ffffff;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .btn a {
+            background-color: #ffffff;
+            border: solid 1px #3498db;
+            border-radius: 5px;
+            box-sizing: border-box;
+            color: #3498db;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0;
+            padding: 12px 25px;
+            text-decoration: none;
+            text-transform: capitalize;
+        }
+
+        .btn-primary table td {
+            background-color: #3498db;
+        }
+
+        .btn-primary a {
+            background-color: #3498db;
+            border-color: #3498db;
+            color: #ffffff;
+        }
+
+        .btn-accent table td {
+            {{#if adjustedAccentColor}}
+                background-color: {{adjustedAccentColor}};
+            {{else}}
+                background-color: #3498db;
+            {{/if}}
+        }
+
+        .btn-accent a {
+            {{#if backgroundIsDark}}
+                background-color: #3498db;
+                border-color: #3498db !important;
+                color: #ffffff;
+            {{else}}
+                background-color: {{adjustedAccentColor}};
+                border-color: {{adjustedAccentColor}} !important;
+                color: {{adjustedAccentContrastColor}};
+            {{/if}}
+        }
+
+        /* -------------------------------------
+            OTHER STYLES THAT MIGHT BE USEFUL
+        ------------------------------------- */
+        .last {
+            margin-bottom: 0;
+        }
+
+        .first {
+            margin-top: 0;
+        }
+
+        .align-center {
+            text-align: center;
+        }
+
+        .align-right {
+            text-align: right;
+        }
+
+        .align-left {
+            text-align: left;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+        .mt0 {
+            margin-top: 0;
+        }
+
+        .mb0 {
+            margin-bottom: 0;
+        }
+
+        .preheader {
+            color: transparent;
+            display: none;
+            height: 0;
+            max-height: 0;
+            max-width: 0;
+            opacity: 0;
+            overflow: hidden;
+            mso-hide: all;
+            visibility: hidden;
+            width: 0;
+        }
+
+        .paywall h2 {
+            margin-top: 62px;
+            margin-bottom: 0;
+            font-weight: 400;
+            font-size: 32px;
+            line-height: 40px;
+            text-align: center;
+            color: #21272C;
+            font-family: 'Adobe Garamond Pro', Times New Roman, serif;
+            padding: 0 !important;
+            border: none;
+        }
+
+        /* -------------------------------------
+            RESPONSIVE AND MOBILE FRIENDLY STYLES
+        ------------------------------------- */
+        @media only screen and (max-width: 620px) {
+
+            table.body {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            table.body p,
+            table.body ul,
+            table.body ol,
+            table.body td,
+            table.body span {
+            }
+
+            table.body pre {
+                white-space: pre-wrap !important;
+                word-break: break-word !important;
+            }
+
+            table.body .wrapper,
+            table.body .article {
+                padding: 0 10px !important;
+            }
+
+            table.body .content {
+                padding: 0 !important;
+            }
+
+            table.body .container {
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            table.body .main {
+                border-left-width: 0 !important;
+                border-radius: 0 !important;
+                border-right-width: 0 !important;
+            }
+
+            table.body .btn table {
+                width: 100% !important;
+            }
+
+            table.body .btn a {
+                width: 100% !important;
+            }
+
+            table.body .img-responsive {
+                height: auto !important;
+                max-width: 100% !important;
+                width: auto !important;
+            }
+
+            table.body .site-icon img {
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            table.body .kg-bookmark-card {
+                width: 90vw !important;
+            }
+
+            table.body .kg-bookmark-thumbnail {
+                display: none !important;
+            }
+
+            table.body .kg-bookmark-metadata span {
+                font-size: 13px !important;
+            }
+
+            table.body .kg-embed-card {
+                max-width: 90vw !important;
+            }
+
+        }
+
+        /* -------------------------------------
+            PRESERVE THESE STYLES IN THE HEAD
+        ------------------------------------- */
+        @media all {
+            .ExternalClass {
+                width: 100%;
+            }
+
+            .ExternalClass,
+            .ExternalClass p,
+            .ExternalClass span,
+            .ExternalClass font,
+            .ExternalClass td,
+            .ExternalClass div {
+                line-height: 100%;
+            }
+
+            .apple-link a {
+                color: inherit !important;
+                font-family: inherit !important;
+                font-size: inherit !important;
+                font-weight: inherit !important;
+                line-height: inherit !important;
+                text-decoration: none !important;
+            }
+
+            #MessageViewBody a {
+                color: inherit;
+                text-decoration: none;
+                font-size: inherit;
+                font-family: inherit;
+                font-weight: inherit;
+                line-height: inherit;
+            }
+
+            .btn-primary table td:hover {
+                background-color: #34495e !important;
+            }
+
+            .btn-primary a:hover {
+                background-color: #34495e !important;
+                border-color: #34495e !important;
+            }
+        }
+
+        /* ----- ENDIF THE BROWSER ----- */
+
+    </style>
+    <style type="text/css">
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-style: normal;
+            font-weight: 400;
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Regular.woff2?v=2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+        ​
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-style: normal;
+            font-weight: 600;
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Semibold.woff2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+        ​
+        @font-face {
+            font-display: swap;
+            font-family: "Adobe Garamond Pro";
+            font-stretch: normal;
+            font-style: normal;
+            font-weight: 700;
+            src: url("https://assets.outpostpublishingcoop.com/assets/fonts/garamond/AGaramondPro-Bold.woff2") format("woff");
+            mso-font-alt: "Georgia";
+        }
+    </style>
+</head>
+
+<body>
+<span class="preheader">{{preheader}}</span>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" width="100%">
+
+    <!-- Outlook doesn't respect max-width so we need an extra centered table -->
+    <!--[if mso]>
+    <tr>
+        <td>
+            <center>
+                <table border="0" cellpadding="0" cellspacing="0" width="600">
+    <![endif]-->
+
+    <tr>
+        <td>&nbsp;</td>
+        <td class="container">
+            <div class="content">
+
+                <!-- START CENTERED WHITE CONTAINER -->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main" width="100%">
+                    {{#unless post.hasEmailOnlyFlag }}
+                        <tr>
+                            <td style="padding: 12px; background-color: white; text-align: center; line-height: 18px;">
+                                <a style="font-family: Arial, sans-serif; font-style: normal; font-weight: normal; font-size: 12px;" href="{{post.url}}">
+                                    View and share the web version
+                                </a>
+                            </td>
+                        </tr>
+                    {{/unless}}
+
+                    <!-- START MAIN CONTENT AREA -->
+                    <tr>
+                        <td class="wrapper">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border: 0.5px solid #000000;">
+
+                                <tr class="email-content">
+                                    <td class="header-subscribe" width="100%" align="center">
+                                        <div>
+                                            <img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-key.png" width="30" height="12" style="vertical-align:middle; display: inline-block" alt="Key Icon">
+                                            <div style="margin-left: 3px;display: inline-block;">
+                                                subscriber newsletter
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="email-content">
+                                    <td class="header-date" width="100%" align="center">
+                                        {{post.publishedAt}} <!-- ATLANTIC_PRESENTED_BY -->
+                                    </td>
+                                </tr>
+
+                                {{#if headerImage }}
+                                    <tr class="email-content">
+                                        <td class="header-image" width="100%" align="center">
+                                            <a href="{{site.url}}">
+                                                <img
+                                                    src="{{headerImage}}"
+                                                    {{#if headerImageWidth}}
+                                                    width="{{headerImageWidth}}"
+                                                    {{/if}}
+                                                >
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {{/if}}
+
+                                <tr>
+                                    <td class="header-info" width="100%" align="center">
+                                        %%{paid_block_start}%%
+                                        With your <i>Atlantic</i> subscription, you have access to all editions
+                                        of this newsletter. Thank you for supporting my work.
+                                        %%{paid_block_end}%%
+
+                                        %%{free_block_start}%%
+                                        Unlock every edition of this newsletter with a month of unlimited access
+                                        to The <i>Atlantic</i>. <a href="https://accounts.theatlantic.com/products/free-trial/">Start your free trial today</a>.
+                                        %%{free_block_end}%%
+                                    </td>
+                                </tr>
+
+                                {{#if showFeatureImage }}
+                                    <tr class="email-content">
+                                        <td class="feature-image
                                                     {{#if post.feature_image_caption }}
                                                         feature-image-with-caption
                                                     {{/if}}
                                                 "><img
-                                                    src="{{post.feature_image}}"
-                                                    {{#if post.feature_image_width }}
-                                                        width="{{post.feature_image_width}}"
-                                                    {{/if}}
-                                                    {{#if post.feature_image_alt }}
-                                                        alt="{{post.feature_image_alt}}"
-                                                    {{/if}}
-                                                ></td>
-                                            </tr>
-                                            {{#if post.feature_image_caption }}
-                                                <tr>
-                                                    <td class="feature-image-caption" align="center">{{{post.feature_image_caption}}}</td>
-                                                </tr>
+                                            src="{{post.feature_image}}"
+                                            {{#if post.feature_image_width }}
+                                            width="{{post.feature_image_width}}"
                                             {{/if}}
-                                        {{/if}}
-                                        <tr class="post-content-row">
-                                            <td class="{{classes.body}}">
-                                                <!-- POST CONTENT START -->
-                                                {{{html}}}
-                                                <!-- POST CONTENT END -->
-
-                                                {{#if paywall}}
-                                                    {{>paywall}}
-                                                {{/if}}
-                                            </td>
+                                            {{#if post.feature_image_alt }}
+                                            alt="{{post.feature_image_alt}}"
+                                            {{/if}}
+                                        ></td>
+                                    </tr>
+                                    {{#if post.feature_image_caption }}
+                                        <tr class="email-content">
+                                            <td class="feature-image-caption" align="center">{{{post.feature_image_caption}}}</td>
                                         </tr>
-                                    </table>
-                                </td>
-                            </tr>
+                                    {{/if}}
+                                {{/if}}
 
-                            <!-- END MAIN CONTENT AREA -->
+                                <tr class="email-content">
+                                    <td class="post-title"><h1><a class="post-title" href="{{post.url}}">{{post.title}}</a></h1></td>
+                                </tr>
 
-                            {{#if (or feedbackButtons newsletter.showCommentCta) }}
-                                <tr>
-                                    <td dir="ltr" width="100%" style="background-color: #ffffff; text-align: center; padding: 32px 0 24px; border-bottom: 1px solid #e5eff5;" align="center">
-                                        <table class="feedback-buttons" role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                {{#if feedbackButtons }}
-                                                    {{> feedbackButton feedbackButtons href=feedbackButtons.likeHref buttonText='More like this' iconUrl="https://static.ghost.org/v5.0.0/images/more-like-this.png" width="145" height="36" }}
-                                                    {{> feedbackButton feedbackButtons href=feedbackButtons.dislikeHref buttonText='Less like this' iconUrl="https://static.ghost.org/v5.0.0/images/less-like-this.png" width="142" height="36" }}
-                                                {{/if}}
-                                                {{#if newsletter.showCommentCta}}
-                                                    {{> feedbackButton href=post.commentUrl buttonText='Comment' iconUrl="https://static.ghost.org/v5.0.0/images/comment.png" width="122" height="36" }}
-                                                {{/if}}
-                                            </tr>
-                                        </table>
-                                        <table class="feedback-buttons-mobile" role="presentation" border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                {{#if feedbackButtons }}
-                                                    {{> feedbackButtonMobile feedbackButtons href=feedbackButtons.likeHref buttonText='More like this' iconUrl="https://static.ghost.org/v5.0.0/images/more-like-this-mobile.png" width="42" height="42" }}
-                                                    {{> feedbackButtonMobile feedbackButtons href=feedbackButtons.dislikeHref buttonText='Less like this' iconUrl="https://static.ghost.org/v5.0.0/images/less-like-this-mobile.png" width="42" height="42" }}
-                                                {{/if}}
-                                                {{#if newsletter.showCommentCta}}
-                                                    {{> feedbackButtonMobile href=post.commentUrl buttonText='Comment' iconUrl="https://static.ghost.org/v5.0.0/images/comment-mobile.png" width="42" height="42" }}
-                                                {{/if}}
-                                            </tr>
-                                        </table>
+                                <tr class="email-content">
+                                    <td class="post-content">
+                                        <!-- POST CONTENT START -->
+                                        {{{html}}}
+                                        <!-- ATLANTIC_BOTTOM_AD -->
+                                        <!-- POST CONTENT END -->
+
+                                        {{#if paywall}}
+                                            {{>paywall}}
+                                        {{/if}}
                                     </td>
                                 </tr>
-                            {{/if}}
 
-                             {{#if latestPosts.length}}
                                 <tr>
-                                    <td style="padding: 24px 0; border-bottom: 1px solid #e5eff5;">
-                                        <h3 class="latest-posts-header">Keep reading</h3>
-                                        {{> latestPosts}}
-                                    </td>
-                                </tr>
-                            {{/if}}
-
-                            {{#if newsletter.showSubscriptionDetails}}
-                                <tr>
-                                    <td class="subscription-box">
-                                        <h3>Subscription details</h3>
-                                        <p style="margin-bottom: 16px;">
-                                            <span>You are receiving this because you are a <strong>%%{status}%% subscriber</strong> to {{site.title}}.</span> %%{status_text}%%
-                                        </p>
-                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                                               style="padding-top: 32px; padding-bottom: 32px; border-top: 1px solid #D3DCE6;">
                                             <tr>
-                                                <td class="subscription-details">
-                                                    <p class="%%{name_class}%%">Name: %%{name, "not provided"}%%</p>
-                                                    <p>Email: <a href="#">%%{email}%%</a></p>
-                                                    <p>Member since: %%{created_at}%%</p>
-                                                </td>
-                                                <td align="right" valign="bottom" class="manage-subscription">
-                                                    <a href="%%{manage_account_url}%%"> Manage subscription &rarr;</a>
+                                                <td class="bottom-subscribe-area">
+                                                    %%{paid_block_start}%%
+                                                    Did someone forward you this newsletter? <a href="{{site.url}}">Sign up here</a>, and
+                                                    <a href="{{site.ctaUrl}}">subscribe to <i>The Atlantic</i></a> for access to more exclusives like this.
+                                                    %%{paid_block_end}%%
+
+                                                    %%{free_block_start}%%
+                                                    Did someone forward you this newsletter?
+                                                    <a href="{{site.url}}">Sign up here</a>.
+                                                    %%{free_block_end}%%
                                                 </td>
                                             </tr>
                                         </table>
                                     </td>
                                 </tr>
-                            {{/if}}
 
-                            <tr>
-                                <td class="wrapper" align="center">
-                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="padding-top: 40px; padding-bottom: 30px;">
-                                        {{#if footerContent }}
-                                            <tr><td class="footer">{{{footerContent}}}</td></tr>
-                                        {{/if}}
-                                        <tr>
-                                            <td class="footer">{{site.title}} &copy; {{year}} – <a href="%%{unsubscribe_url}%%">Unsubscribe</a></td>
-                                        </tr>
-
-                                        {{#if showBadge }}
+                                <tr>
+                                    <td class="wrapper" align="center" style="padding-left: 20px;padding-right: 20px;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"
+                                               style="padding-top: 20px; padding-bottom: 40px; border-top: 1px solid #D3DCE6;">
                                             <tr>
-                                                <td class="footer-powered"><a href="https://ghost.org/"><img src="https://static.ghost.org/v4.0.0/images/powered.png" border="0" width="142" height="30" class="gh-powered" alt="Powered by Ghost"></a></td>
+                                                <td class="footer-top">Share This Newsletter:</td>
                                             </tr>
-                                        {{/if}}
-                                    </table>
-                                </td>
-                            </tr>
+                                            <tr>
+                                                <td class="footer footer-icons">
+                                                    <a href="https://www.facebook.com/sharer/sharer.php?u={{post.encodedPageUrl}}"><img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-facebook.png" border="0" width="16" height="16" class="footer-social" alt="Facebook"></a>
+                                                    <a href="https://twitter.com/share?url={{post.encodedPageUrl}}"><img src="https://assets.outpostpublishingcoop.com/assets/img/email/icon-twitter.png" border="0" width="16" height="16" class="footer-social" alt="Twitter"></a>
+                                                </td>
+                                            </tr>
 
-                        </table>
-                        <!-- END CENTERED WHITE CONTAINER -->
-                    </div>
-                </td>
-                <td>&nbsp;</td>
-            </tr>
+                                            <tr>
+                                                <td class="footer">600 New Hampshire Avenue NW ∙ Washington, DC 20037</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="footer">
+                                                    <a href="{{site.ctaUrl}}">Subscribe to The Atlantic</a>  |
+                                                    <span style="padding-left: 5px;color: #5E6A74;">Download The Atlantic app for <a style="padding: 0;color: #5E6A74;" href="https://play.google.com/store/apps/details?id=com.theatlantic.newsstand">Android</a> and <a style="padding: 0;color: #5E6A74;" href="https://apps.apple.com/us/app/the-atlantic-magazine/id397599894">iOS</a></span>
+                                                </td>
+                                            </tr>
 
-            <!--[if mso]>
+                                            <tr>
+                                                <td class="footer">
+                                                    <a href="https://www.theatlantic.com/newsletters/">See all of our newsletters</a>  |
+                                                    <a href="%%{unsubscribe_url}%%">Unsubscribe</a>  |
+                                                    <a href="https://www.theatlantic.com/privacy-policy/">Privacy Policy</a>  |
+                                                    <a href="https://support.theatlantic.com/hc/en-us/requests/new">Customer Care</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
                             </table>
-                        </center>
-                    </td>
-                </tr>
-            <![endif]-->
-        </table>
-    </body>
+                        </td>
+                    </tr>
+
+                    <!-- END MAIN CONTENT AREA -->
+
+                </table>
+                <!-- END CENTERED WHITE CONTAINER -->
+
+            </div>
+        </td>
+        <td>&nbsp;</td>
+    </tr>
+
+    <!--[if mso]>
+    </table>
+    </center>
+    </td>
+    </tr>
+    <![endif]-->
+
+</table>
+</body>
+
 </html>
