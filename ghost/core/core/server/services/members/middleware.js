@@ -8,6 +8,10 @@ const spamPrevention = require('../../web/shared/middleware/api/spam-prevention'
 const {formattedMemberResponse} = require('./utils');
 const errors = require('@tryghost/errors');
 const tpl = require('@tryghost/tpl');
+const createCookies = require('cookies');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 const messages = {
     missingUuid: 'Missing uuid.',
@@ -18,7 +22,12 @@ const messages = {
 // Need to figure a way to separate these things (e.g. frontend actually talks to members API)
 const loadMemberSession = async function (req, res, next) {
     try {
-        const member = await membersService.ssr.getMemberDataFromSession(req, res);
+        // check if we have Atlantic cookie with premium access
+        let member = await getAtlanticMemberCookie(req, res);
+        if (!member) {
+            member = await membersService.ssr.getMemberDataFromSession(req, res);
+        }
+
         Object.assign(req, {member});
         res.locals.member = req.member;
         next();
@@ -58,6 +67,48 @@ const authMemberByUuid = async function (req, res, next) {
     } catch (err) {
         next(err);
     }
+};
+
+const getAtlanticMemberCookie = async function (req, res) {
+    const cookies = createCookies(req, res);
+    const atlanticCookie = cookies.get('atljwt');
+    const atlanticPaywallHeaderName = 'X-Paywall';
+
+    if (atlanticCookie) {
+        const atlanticCookieDecoded = jwt.decode(atlanticCookie, {complete: true});
+
+        if (atlanticCookieDecoded && atlanticCookieDecoded.payload) {
+            const atlanticCookiePayload = atlanticCookieDecoded.payload;
+
+            if (atlanticCookiePayload.paymeter_access === true) {
+                try {
+                    // we need to use custom expiration field, so we need to use "maxAge" option for cookie verification
+                    const cookieMaxAge = atlanticCookiePayload.refresh_exp - atlanticCookiePayload.iat;
+
+                    const publicKeyPath = path.resolve(__dirname, '../../../../content/keys/jwt_cookie_cert.pem');
+                    const publicKey = fs.readFileSync(publicKeyPath);
+                    jwt.verify(atlanticCookie, publicKey, {ignoreExpiration: true, maxAge: cookieMaxAge});
+                    //console.log('cookie valid');
+
+                    res.setHeader(atlanticPaywallHeaderName, 0);
+
+                    return {
+                        uuid: 'PREMIUM_UID',
+                        email: 'member@theatlantic.com',
+                        name: '',
+                        subscribed: '',
+                        subscriptions: '',
+                        status: 'paid'
+                    };
+                } catch (err) {
+                    //console.log('cookie NOT verified');
+                    //console.log(err);
+                }
+            }
+        }
+    }
+
+    res.setHeader(atlanticPaywallHeaderName, 1);
 };
 
 const getIdentityToken = async function (req, res) {

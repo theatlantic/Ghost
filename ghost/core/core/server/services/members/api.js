@@ -56,19 +56,18 @@ function createApiInstance(config) {
                 }
             },
             getSubject(type) {
-                const siteTitle = settingsCache.get('title');
                 switch (type) {
                 case 'subscribe':
-                    return `📫 ${t(`Confirm your subscription to {{siteTitle}}`, {siteTitle, interpolation: {escapeValue: false}})}`;
+                    return `Please confirm your email address`;
                 case 'signup':
-                    return `🙌 ${t(`Complete your sign up to {{siteTitle}}!`, {siteTitle, interpolation: {escapeValue: false}})}`;
+                    return `Please confirm your email address`;
                 case 'signup-paid':
-                    return `🙌 ${t(`Thank you for signing up to {{siteTitle}}!`, {siteTitle, interpolation: {escapeValue: false}})}`;
+                    return `Please confirm your email address`;
                 case 'updateEmail':
-                    return `📫 ${t(`Confirm your email update for {{siteTitle}}!`, {siteTitle, interpolation: {escapeValue: false}})}`;
+                    return `Please confirm your email address`;
                 case 'signin':
                 default:
-                    return `🔑 ${t(`Secure sign in link for {{siteTitle}}`, {siteTitle, interpolation: {escapeValue: false}})}`;
+                    return `Please confirm your email address`;
                 }
             },
             getText(url, type, email) {
