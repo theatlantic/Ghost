@@ -27,6 +27,7 @@
     "fix": "yarn cache clean && rm -rf node_modules && yarn",
     "knex-migrator": "yarn workspace ghost run knex-migrator",
     "setup": "yarn && yarn workspace ghost run setup && git submodule update --init",
+    "start": "yarn workspace ghost run start",
     "lint": "lerna run lint",
     "test": "lerna run test",
     "test:unit": "lerna run test:unit",
